@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Venda Certa</title>
+    <link rel="stylesheet" href="{% static 'core/css/login.css' %}">
+</head>
+<body>
+    <main class="login-container">
+
+        <section class="login-card">
+
+            <div class="logo">
+                <span>VENDA</span>CERTA
+            </div>
+
+            <h1>Bem-vindo</h1>
+
+            <p class="subtitle">
+                Entre na sua conta para continuar
+            </p>
+
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+                
+            {% endif %}
+
+            <form method="post" id="loginForm">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <label for="username">Usuário</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Digite seu usuário"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Senha</label>
+
+                    <div class="password-container">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Digite sua senha"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <button
+                            type="button"
+                            id="togglePassword"
+                            class="toggle-password"
+                        >
+                            Mostrar
+                        </button>
+
+                    </div>
+                </div>
+
+                <button type="submit" class="login-button">
+                    Entrar
+                </button>
+
+            </form>
+        </section>
+    </main>
+
+    <script src="{% static 'core/js/login.js' %}"></script>
+
+</body>
+</html>

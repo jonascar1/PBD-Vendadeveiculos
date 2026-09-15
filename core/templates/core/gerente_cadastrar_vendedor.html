@@ -1,0 +1,231 @@
+{% extends 'core/gerente_base.html' %}
+
+{% load static %}
+
+{% block title %}Cadastrar vendedor | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/gerente_cadastrar_vendedor.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<!-- CABEÇALHO -->
+            <header class="topbar">
+
+                <div>
+                    <h1>Cadastrar vendedor</h1>
+                    <p>Cadastre um novo vendedor na revenda.</p>
+                </div>
+
+                <div class="user-info">
+                    Gerente
+                </div>
+
+            </header>
+
+
+            <!-- MENSAGENS -->
+            {% if messages %}
+                <div class="messages">
+
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+
+                </div>
+            {% endif %}
+
+
+            <!-- FORMULÁRIO -->
+            <section class="section">
+
+                <div class="form-container">
+
+                    <div class="section-header">
+                        <div>
+                            <h2>Dados do vendedor</h2>
+                            <p>Preencha as informações para criar o acesso do vendedor.</p>
+                        </div>
+                    </div>
+
+
+                    <form method="post">
+
+                        {% csrf_token %}
+
+
+                        <div class="form-grid">
+
+                            <!-- NOME -->
+                            <div class="form-group">
+
+                                <label for="nome">
+                                    Nome completo
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="nome"
+                                    name="nome"
+                                    placeholder="Digite o nome completo"
+                                    required
+                                >
+
+                            </div>
+
+
+                            <!-- USUÁRIO -->
+                            <div class="form-group">
+
+                                <label for="username">
+                                    Usuário
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    placeholder="Digite o usuário para login"
+                                    required
+                                >
+
+                                <small>
+                                    Usado pelo vendedor para entrar no sistema.
+                                </small>
+
+                            </div>
+
+
+                            <!-- EMAIL -->
+                            <div class="form-group">
+
+                                <label for="email">
+                                    E-mail
+                                </label>
+
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="Digite o e-mail"
+                                >
+
+                            </div>
+
+
+                            <!-- SENHA -->
+                            <div class="form-group">
+                                <label for="senha">Senha</label>
+
+                                <div class="senha-container">
+                                    <input
+                                        type="password"
+                                        id="senha"
+                                        name="senha"
+                                        placeholder="Digite a senha"
+                                        required
+                                    >
+
+                                    <button
+                                        type="button"
+                                        class="btn-mostrar-senha"
+                                        onclick="mostrarSenha('senha', this)"
+                                    >
+                                        Mostrar
+                                    </button>
+                                </div>
+                            </div>
+
+
+                            
+
+
+                            <!-- ALÇADA -->
+                            <div class="form-group">
+
+                                <label for="alcada_desconto">
+                                    Alçada de desconto (%)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="alcada_desconto"
+                                    name="alcada_desconto"
+                                    step="0.01"
+                                    min="0"
+                                    max="100"
+                                    value="0"
+                                    required
+                                >
+
+                                <small>
+                                    Percentual máximo de desconto sem aprovação.
+                                </small>
+
+                            </div>
+
+
+                            <!-- COMISSÃO -->
+                            <div class="form-group">
+
+                                <label for="percentual_comissao">
+                                    Percentual de comissão (%)
+                                </label>
+
+                                <input
+                                    type="number"
+                                    id="percentual_comissao"
+                                    name="percentual_comissao"
+                                    step="0.01"
+                                    min="0"
+                                    value="0"
+                                    max="100"
+                                    required
+
+                                >
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BOTÕES -->
+                        <div class="form-actions">
+
+                            <a class="voltar-button"
+                                href="{% url 'vendedores' %}"
+                            >
+                                Voltar
+                            </a>
+
+                            <button class="cadastrar-button"
+                                type="submit"
+                                
+                            >
+                                Cadastrar vendedor
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </section>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+function mostrarSenha(id, botao) {
+    const campo = document.getElementById(id);
+
+    if (campo.type === "password") {
+        campo.type = "text";
+        botao.textContent = "Esconder";
+    } else {
+        campo.type = "password";
+        botao.textContent = "Mostrar";
+    }
+}
+</script>
+{% endblock extra_js %}

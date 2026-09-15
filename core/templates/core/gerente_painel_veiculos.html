@@ -1,0 +1,250 @@
+{% extends 'core/gerente_base.html' %}
+
+{% load static %}
+
+{% block title %}
+Veículos | VENDACERTA
+{% endblock %}
+
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'core/css/gerente_painel_veiculos.css' %}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topo">
+
+    <div>
+        <h1>Veículos</h1>
+
+        <p>
+            Gerencie os veículos cadastrados no estoque.
+        </p>
+    </div>
+
+    <div class="topo-acoes">
+
+        <div class="badge">
+            Gerente
+        </div>
+
+        <a
+            href="{% url 'cadastrar_veiculo' %}"
+            class="btn-cadastrar"
+        >
+            + Cadastrar veículo
+        </a>
+
+    </div>
+
+</header>
+
+
+{% if messages %}
+
+<div class="messages">
+
+    {% for message in messages %}
+
+    <div class="message message-{{ message.tags }}">
+        {{ message }}
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
+
+<section class="card">
+
+    <div class="card-header">
+
+        <div>
+
+            <h2>Estoque de veículos</h2>
+
+            <p>
+                Consulte os veículos cadastrados no sistema.
+            </p>
+
+        </div>
+
+        <span class="contador">
+            {{ veiculos|length }} veículo{{ veiculos|length|pluralize }}
+        </span>
+
+    </div>
+
+
+    <div class="table-container">
+
+        <table>
+
+            <thead>
+
+                <tr>
+                    <th>Veículo</th>
+                    <th>Placa</th>
+                    <th>Ano</th>
+                    <th>Origem</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for v in veiculos %}
+
+                <tr>
+
+                    <td>
+
+                        <div class="veiculo">
+
+                            <div class="veiculo-icon">
+                                {% for foto in v.fotos.all %}
+                                    {% if foto.principal %}
+                                        <img src="{{ foto.imagem.url }}" alt="{{ v.marca }} {{ v.modelo }}">
+                                    {% endif %}
+                                {% empty %}
+                                    🚗
+                                {% endfor %}
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    {{ v.marca }} {{ v.modelo }}
+                                </strong>
+
+                                <small>
+                                    {{ v.cor }} · {{ v.combustivel }}
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+
+                    <td>
+
+                        <span class="placa">
+                            {{ v.placa }}
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        {{ v.ano_fabricacao }}/{{ v.ano_modelo }}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ v.get_origem_display }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if v.status == "DISPONIVEL" %}
+
+                            <span class="status disponivel">
+                                Disponível
+                            </span>
+
+                        {% elif v.status == "RESERVADO" %}
+
+                            <span class="status reservado">
+                                Reservado
+                            </span>
+
+                        {% elif v.status == "VENDIDO" %}
+
+                            <span class="status vendido">
+                                Vendido
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        <a
+                            href="{% url 'detalhes_veiculo' v.id %}"
+                            class="btn-ver">
+                            Ver detalhes
+                        </a>
+
+                    </td>
+
+                </tr>
+
+
+                {% empty %}
+
+                <tr>
+
+                    <td
+                        colspan="6"
+                        class="empty"
+                    >
+
+                        <div class="empty-content">
+
+                            <div class="empty-icon">
+                                🚗
+                            </div>
+
+                            <strong>
+                                Nenhum veículo cadastrado
+                            </strong>
+
+                            <p>
+                                Cadastre um veículo para começar a montar seu estoque.
+                            </p>
+
+                            <a
+                                href="{% url 'cadastrar_veiculo' %}"
+                                class="btn-cadastrar-empty"
+                            >
+                                Cadastrar veículo
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+{% endblock %}

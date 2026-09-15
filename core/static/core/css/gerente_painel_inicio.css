@@ -1,0 +1,239 @@
+
+
+/* ==============================
+   SEÇÕES
+============================== */
+
+.section {
+    margin-bottom: 35px;
+}
+
+.section-header {
+    margin-bottom: 18px;
+}
+
+.section-header h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.section-header p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ==============================
+   AÇÕES
+============================== */
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.action-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s;
+}
+
+.action-card:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: #eff6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    flex-shrink: 0;
+}
+
+.action-card h3 {
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.action-card p {
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.arrow {
+    margin-left: auto;
+    font-size: 20px;
+    color: #9ca3af;
+}
+
+/* ==============================
+   TABELA
+============================== */
+
+.table-container {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f9fafb;
+}
+
+th {
+    text-align: left;
+    padding: 15px 18px;
+    font-size: 12px;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+td {
+    padding: 15px 18px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 14px;
+}
+
+/* VENDEDOR */
+
+.seller {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.seller-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.seller strong {
+    display: block;
+    font-size: 14px;
+}
+
+.seller small {
+    display: block;
+    color: #9ca3af;
+    font-size: 11px;
+    margin-top: 2px;
+}
+
+/* PORCENTAGEM */
+
+.percentage {
+    font-weight: bold;
+    color: #374151;
+}
+
+/* BOTÃO EDITAR */
+
+.negociacoes-button, .edit-button {
+    display: inline-block;
+    padding: 7px 13px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.negociacoes-button:hover, .edit-button:hover {
+    background: #2563eb;
+    color: white;
+}
+
+/* SEM VENDEDORES */
+
+.empty {
+    text-align: center;
+    padding: 30px;
+    color: #9ca3af;
+}
+
+/* ==============================
+   MENSAGENS
+============================== */
+
+.messages {
+    margin-bottom: 18px;
+}
+
+.message {
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.message-success {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #2563eb;
+}
+
+
+/* ==============================
+   RESPONSIVIDADE
+============================== */
+
+@media (max-width: 900px) {
+    .main-content {
+        margin-left: 210px;
+        width: calc(100% - 210px);
+        padding: 30px;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 25px 18px;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 600px;
+    }
+}

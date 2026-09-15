@@ -1,0 +1,804 @@
+{% extends "core/gerente_base.html" %}
+
+{% load static %}
+
+{% block title %}
+Cadastrar veículo | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+
+<link
+    rel="stylesheet"
+    href="{% static 'core/css/gerente_cadastrar_veiculo.css' %}"
+>
+
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topo">
+
+    <div>
+
+        <h1>Cadastrar veículo</h1>
+
+        <p>
+            Adicione um novo veículo ao estoque.
+        </p>
+
+    </div>
+
+    <div class="badge">
+        Gerente
+    </div>
+
+</header>
+
+
+{% if messages %}
+
+<div class="messages">
+
+    {% for message in messages %}
+
+    <div class="message message-{{ message.tags }}">
+        {{ message }}
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endif %}
+
+
+<form method="POST" enctype="multipart/form-data">
+
+    {% csrf_token %}
+
+
+    <!-- DADOS DO VEÍCULO -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <h2>Dados do veículo</h2>
+
+            <p>
+                Informe os dados de identificação e características.
+            </p>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="campo">
+
+                <label for="placa">
+                    Placa
+                </label>
+
+                <input
+                    type="text"
+                    id="placa"
+                    name="placa"
+                    maxlength="8"
+                    placeholder="ABC1D23 ou ABC1234"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="chassi">
+                    Chassi
+                </label>
+
+                <input
+                    type="text"
+                    id="chassi"
+                    name="chassi"
+                    maxlength="17"
+                    placeholder="17 caracteres"
+                    required
+                >
+
+            </div>
+
+            <div class="campo">
+                <label for="renavam">
+                    Renavam
+                </label>
+
+                <input
+                    type="text"
+                    id="renavam"
+                    name="renavam"
+                    maxlength="11"
+                    inputmode="numeric"
+                    placeholder="Digite o renavam"
+                    required
+                >
+            </div>
+
+            <div class="campo">
+
+                <label for="marca">
+                    Marca
+                </label>
+
+                <input
+                    type="text"
+                    id="marca"
+                    name="marca"
+                    placeholder="Ex.: Toyota"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="modelo">
+                    Modelo
+                </label>
+
+                <input
+                    type="text"
+                    id="modelo"
+                    name="modelo"
+                    placeholder="Ex.: Corolla"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="ano_fabricacao">
+                    Ano de fabricação
+                </label>
+
+                <input
+                    type="number"
+                    id="ano_fabricacao"
+                    name="ano_fabricacao"
+                    oninput="this.value = this.value.slice(0, 4)"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="ano_modelo">
+                    Ano do modelo
+                </label>
+
+                <input
+                    type="number"
+                    id="ano_modelo"
+                    name="ano_modelo"
+                    oninput="this.value = this.value.slice(0, 4)"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="cor">
+                    Cor
+                </label>
+
+                <input
+                    type="text"
+                    id="cor"
+                    name="cor"
+                    placeholder="Ex.: Branco"
+                    required
+                >
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="combustivel">
+                    Combustível
+                </label>
+
+                <select
+                    id="combustivel"
+                    name="combustivel"
+                    required
+                >
+
+                    <option value="">
+                        Selecione
+                    </option>
+
+                    <option value="Gasolina">
+                        Gasolina
+                    </option>
+
+                    <option value="Etanol">
+                        Etanol
+                    </option>
+
+                    <option value="Flex">
+                        Flex
+                    </option>
+
+                    <option value="Diesel">
+                        Diesel
+                    </option>
+
+                    <option value="Elétrico">
+                        Elétrico
+                    </option>
+
+                    <option value="Híbrido">
+                        Híbrido
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="campo">
+
+                <label for="quilometragem">
+                    Quilometragem
+                </label>
+
+                <div class="input-unidade">
+
+                    <input
+                        type="number"
+                        id="quilometragem"
+                        name="quilometragem"
+                        min="0"
+                        required
+                    >
+
+                    <span>km</span>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="campo-opcionais">
+
+            <label for="opcionais">
+                Opcionais
+            </label>
+
+            <span class="descricao">
+                Informe os principais opcionais do veículo.
+            </span>
+
+            <textarea
+                id="opcionais"
+                name="opcionais"
+                rows="4"
+                placeholder="Ex.: ar-condicionado, câmera de ré, bancos de couro..."
+            ></textarea>
+
+        </div>
+
+    </section>
+
+
+    <!-- ORIGEM -->
+
+    <section class="card">
+
+        <div class="card-header">
+
+            <h2>Origem e valores</h2>
+
+            <p>
+                Informe como o veículo entrou no estoque.
+            </p>
+
+        </div>
+
+
+        <div class="campo">
+
+            <label>
+                Origem do veículo
+            </label>
+
+
+            <div class="origens">
+
+                <label class="origem-option">
+
+                    <input
+                        type="radio"
+                        name="origem"
+                        value="COMPRADO"
+                        checked
+                        required
+                    >
+
+                    <div>
+
+                        <strong>
+                            Comprado de terceiro
+                        </strong>
+
+                        <span>
+                            Veículo adquirido de um terceiro.
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <label class="origem-option">
+
+                    <input
+                        type="radio"
+                        name="origem"
+                        value="TROCA"
+                    >
+
+                    <div>
+
+                        <strong>
+                            Recebido em troca
+                        </strong>
+
+                        <span>
+                            Veículo recebido em uma negociação.
+                        </span>
+
+                    </div>
+
+                </label>
+
+
+                <label class="origem-option">
+
+                    <input
+                        type="radio"
+                        name="origem"
+                        value="CONSIGNADO"
+                    >
+
+                    <div>
+
+                        <strong>
+                            Consignado
+                        </strong>
+
+                        <span>
+                            Veículo recebido para venda em consignação.
+                        </span>
+
+                    </div>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid valores">
+
+            <div class="campo" id="campo-custo">
+                <label for="custo_aquisicao">
+                    Custo de aquisição
+                </label>
+
+                <div class="input-moeda">
+                    <span>R$</span>
+
+                    <input
+                        type="number"
+                        id="custo_aquisicao"
+                        name="custo_aquisicao"
+                        min="0"
+                        step="0.01"
+                        placeholder="0,00"
+                    >
+                </div>
+
+                <small class="descricao" id="descricao-custo">
+                    Obrigatório para veículo comprado ou recebido em troca.
+                </small>
+            </div>
+
+
+            <div class="campo" id="campo-repasse">
+                <label for="valor_repasse">
+                    Valor de repasse
+                </label>
+
+                <div class="input-moeda">
+                    <span>R$</span>
+
+                    <input
+                        type="number"
+                        id="valor_repasse"
+                        name="valor_repasse"
+                        min="0"
+                        step="0.01"
+                        placeholder="0,00"
+                    >
+                </div>
+
+                <small class="descricao" id="descricao-repasse">
+                    Utilizado quando o veículo for consignado.
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="aviso">
+
+            🔒 O custo de aquisição não poderá ser alterado após o fechamento da venda.
+
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <div class="campo fotos-campo">
+
+            <label>Fotos do veículo</label>
+
+            <span class="descricao">
+                Adicione fotos para apresentar o veículo no sistema.
+            </span>
+
+            <div class="upload-area" id="area-upload">
+
+                <div class="upload-icon">
+                    📷
+                </div>
+
+                <strong>Adicione fotos do veículo</strong>
+
+                <p>
+                    Selecione uma ou várias imagens para enviar.
+                </p>
+
+                <label for="fotos" class="btn-selecionar">
+                    Selecionar fotos
+                </label>
+
+                <input
+                    type="file"
+                    id="fotos"
+                    name="fotos"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    hidden
+                >
+
+                <small>
+                    JPG, PNG ou WEBP
+                </small>
+
+            </div>
+
+            <div
+                id="preview-fotos"
+                class="preview-fotos"
+            ></div>
+
+            <div class="aviso-fotos">
+                📌 A primeira foto será utilizada como foto principal.
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- BOTÕES -->
+
+    <div class="acoes">
+
+        <a
+            href="{% url 'veiculos' %}"
+            class="btn-voltar"
+        >
+            Cancelar
+        </a>
+
+        <button
+            type="submit"
+            class="btn-salvar"
+        >
+            Cadastrar veículo
+        </button>
+
+    </div>
+
+
+</form>
+{% endblock content %}
+
+{% block extra_js %}
+
+<script>
+const origens = document.querySelectorAll('input[name="origem"]');
+
+const campoCusto = document.getElementById("campo-custo");
+const custoAquisicao = document.getElementById("custo_aquisicao");
+
+const campoRepasse = document.getElementById("campo-repasse");
+const valorRepasse = document.getElementById("valor_repasse");
+
+function atualizarOrigem() {
+
+    const origemSelecionada = document.querySelector(
+        'input[name="origem"]:checked'
+    );
+
+    if (!origemSelecionada) {
+        return;
+    }
+
+    const origem = origemSelecionada.value;
+
+    if (origem === "CONSIGNADO") {
+
+        // Consignado não possui custo de aquisição
+        custoAquisicao.value = "0";
+        custoAquisicao.disabled = true;
+        custoAquisicao.required = false;
+
+        campoCusto.classList.add("campo-desabilitado");
+
+        // No consignado, o repasse é obrigatório
+        valorRepasse.disabled = false;
+        valorRepasse.required = true;
+
+        campoRepasse.classList.remove("campo-desabilitado");
+
+    } else {
+
+        // Comprado ou troca precisam de custo
+        custoAquisicao.disabled = false;
+        custoAquisicao.required = true;
+
+        campoCusto.classList.remove("campo-desabilitado");
+
+        // Repasse não é necessário nesses casos
+        valorRepasse.value = "";
+        valorRepasse.disabled = true;
+        valorRepasse.required = false;
+
+        campoRepasse.classList.add("campo-desabilitado");
+    }
+}
+
+
+origens.forEach(function (origem) {
+    origem.addEventListener("change", atualizarOrigem);
+});
+
+
+atualizarOrigem();
+
+const inputFotos = document.getElementById("fotos");
+const previewFotos = document.getElementById("preview-fotos");
+
+let arquivosSelecionados = [];
+let indiceArrastado = null;
+
+const areaUpload = document.getElementById("area-upload");
+
+areaUpload.addEventListener("dragover", function (event) {
+    event.preventDefault();
+    areaUpload.classList.add("arrastando-arquivos");
+});
+
+areaUpload.addEventListener("dragleave", function () {
+    areaUpload.classList.remove("arrastando-arquivos");
+});
+
+areaUpload.addEventListener("drop", function (event) {
+    event.preventDefault();
+
+    areaUpload.classList.remove("arrastando-arquivos");
+
+    const arquivos = Array.from(event.dataTransfer.files);
+
+    const imagens = arquivos.filter(function (arquivo) {
+        return arquivo.type.startsWith("image/");
+    });
+
+    arquivosSelecionados = [
+        ...arquivosSelecionados,
+        ...imagens
+    ];
+
+    atualizarInput();
+    atualizarPreview();
+});
+
+
+inputFotos.addEventListener("change", function () {
+
+    const novosArquivos = Array.from(this.files);
+
+    arquivosSelecionados = [
+        ...arquivosSelecionados,
+        ...novosArquivos
+    ];
+
+    atualizarInput();
+    atualizarPreview();
+});
+
+
+function atualizarPreview() {
+
+    previewFotos.innerHTML = "";
+
+    arquivosSelecionados.forEach((arquivo, index) => {
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            const item = document.createElement("div");
+
+            item.className = "foto-preview";
+            item.draggable = true;
+
+            item.innerHTML = `
+                <img
+                    src="${e.target.result}"
+                    alt="Pré-visualização da foto"
+                >
+
+                ${index === 0
+                    ? '<span class="foto-principal">Principal</span>'
+                    : ''
+                }
+
+                <button
+                    type="button"
+                    class="remover-foto"
+                >
+                    ×
+                </button>
+            `;
+
+
+            const botaoRemover =
+                item.querySelector(".remover-foto");
+
+            botaoRemover.addEventListener("click", function () {
+
+                const indiceAtual =
+                    Array.from(previewFotos.children)
+                    .indexOf(item);
+
+                removerFoto(indiceAtual);
+            });
+
+
+            item.addEventListener("dragstart", function () {
+
+                indiceArrastado =
+                    Array.from(previewFotos.children)
+                    .indexOf(item);
+
+                item.classList.add("arrastando");
+            });
+
+
+            item.addEventListener("dragend", function () {
+
+                item.classList.remove("arrastando");
+
+                indiceArrastado = null;
+            });
+
+
+            item.addEventListener("dragover", function (event) {
+
+                event.preventDefault();
+            });
+
+
+            item.addEventListener("drop", function (event) {
+
+                event.preventDefault();
+
+                const indiceDestino =
+                    Array.from(previewFotos.children)
+                    .indexOf(item);
+
+                if (
+                    indiceArrastado === null ||
+                    indiceArrastado === indiceDestino
+                ) {
+                    return;
+                }
+
+
+                const arquivoMovido =
+                    arquivosSelecionados[indiceArrastado];
+
+
+                arquivosSelecionados.splice(
+                    indiceArrastado,
+                    1
+                );
+
+
+                arquivosSelecionados.splice(
+                    indiceDestino,
+                    0,
+                    arquivoMovido
+                );
+
+
+                atualizarInput();
+                atualizarPreview();
+            });
+
+
+            previewFotos.appendChild(item);
+        };
+
+
+        reader.readAsDataURL(arquivo);
+    });
+}
+
+
+function removerFoto(index) {
+
+    arquivosSelecionados.splice(index, 1);
+
+    atualizarInput();
+    atualizarPreview();
+}
+
+
+function atualizarInput() {
+
+    const dataTransfer = new DataTransfer();
+
+    arquivosSelecionados.forEach(function (arquivo) {
+
+        dataTransfer.items.add(arquivo);
+    });
+
+    inputFotos.files = dataTransfer.files;
+}
+</script>
+
+{% endblock extra_js %}
+

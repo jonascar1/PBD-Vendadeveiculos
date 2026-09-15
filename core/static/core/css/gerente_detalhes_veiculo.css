@@ -1,0 +1,345 @@
+/* ==============================
+   DETALHES DO VEÍCULO
+============================== */
+
+.detalhes-container {
+    display: grid;
+    grid-template-columns: minmax(400px, 0.95fr) minmax(450px, 1.05fr);
+    gap: 28px;
+    align-items: start;
+}
+
+
+/* ==============================
+   GALERIA
+============================== */
+
+.galeria {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.foto-principal-container {
+    width: 100%;
+    height: 390px;
+    border-radius: 9px;
+    overflow: hidden;
+    background: #f3f4f6;
+}
+
+.foto-principal-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.sem-foto {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+}
+
+.sem-foto span {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.sem-foto p {
+    font-size: 13px;
+}
+
+
+/* ==============================
+   MINIATURAS
+============================== */
+
+.miniaturas {
+    display: flex;
+    gap: 9px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.miniatura {
+    width: 78px;
+    height: 58px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    overflow: hidden;
+    background: #f3f4f6;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+
+.miniatura img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.miniatura:hover {
+    border-color: #93c5fd;
+}
+
+.miniatura.ativa {
+    border-color: #2563eb;
+}
+
+
+/* ==============================
+   INFORMAÇÕES
+============================== */
+
+.informacoes {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+
+/* ==============================
+   TÍTULO
+============================== */
+
+.titulo-veiculo {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.label-veiculo {
+    color: #9ca3af;
+    font-size: 10px;
+    font-weight: bold;
+    letter-spacing: 0.8px;
+}
+
+.titulo-veiculo h2 {
+    font-size: 23px;
+    margin-top: 5px;
+    color: #1f2937;
+}
+
+.titulo-veiculo p {
+    margin-top: 5px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* ==============================
+   STATUS
+============================== */
+
+.status {
+    padding: 7px 11px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.status-disponivel {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-reservado {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-vendido {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+
+/* ==============================
+   CARDS
+============================== */
+
+.card-info {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px 22px;
+}
+
+.card-info h3 {
+    font-size: 14px;
+    margin-bottom: 18px;
+    color: #1f2937;
+}
+
+
+/* ==============================
+   GRID DE INFORMAÇÕES
+============================== */
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px 20px;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.info-item span {
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+.info-item strong {
+    color: #1f2937;
+    font-size: 13px;
+    word-break: break-word;
+}
+
+
+/* ==============================
+   OPCIONAIS
+============================== */
+
+.opcionais {
+    color: #4b5563;
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.sem-informacao {
+    color: #9ca3af;
+    font-size: 13px;
+    margin: 0;
+}
+
+
+/* ==============================
+   TOPO
+============================== */
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 28px;
+}
+
+.topo h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.topo p {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.badge {
+    background: white;
+    padding: 9px 15px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+/* ==============================
+   BOTÃO VOLTAR
+============================== */
+
+.btn-voltar {
+    display: inline-block;
+    padding: 8px 13px;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    text-decoration: none;
+    font-size: 12px;
+    transition: 0.2s;
+    margin-top: 20px;
+}
+
+.btn-voltar:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+
+/* ==============================
+   RESPONSIVIDADE
+============================== */
+
+@media (max-width: 1100px) {
+
+    .detalhes-container {
+        grid-template-columns: 1fr;
+    }
+
+    .foto-principal-container {
+        height: 420px;
+    }
+}
+
+
+@media (max-width: 700px) {
+
+    .topo-acoes {
+        align-items: flex-start;
+    }
+
+    .titulo-veiculo {
+        flex-direction: column;
+    }
+
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .foto-principal-container {
+        height: 300px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .foto-principal-container {
+        height: 250px;
+    }
+
+    .galeria,
+    .card-info,
+    .titulo-veiculo {
+        padding: 16px;
+    }
+}

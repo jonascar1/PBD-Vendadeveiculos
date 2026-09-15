@@ -1,0 +1,259 @@
+{% extends 'core/gerente_base.html' %}
+{% load static %}
+
+{% block title %}Painel do Gerente | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/gerente_painel_inicio.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- CABEÇALHO -->
+            <header class="topbar">
+
+                <div>
+                    <h1>Painel do Gerente</h1>
+                    <p>Olá, {{ request.user.get_full_name|default:request.user.username }}!</p>
+                </div>
+
+                <div class="user-info">
+                    <span>Gerente</span>
+                </div>
+
+            </header>
+
+             <!-- MENSAGENS -->
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message message-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+
+            <!-- AÇÕES RÁPIDAS -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Ações rápidas</h2>
+
+                        <p>
+                            Acesse rapidamente as principais funções.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="actions-grid">
+
+                    <a href="{% url 'cadastrar_veiculo' %}" class="action-card">
+
+                        <div class="action-icon">
+                            🚗
+                        </div>
+
+                        <div>
+                            <h3>Cadastrar veículo</h3>
+
+                            <p>
+                                Adicione um novo veículo ao estoque.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+                    <a href="{% url 'cadastrar_vendedor' %}" class="action-card">
+
+                        <div class="action-icon">
+                            👤
+                        </div>
+
+                        <div>
+                            <h3>Cadastrar vendedor</h3>
+
+                            <p>
+                                Adicione um novo vendedor à equipe.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+
+                    <a href="#" class="action-card">
+
+                        <div class="action-icon">
+                            💰
+                        </div>
+
+                        <div>
+                            <h3>Definir preço e alçada</h3>
+
+                            <p>
+                                Configure preços e limites de desconto.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+
+                    <a href="#" class="action-card">
+
+                        <div class="action-icon">
+                            ✓
+                        </div>
+
+                        <div>
+                            <h3>Aprovar descontos</h3>
+
+                            <p>
+                                Analise descontos acima da alçada.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+
+                    <a href="#" class="action-card">
+
+                        <div class="action-icon">
+                            🔄
+                        </div>
+
+                        <div>
+                            <h3>Avaliar troca</h3>
+
+                            <p>
+                                Avalie veículos recebidos em troca.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- VENDEDORES -->
+            <section class="section">
+
+                <div class="section-header">
+
+                    <div>
+                        <h2>Vendedores</h2>
+
+                        <p>
+                            Gerencie a alçada de desconto e comissão dos vendedores.
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+                                <th>Nome</th>
+                                <th>Alçada de desconto</th>
+                                <th>Comissão</th>
+                                <th>Ação</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {% for v in vendedores %}
+
+                            <tr>
+
+                                <td>
+                                    <div class="seller">
+
+                                        <div class="seller-icon">
+                                            {{ v.usuario.username|first|upper }}
+                                        </div>
+
+                                        <div>
+                                            <strong>
+                                                {{ v.usuario.get_full_name|default:v.usuario.username }}
+                                            </strong>
+
+                                            <small>
+                                                @{{ v.usuario.username }}
+                                            </small>
+                                        </div>
+
+                                    </div>
+                                </td>
+
+
+                                <td>
+                                    <span class="percentage">
+                                        {{ v.alcada_desconto }}%
+                                    </span>
+                                </td>
+
+
+                                <td>
+                                    <span class="percentage">
+                                        {{ v.percentual_comissao }}%
+                                    </span>
+                                </td>
+
+
+                                <td>
+
+                                    <a
+                                        href="#"
+                                        class="negociacoes-button"
+                                    >
+                                        Ver negociações
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td colspan="4" class="empty">
+
+                                    Nenhum vendedor cadastrado.
+
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+{% endblock content %}

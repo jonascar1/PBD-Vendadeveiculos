@@ -1,0 +1,741 @@
+/* ==============================
+   TOPO
+============================== */
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.topo h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.topo p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* ==============================
+   BADGE
+============================== */
+
+.badge {
+    background: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+/* ==============================
+   CARD
+============================== */
+
+.card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    max-width: 1000px;
+}
+
+
+/* ==============================
+   CABEÇALHO DO CARD
+============================== */
+
+.card-header {
+    padding-bottom: 20px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.card-header h2 {
+    font-size: 17px;
+    margin-bottom: 5px;
+}
+
+.card-header p {
+    color: #6b7280;
+    font-size: 13px;
+}
+
+
+/* ==============================
+   GRID DOS CAMPOS
+============================== */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px 20px;
+}
+
+
+/* ==============================
+   CAMPOS
+============================== */
+
+.campo {
+    margin-bottom: 4px;
+}
+
+.campo label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.descricao {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 9px;
+}
+
+.campo-opcionais textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 11px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #fff;
+    color: #1f2937;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: none;
+    box-sizing: border-box;
+    outline: none;
+    transition: 0.2s;
+}
+
+.campo-opcionais textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.campo-opcionais ::placeholder{
+    color: #9ca3af;
+}
+
+.campo-opcionais {
+    margin-bottom: 4px;
+}
+
+.campo-opcionais label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 6px;
+    margin-top: 20px;
+}
+
+/* ==============================
+   INPUTS
+============================== */
+
+.campo input,
+.campo select {
+    width: 100%;
+    height: 42px;
+
+    padding: 10px 12px;
+
+    background: white;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    outline: none;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+
+    color: #1f2937;
+}
+
+.campo input:focus,
+.campo select:focus {
+    border-color: #2563eb;
+}
+
+
+/* ==============================
+   INPUT COM UNIDADE
+============================== */
+
+.input-unidade {
+    display: flex;
+    align-items: center;
+
+    height: 42px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+.input-unidade:focus-within {
+    border-color: #2563eb;
+}
+
+.input-unidade input {
+    border: none;
+    height: 40px;
+}
+
+.input-unidade span {
+    padding-right: 12px;
+
+    color: #6b7280;
+
+    font-size: 13px;
+}
+
+
+/* ==============================
+   ORIGEM
+============================== */
+
+.origens {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.origem-option {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 12px;
+
+    padding: 14px;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.origem-option:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.origem-option input {
+    width: 16px;
+    height: 16px;
+
+    margin-top: 2px;
+
+    accent-color: #2563eb;
+}
+
+.origem-option strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.origem-option span {
+    display: block;
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+
+/* ==============================
+   CUSTO
+============================== */
+
+.campo-custo {
+    max-width: 400px;
+    margin-top: 25px;
+}
+
+.input-moeda {
+    display: flex;
+    align-items: center;
+
+    height: 42px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+.input-moeda:focus-within {
+    border-color: #2563eb;
+}
+
+.input-moeda span {
+    padding-left: 12px;
+
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.input-moeda input {
+    border: none;
+    height: 40px;
+}
+
+
+/* ==============================
+   AVISO
+============================== */
+
+.aviso {
+    background: #eff6ff;
+
+    border: 1px solid #dbeafe;
+
+    border-radius: 8px;
+
+    padding: 13px 15px;
+
+    color: #2563eb;
+
+    font-size: 12px;
+
+    margin-top: 22px;
+}
+
+
+/* ==============================
+   UPLOAD
+============================== */
+
+.upload-area {
+    border: 2px dashed #d1d5db;
+
+    border-radius: 10px;
+
+    padding: 30px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    text-align: center;
+
+    background: #fafafa;
+}
+
+.upload-icon {
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.upload-area strong {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.upload-area > span {
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+
+/* ==============================
+   BOTÃO UPLOAD
+============================== */
+
+.btn-upload {
+    display: inline-block;
+
+    padding: 9px 15px;
+
+    background: white;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    color: #374151;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-upload:hover {
+    background: #f3f4f6;
+}
+
+
+/* ==============================
+   PREVIEW DAS FOTOS
+============================== */
+
+.fotos-preview {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+
+    margin-top: 20px;
+}
+
+.foto-placeholder {
+    height: 150px;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    background: #f9fafb;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    color: #9ca3af;
+}
+
+.foto-placeholder span {
+    font-size: 28px;
+}
+
+.foto-placeholder small {
+    font-size: 11px;
+}
+
+
+/* ==============================
+   INFORMAÇÃO DAS FOTOS
+============================== */
+
+.foto-info {
+    margin-top: 15px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+
+/* ==============================
+   BOTÕES
+============================== */
+
+.acoes {
+    max-width: 1000px;
+
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 25px;
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.btn-voltar {
+    display: inline-block;
+
+    padding: 9px 15px;
+
+    border-radius: 6px;
+
+    background: white;
+
+    border: 1px solid #d1d5db;
+
+    color: #374151;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    transition: 0.2s;
+}
+
+.btn-voltar:hover {
+    background: #f9fafb;
+}
+
+.btn-salvar {
+    padding: 9px 15px;
+
+    border: none;
+    border-radius: 6px;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.btn-salvar:hover {
+    background: #1d4ed8;
+}
+
+/* ==============================
+   FOTOS DO VEÍCULO
+============================== */
+
+.upload-area {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 28px 20px;
+    text-align: center;
+    background: #fafbfc;
+    transition: 0.2s;
+}
+
+.upload-area:hover {
+    border-color: #2563eb;
+    background: #f8faff;
+}
+
+.upload-icon {
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.upload-area strong {
+    display: block;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.upload-area p {
+    margin: 5px 0 14px;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.btn-selecionar {
+    display: inline-block;
+    padding: 9px 14px;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-selecionar:hover {
+    background: #1d4ed8;
+}
+
+.upload-area small {
+    display: block;
+    margin-top: 10px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+
+/* ==============================
+   PRÉ-VISUALIZAÇÃO
+============================== */
+
+.preview-fotos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.foto-preview {
+    position: relative;
+    width: 150px;
+    height: 105px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    cursor: grab;
+}
+
+.foto-preview:active {
+    cursor: grabbing;
+}
+
+.foto-preview.arrastando {
+    opacity: 0.5;
+    border: 2px dashed #2563eb;
+}
+
+.foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.foto-principal {
+    position: absolute;
+    left: 7px;
+    bottom: 7px;
+    padding: 4px 7px;
+    border-radius: 5px;
+    background: #2563eb;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.remover-foto {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: white;
+    color: #dc2626;
+    font-size: 17px;
+    line-height: 20px;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.remover-foto:hover {
+    background: #fee2e2;
+}
+
+
+/* ==============================
+   AVISO DAS FOTOS
+============================== */
+
+.aviso-fotos {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #2563eb;
+    font-size: 11px;
+}
+
+.foto-preview {
+    position: relative;
+    width: 150px;
+    height: 105px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    background: #f3f4f6;
+    cursor: grab;
+}
+
+.foto-preview:active {
+    cursor: grabbing;
+}
+
+.foto-preview.arrastando {
+    opacity: 0.5;
+    border: 2px dashed #2563eb;
+}
+
+.upload-area.arrastando-arquivos {
+    border-color: #2563eb;
+    background: #eff6ff;
+    transform: scale(1.01);
+}
+
+.campo-desabilitado {
+    opacity: 0.55;
+}
+
+.campo-desabilitado input {
+    background: #f3f4f6;
+    cursor: not-allowed;
+}
+
+.descricao {
+    display: block;
+    margin-top: 5px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+
+
+
+/* ==============================
+   RESPONSIVIDADE
+============================== */
+
+@media (max-width: 800px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fotos-preview {
+        grid-template-columns: 1fr 1fr;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .topo {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .fotos-preview {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes {
+        justify-content: stretch;
+    }
+
+    .btn-voltar,
+    .btn-salvar {
+        flex: 1;
+        text-align: center;
+    }
+
+}

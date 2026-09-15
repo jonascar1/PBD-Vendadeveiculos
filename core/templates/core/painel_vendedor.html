@@ -1,0 +1,367 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Painel do Vendedor | VENDACERTA</title>
+
+    <link rel="stylesheet" href="{% static 'core/css/painel_vendedor.css' %}">
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <span>VENDA</span>CERTA
+        </div>
+
+        <div class="perfil">
+            <div class="avatar">
+                {{ request.user.first_name|first|upper }}
+            </div>
+
+            <div>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                <span>Vendedor</span>
+            </div>
+        </div>
+
+        <nav class="menu">
+
+            <a href="#" class="ativo">
+                <span>⌂</span>
+                Início
+            </a>
+
+            <a href="#">
+                <span>👤</span>
+                Clientes
+            </a>
+
+            <a href="#">
+                <span>🚗</span>
+                Veículos
+            </a>
+
+            <a href="#">
+                <span>💰</span>
+                Negociações
+            </a>
+
+            <a href="#">
+                <span>🔄</span>
+                Registrar troca
+            </a>
+
+        </nav>
+
+        <div class="menu-inferior">
+
+            <a href="#">
+                <span>⚙</span>
+                Configurações
+            </a>
+
+            <a href="{% url 'logout' %}" class="sair">
+                <span>↪</span>
+                Sair
+            </a>
+
+        </div>
+
+    </aside>
+
+
+    <main class="conteudo">
+
+        <header class="topo">
+
+            <div>
+                <h1>Painel do Vendedor</h1>
+                <p>Olá, {{ request.user.get_full_name|default:request.user.username }}!</p>
+            </div>
+
+            <div class="cargo">
+                Vendedor
+            </div>
+
+        </header>
+
+
+        <section>
+
+            <div class="titulo-secao">
+                <h2>Ações rápidas</h2>
+                <p>Acesse rapidamente as principais funções.</p>
+            </div>
+
+
+            <div class="cards-acoes">
+
+                <a href="#" class="card-acao">
+
+                    <div class="icone">
+                        👤
+                    </div>
+
+                    <div class="card-texto">
+                        <strong>Atender cliente</strong>
+                        <span>Cadastre e consulte clientes.</span>
+                    </div>
+
+                    <div class="seta">
+                        →
+                    </div>
+
+                </a>
+
+
+                <a href="#" class="card-acao">
+
+                    <div class="icone">
+                        🚗
+                    </div>
+
+                    <div class="card-texto">
+                        <strong>Consultar veículos</strong>
+                        <span>Veja os veículos disponíveis no estoque.</span>
+                    </div>
+
+                    <div class="seta">
+                        →
+                    </div>
+
+                </a>
+
+
+                <a href="#" class="card-acao">
+
+                    <div class="icone">
+                        💰
+                    </div>
+
+                    <div class="card-texto">
+                        <strong>Nova negociação</strong>
+                        <span>Crie uma proposta para seu cliente.</span>
+                    </div>
+
+                    <div class="seta">
+                        →
+                    </div>
+
+                </a>
+
+
+                <a href="#" class="card-acao">
+
+                    <div class="icone">
+                        🔄
+                    </div>
+
+                    <div class="card-texto">
+                        <strong>Registrar troca</strong>
+                        <span>Informe um veículo recebido como troca.</span>
+                    </div>
+
+                    <div class="seta">
+                        →
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+        <section class="atividade-section">
+
+            <div class="titulo-secao">
+                <h2>Minhas propostas</h2>
+                <p>Acompanhe suas propostas e o andamento das negociações.</p>
+            </div>
+
+            <div class="propostas-card">
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>João da Silva</strong>
+                        <span>Honda Civic 2022</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 85.000,00</strong>
+                        <span class="status pendente">Pendente</span>
+                    </div>
+
+                </div>
+
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>Maria Oliveira</strong>
+                        <span>Toyota Corolla 2023</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 112.000,00</strong>
+                        <span class="status aprovada">Aprovada</span>
+                    </div>
+
+                </div>
+
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>Carlos Souza</strong>
+                        <span>Volkswagen T-Cross 2023</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 98.500,00</strong>
+                        <span class="status recusada">Recusada</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="atividade-section">
+
+            <div class="titulo-secao">
+                <h2>Fila de hoje</h2>
+                <p>Clientes e negociações que precisam de atenção hoje.</p>
+            </div>
+
+            <div class="fila-card">
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>09:00</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>João da Silva</strong>
+                        <span>Retorno sobre proposta do Honda Civic</span>
+                    </div>
+
+                    <span class="fila-status">Aguardando</span>
+
+                </div>
+
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>11:30</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>Maria Oliveira</strong>
+                        <span>Apresentação do Toyota Corolla</span>
+                    </div>
+
+                    <span class="fila-status">Agendado</span>
+
+                </div>
+
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>15:00</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>Carlos Souza</strong>
+                        <span>Negociação de veículo</span>
+                    </div>
+
+                    <span class="fila-status">Agendado</span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="dados-section">
+
+            <div class="titulo-secao">
+
+                <h2>Meus dados</h2>
+
+                <p>
+                    Informações definidas pelo gerente.
+                </p>
+
+            </div>
+
+
+            <div class="dados-grid">
+
+                <div class="dado">
+
+                    <span>Alçada de desconto</span>
+
+                    <strong>
+                        {{ dados.alcada_desconto }}%
+                    </strong>
+
+                    <small>
+                        Limite de desconto permitido
+                    </small>
+
+                </div>
+
+
+                <div class="dado">
+
+                    <span>Comissão</span>
+
+                    <strong>
+                        {{ dados.percentual_comissao }}%
+                    </strong>
+
+                    <small>
+                        Percentual de comissão
+                    </small>
+
+                </div>
+
+
+                <div class="aviso">
+
+                    <span>🔒</span>
+
+                    <div>
+                        <strong>Dados protegidos</strong>
+
+                        <p>
+                            Sua alçada e comissão só podem ser
+                            alteradas pelo gerente.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+</html>
