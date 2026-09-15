@@ -1,13 +1,4 @@
-"""
-T01 - Views: login e painel de cada perfil.
 
-Critérios cobertos aqui:
-- Login com usuário/senha, erro genérico (não revela se foi usuário ou senha errada)
-- O menu/painel mostra só o que o perfil pode usar
-- Só gerente edita alçada/comissão
-- Abrir pelo endereço uma rota de outro perfil é recusado no servidor
-  (via @perfil_requerido, não por esconder link)
-"""
 
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required

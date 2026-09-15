@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models_usuarios import Usuario, PerfilVendedor
+from models import Usuario, PerfilVendedor
 
 
 class PerfilVendedorSerializer(serializers.ModelSerializer):

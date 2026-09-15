@@ -1,15 +1,4 @@
-"""
-T01 - Perfis, vendedores e o painel de cada um
 
-Cobre os critérios de aceite:
-- Login com usuário/senha (senha cifrada via AbstractUser do Django)
-- Três perfis: gerente, vendedor, administrativo
-- Vendedor tem alçada de desconto e percentual de comissão
-- Só gerente edita alçada/comissão (regra fica no lado de permissões/views, aqui
-  deixamos o campo protegido por um método de validação)
-- Vendedor desativado não entra, mas vendas dele continuam no sistema
-  (usamos soft delete: campo `ativo`, nunca deletamos o registro)
-"""
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
