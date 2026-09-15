@@ -1,0 +1,126 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Painel do Gerente | VENDACERTA
+        {% endblock %}
+    </title>
+
+    <!-- CSS PADRÃO DO PAINEL -->
+    <link rel="stylesheet" href="{% static 'core/css/gerente_base.css' %}">
+
+    <!-- CSS ESPECÍFICO DE CADA PÁGINA -->
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- BARRA LATERAL -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <span>VENDA</span>CERTA
+            </div>
+
+            <div class="perfil">
+
+                <div class="perfil-icon">
+                    {{ request.user.first_name|first|upper }}
+                </div>
+
+                <div>
+                    <strong>
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </strong>
+
+                    <small>
+                        Gerente
+                    </small>
+                </div>
+
+            </div>
+
+
+            <nav class="menu">
+
+                <a href="{% url 'painel_gerente' %}" 
+                class="menu-item 
+                {% if request.resolver_match.url_name == 'painel_gerente' %}active{% endif %}">
+                    <span>⌂</span>
+                    Início
+                </a>
+
+                <a href="{% url 'veiculos' %}"
+                class="menu-item
+                {% if request.resolver_match.url_name == 'veiculos' or request.resolver_match.url_name == 'cadastrar_veiculo' or request.resolver_match.url_name == 'detalhes_veiculo' %}active{% endif %}">
+                    <span>🚗</span>
+                    Veículos
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span>💰</span>
+                    Negociações
+                </a>
+
+                <a href="{% url 'vendedores' %}" class="menu-item
+                {% if request.resolver_match.url_name == 'vendedores' or request.resolver_match.url_name == 'cadastrar_vendedor' or request.resolver_match.url_name == 'editar_vendedor' %}active{% endif %}">
+                    <span>👥</span>
+                    Vendedores
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span>🔄</span>
+                    Avaliar troca
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <a href="#" class="menu-item">
+                    <span>⚙</span>
+                    Configurações
+                </a>
+
+                <a href="{% url 'logout' %}" class="menu-item logout">
+                    <span>↪</span>
+                    Sair
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTEÚDO DA PÁGINA -->
+        <main class="main-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+
+    <!-- JAVASCRIPT ESPECÍFICO DA PÁGINA -->
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+
+</html>

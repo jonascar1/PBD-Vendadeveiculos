@@ -131,7 +131,7 @@ class Veiculo(models.Model):
     # --- Identificação única no estoque ativo ---
     placa = models.CharField(max_length=8)
     chassi = models.CharField(max_length=17)
-
+    renavam = models.CharField(max_length=11)
     marca = models.CharField(max_length=60)
     modelo = models.CharField(max_length=60)
     ano_fabricacao = models.PositiveSmallIntegerField()

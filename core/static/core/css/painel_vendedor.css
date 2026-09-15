@@ -6,8 +6,8 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f6fa;
-    color: #142033;
+    background: #f5f7fb;
+    color: #1f2937;
 }
 
 
@@ -17,14 +17,11 @@ body {
     position: fixed;
     left: 0;
     top: 0;
-
-    width: 255px;
+    bottom: 0;
+    width: 250px;
     height: 100vh;
-
-    background: #101827;
-
-    padding: 28px 16px;
-
+    background: #111827;
+    padding: 25px 18px;
     display: flex;
     flex-direction: column;
 }
@@ -33,10 +30,12 @@ body {
 /* LOGO */
 
 .logo {
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 800;
 
-    margin: 0 14px 35px;
+    margin-left: 16px;
+    margin-bottom: 32px;
+    letter-spacing: -0.5px;
 
     color: white;
 }
@@ -54,22 +53,22 @@ body {
 
     gap: 12px;
 
-    background: #1e293b;
+    background: #1f2937;
 
-    padding: 11px;
+    padding: 12px;
 
     border-radius: 10px;
 
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .avatar {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
 
     border-radius: 50%;
 
-    background: #2864e8;
+    background: #2563eb;
 
     display: flex;
     align-items: center;
@@ -83,15 +82,15 @@ body {
     display: block;
 
     color: white;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .perfil span {
     display: block;
 
-    color: #94a3b8;
+    color: #9ca3af;
 
-    font-size: 11px;
+    font-size: 12px;
 
     margin-top: 3px;
 }
@@ -103,20 +102,20 @@ body {
     display: flex;
     flex-direction: column;
 
-    gap: 5px;
+    gap: 6px;
 }
 
 .menu a,
 .menu-inferior a {
     text-decoration: none;
 
-    color: #d5dbe5;
+    color: #d1d5db;
 
-    padding: 11px 14px;
+    padding: 12px;
 
     border-radius: 8px;
 
-    font-size: 13px;
+    font-size: 14px;
 
     display: flex;
     align-items: center;
@@ -128,12 +127,19 @@ body {
 
 .menu a:hover,
 .menu-inferior a:hover {
-    background: #1e293b;
+    background: #1f2937;
+    color: white;
 }
 
 .menu a.ativo {
-    background: #2864e8;
+    background: #2563eb;
     color: white;
+}
+
+.menu a span {
+    width: 20px;
+
+    text-align: center;
 }
 
 
@@ -145,21 +151,37 @@ body {
     display: flex;
     flex-direction: column;
 
-    gap: 5px;
+    gap: 6px;
 }
 
 .menu-inferior .sair {
     color: #fca5a5;
 }
 
+.menu-inferior a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    color: #d1d5db;
+    text-decoration: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.menu-inferior a:hover {
+    background: #1f2937;
+    color: white;
+}
 
 
 /* CONTEÚDO */
 
 .conteudo {
-    margin-left: 255px;
+    margin-left: 250px;
 
-    padding: 32px 38px;
+    padding: 35px 45px;
 
     min-height: 100vh;
 }
@@ -171,33 +193,33 @@ body {
     display: flex;
 
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 
-    margin-bottom: 32px;
+    margin-bottom: 35px;
 }
 
 .topo h1 {
-    font-size: 26px;
+    font-size: 28px;
 
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
 
 .topo p {
-    color: #64748b;
+    color: #6b7280;
 
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .cargo {
     background: white;
 
-    border: 1px solid #dfe4ec;
+    border: 1px solid #e5e7eb;
 
-    padding: 9px 16px;
+    padding: 10px 16px;
 
     border-radius: 8px;
 
-    font-size: 12px;
+    font-size: 14px;
 
     font-weight: bold;
 }
@@ -281,7 +303,7 @@ body {
 
     color: #142033;
 
-    font-size: 13px;
+    font-size: 14px;
 
     margin-bottom: 5px;
 }
@@ -289,7 +311,7 @@ body {
 .card-texto span {
     color: #64748b;
 
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .seta {
@@ -388,6 +410,157 @@ body {
     line-height: 1.5;
 }
 
+/* ==============================
+   PROPOSTAS E FILA
+============================== */
+
+.atividade-section {
+    margin-top: 32px;
+}
+
+
+/* PROPOSTAS */
+
+.propostas-card {
+    background: white;
+    border: 1px solid #dfe4ec;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.proposta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #eef1f5;
+}
+
+.proposta:last-child {
+    border-bottom: none;
+}
+
+.proposta-info strong {
+    display: block;
+    color: #142033;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.proposta-info span {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.proposta-valor {
+    text-align: right;
+}
+
+.proposta-valor strong {
+    display: block;
+    color: #142033;
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+
+/* STATUS DA PROPOSTA */
+
+.status {
+    display: inline-block;
+
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.status.pendente {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status.aprovada {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status.recusada {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+
+/* FILA */
+
+.fila-card {
+    background: white;
+    border: 1px solid #dfe4ec;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.fila-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    padding: 18px 20px;
+
+    border-bottom: 1px solid #eef1f5;
+}
+
+.fila-item:last-child {
+    border-bottom: none;
+}
+
+.fila-horario {
+    min-width: 55px;
+
+    color: #2563eb;
+
+    font-size: 14px;
+}
+
+.fila-info {
+    flex: 1;
+}
+
+.fila-info strong {
+    display: block;
+
+    color: #142033;
+
+    font-size: 14px;
+
+    margin-bottom: 5px;
+}
+
+.fila-info span {
+    color: #64748b;
+
+    font-size: 12px;
+}
+
+.fila-status {
+    padding: 5px 9px;
+
+    border-radius: 20px;
+
+    background: #edf4ff;
+
+    color: #2563eb;
+
+    font-size: 11px;
+
+    font-weight: bold;
+}
+
 
 /* RESPONSIVO */
 
@@ -421,6 +594,25 @@ body {
 
     .cards-acoes {
         grid-template-columns: 1fr;
+    }
+
+    .proposta {
+    align-items: flex-start;
+    flex-direction: column;
+    }
+
+    .proposta-valor {
+        width: 100%;
+        text-align: left;
+    }
+
+    .fila-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .fila-status {
+        margin-left: 75px;
     }
 
 }

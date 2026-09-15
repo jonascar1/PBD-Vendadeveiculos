@@ -10,8 +10,8 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f6fa;
-    color: #172033;
+    background: #f5f7fb;
+    color: #1f2937;
 }
 
 
@@ -35,11 +35,17 @@ body {
 
     background: #111827;
 
-    padding: 28px 16px;
+    padding: 25px 18px;
 
     display: flex;
     flex-direction: column;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    color: white;
 }
+
+
 
 
 /* LOGO */
@@ -68,46 +74,43 @@ body {
 .perfil {
     display: flex;
     align-items: center;
+    gap: 12px;
 
-    background: #1e293b;
+    background: #1f2937;
 
     border-radius: 10px;
 
     padding: 12px;
 
-    margin-bottom: 22px;
+    margin-bottom: 25px;
 }
 
 .perfil-avatar {
-    width: 38px;
-    height: 38px;
-
-    background: #2864e8;
-
+    width: 40px;
+    height: 40px;
+    background: #2563eb;
     border-radius: 50%;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     color: white;
     font-weight: bold;
-
-    margin-right: 10px;
+    flex-shrink: 0;
 }
 
 .perfil-info {
-    display: flex;
+    display: block;
     flex-direction: column;
 }
 
 .perfil-info strong {
+    display: block;
     color: white;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .perfil-info span {
-    color: #94a3b8;
+    color: #9ca3af;
     font-size: 12px;
 
     margin-top: 3px;
@@ -131,7 +134,7 @@ body {
 
     gap: 12px;
 
-    padding: 11px 14px;
+    padding: 12px;
 
     border-radius: 8px;
 
@@ -139,18 +142,18 @@ body {
 
     color: #d1d5db;
 
-    font-size: 13px;
+    font-size: 14px;
 
     transition: 0.2s;
 }
 
 .menu-item:hover {
-    background: #1e293b;
+    background: #1f2937;
     color: white;
 }
 
 .menu-item.ativo {
-    background: #2864e8;
+    background: #2563eb;
     color: white;
 }
 
@@ -159,7 +162,6 @@ body {
 
     text-align: center;
 
-    font-size: 15px;
 }
 
 
@@ -173,11 +175,11 @@ body {
     display: flex;
     flex-direction: column;
 
-    gap: 5px;
+    gap: 6px;
 }
 
 .menu-item.sair {
-    color: #ff7b7b;
+    color: #fca5a5;
 }
 
 .menu-item.sair:hover {
@@ -192,7 +194,7 @@ body {
 .conteudo {
     flex: 1;
 
-    padding: 32px 38px;
+    padding: 35px 45px;
 
     max-width: 1500px;
 }
@@ -206,35 +208,35 @@ body {
     display: flex;
 
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
 
-    margin-bottom: 32px;
+    margin-bottom: 35px;
 }
 
 .cabecalho h1 {
-    font-size: 25px;
+    font-size: 28px;
 
     margin-bottom: 6px;
 }
 
 .cabecalho p {
-    color: #64748b;
+    color: #6b7280;
 
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .badge-perfil {
     background: white;
 
-    border: 1px solid #e1e5eb;
+    border: 1px solid #e5e7eb;
 
-    border-radius: 7px;
+    border-radius: 8px;
 
-    padding: 9px 15px;
+    padding: 10px 16px;
 
     font-size: 12px;
 
-    font-weight: 600;
+    font-weight: bold;
 
     color: #334155;
 }

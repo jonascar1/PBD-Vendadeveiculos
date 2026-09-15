@@ -1,0 +1,244 @@
+{% extends "core/gerente_base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Detalhes do veículo | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/gerente_detalhes_veiculo.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<header class="topo">
+    <div>
+        <h1>Detalhes do veículo</h1>
+        <p>Visualize todas as informações do veículo cadastrado.</p>
+    </div>
+
+    <div class="topo-acoes">
+        <div class="badge">Gerente</div>
+
+        <a href="{% url 'veiculos' %}" class="btn-voltar">
+            ← Voltar para veículos
+        </a>
+    </div>
+</header>
+
+
+<section class="detalhes-container">
+
+    <!-- GALERIA -->
+    <div class="galeria">
+
+        <div class="foto-principal-container">
+
+            {% if fotos %}
+                <img
+                    id="foto-principal"
+                    src="{{ fotos.0.imagem.url }}"
+                    alt="Foto do {{ veiculo.marca }} {{ veiculo.modelo }}"
+                >
+            {% else %}
+                <div class="sem-foto">
+                    <span>📷</span>
+                    <p>Nenhuma foto cadastrada</p>
+                </div>
+            {% endif %}
+
+        </div>
+
+
+        {% if fotos %}
+        <div class="miniaturas">
+
+            {% for foto in fotos %}
+                <button
+                    type="button"
+                    class="miniatura {% if forloop.first %}ativa{% endif %}"
+                    onclick="trocarFoto('{{ foto.imagem.url }}', this)"
+                >
+                    <img
+                        src="{{ foto.imagem.url }}"
+                        alt="Foto {{ forloop.counter }}"
+                    >
+                </button>
+            {% endfor %}
+
+        </div>
+        {% endif %}
+
+    </div>
+
+
+    <!-- INFORMAÇÕES -->
+    <div class="informacoes">
+
+        <div class="titulo-veiculo">
+            <div>
+                <span class="label-veiculo">VEÍCULO</span>
+
+                <h2>
+                    {{ veiculo.marca }} {{ veiculo.modelo }}
+                </h2>
+
+                <p>
+                    {{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}
+                </p>
+            </div>
+
+            <span class="status status-{{ veiculo.status|lower }}">
+                {{ veiculo.get_status_display }}
+            </span>
+        </div>
+
+
+        <!-- DADOS PRINCIPAIS -->
+        <div class="card-info">
+
+            <h3>Informações do veículo</h3>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span>Placa</span>
+                    <strong>{{ veiculo.placa }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Chassi</span>
+                    <strong>{{ veiculo.chassi }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Renavam</span>
+                    <strong>{{ veiculo.renavam }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Marca</span>
+                    <strong>{{ veiculo.marca }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Modelo</span>
+                    <strong>{{ veiculo.modelo }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Ano de fabricação</span>
+                    <strong>{{ veiculo.ano_fabricacao }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Ano modelo</span>
+                    <strong>{{ veiculo.ano_modelo }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Cor</span>
+                    <strong>{{ veiculo.cor }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Combustível</span>
+                    <strong>{{ veiculo.combustivel }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Quilometragem</span>
+                    <strong>{{ veiculo.quilometragem }} km</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ORIGEM -->
+        <div class="card-info">
+
+            <h3>Origem e valores</h3>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span>Origem</span>
+                    <strong>{{ veiculo.get_origem_display }}</strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Custo de aquisição</span>
+
+                    <strong>
+                        {% if veiculo.custo_aquisicao %}
+                            R$ {{ veiculo.custo_aquisicao }}
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </strong>
+                </div>
+
+                <div class="info-item">
+                    <span>Valor de repasse</span>
+
+                    <strong>
+                        {% if veiculo.valor_repasse %}
+                            R$ {{ veiculo.valor_repasse }}
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- OPCIONAIS -->
+        <div class="card-info">
+
+            <h3>Opcionais</h3>
+
+            {% if veiculo.opcionais %}
+                <p class="opcionais">
+                    {{ veiculo.opcionais }}
+                </p>
+            {% else %}
+                <p class="sem-informacao">
+                    Nenhum opcional informado.
+                </p>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock content %}
+
+{% block extra_js %}
+
+
+<script>
+function trocarFoto(url, elemento) {
+
+    const fotoPrincipal = document.getElementById("foto-principal");
+
+    if (fotoPrincipal) {
+        fotoPrincipal.src = url;
+    }
+
+    document.querySelectorAll(".miniatura").forEach(function(miniatura) {
+        miniatura.classList.remove("ativa");
+    });
+
+    elemento.classList.add("ativa");
+}
+</script>
+
+{% endblock extra_js %}

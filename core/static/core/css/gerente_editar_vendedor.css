@@ -1,166 +1,3 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #f5f7fb;
-    color: #1f2937;
-}
-
-
-/* ==============================
-   LAYOUT
-============================== */
-
-.layout {
-    display: flex;
-    min-height: 100vh;
-}
-
-
-/* ==============================
-   SIDEBAR
-============================== */
-
-.sidebar {
-    width: 250px;
-    background: #111827;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    padding: 25px 18px;
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-}
-
-
-/* LOGO */
-
-.logo {
-    font-size: 22px;
-    font-weight: 800;
-
-    color: #ffffff;
-
-    margin-left: 16px;
-    margin-bottom: 32px;
-
-    letter-spacing: -0.5px;
-}
-
-.logo span {
-    color: #2864e8;
-}
-
-
-/* PERFIL */
-
-.perfil {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    background: #1f2937;
-    border-radius: 10px;
-    margin-bottom: 25px;
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #2563eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    flex-shrink: 0;
-}
-
-.perfil strong {
-    display: block;
-    font-size: 14px;
-}
-
-.perfil small {
-    color: #9ca3af;
-    font-size: 12px;
-}
-
-
-/* MENU */
-
-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-nav a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    color: #d1d5db;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.2s;
-}
-
-.menu-item span {
-    width: 20px;
-
-    text-align: center;
-}
-
-nav a:hover {
-    background: #1f2937;
-    color: white;
-}
-
-.menu-item.active {
-    background: #2563eb;
-
-    color: white;
-}
-
-
-/* PARTE INFERIOR */
-
-.menu-bottom {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.menu-bottom a {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 8px;
-    color: #d1d5db;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.2s;
-}
-
-.menu-bottom a:hover {
-    background: #1f2937;
-    color: white;
-}
-
-.menu-bottom .sair {
-    color: #fca5a5;
-}
-
 
 /* ==============================
    CONTEÚDO
@@ -238,6 +75,12 @@ nav a:hover {
     height: 45px;
     background: #dbeafe;
     color: #2563eb;
+    font-size: 18px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .vendedor-info h2 {
@@ -271,6 +114,7 @@ nav a:hover {
     color: #6b7280;
     font-size: 12px;
     margin-bottom: 9px;
+    
 }
 
 
@@ -302,6 +146,7 @@ nav a:hover {
     padding-right: 12px;
     color: #6b7280;
     font-size: 14px;
+    margin-left: 6px;
 }
 
 
@@ -369,6 +214,222 @@ nav a:hover {
 
 .btn-salvar:hover {
     background: #1d4ed8;
+}
+
+/* ==============================
+   NOVOS CAMPOS - EDITAR VENDEDOR
+============================== */
+
+
+/* STATUS DO VENDEDOR */
+
+.status {
+    margin-left: auto;
+
+    padding: 6px 10px;
+
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: bold;
+
+    white-space: nowrap;
+}
+
+.status.ativo {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status.inativo {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+
+/* ==============================
+   SEÇÕES
+============================== */
+
+.secao {
+    margin-bottom: 28px;
+}
+
+.secao-titulo {
+    margin-bottom: 18px;
+
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.secao-titulo h3 {
+    font-size: 15px;
+    color: #1f2937;
+}
+
+.secao-titulo p {
+    margin-top: 4px;
+
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
+/* ==============================
+   GRID DOS CAMPOS
+============================== */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 18px;
+}
+
+
+/* ==============================
+   INPUTS E SELECT
+============================== */
+
+.campo input,
+.campo select {
+    width: 100%;
+
+    height: 40px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 7px;
+
+    background: white;
+
+    color: #1f2937;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.2s;
+}
+
+.campo input:focus,
+.campo select:focus {
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+
+/* USUÁRIO - CAMPO DESABILITADO */
+
+.campo input:disabled {
+    background: #f3f4f6;
+
+    color: #6b7280;
+
+    cursor: not-allowed;
+}
+
+
+/* ==============================
+   SENHA
+============================== */
+
+.senha-info {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    background: #f9fafb;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 14px 15px;
+}
+
+.senha-info strong {
+    display: block;
+
+    font-size: 13px;
+
+    color: #1f2937;
+}
+
+.senha-info p {
+    margin-top: 4px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+}
+
+
+/* BOTÃO ALTERAR SENHA */
+
+.btn-alterar-senha {
+    padding: 8px 13px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 6px;
+
+    background: white;
+
+    color: #374151;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+
+    white-space: nowrap;
+}
+
+.btn-alterar-senha:hover {
+    background: #f9fafb;
+
+    border-color: #9ca3af;
+}
+
+
+/* ==============================
+   RESPONSIVIDADE DOS NOVOS CAMPOS
+============================== */
+
+@media (max-width: 650px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .senha-info {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .btn-alterar-senha {
+        width: 100%;
+    }
+
+    .status {
+        margin-left: auto;
+    }
 }
 
 

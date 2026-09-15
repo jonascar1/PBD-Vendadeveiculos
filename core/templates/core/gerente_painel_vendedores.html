@@ -1,0 +1,229 @@
+{% extends 'core/gerente_base.html' %}
+
+{% load static %}
+
+{% block title %}Vendedores | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/gerente_painel_vendedores.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+<!-- CABEÇALHO -->
+            <header class="topbar">
+
+                <div>
+
+                    <h1>
+                        Vendedores
+                    </h1>
+
+                    <p>
+                        Gerencie os vendedores da revenda.
+                    </p>
+
+                </div>
+
+                
+                <div class="user-info">
+
+                    <span>
+                        Gerente
+                    </span>
+
+                </div>
+
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="message message-success">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+            </header>
+
+
+            <!-- SEÇÃO -->
+            <section class="section">
+
+                <div class="section-header vendedores-header">
+
+                    <div>
+
+                        <h2>
+                            Vendedores cadastrados
+                        </h2>
+
+                        <p>
+                            Consulte e gerencie os vendedores do sistema.
+                        </p>
+
+                    </div>
+
+
+                    <a
+                        href="{% url 'cadastrar_vendedor' %}"
+                        class="add-button"
+                    >
+                        + Cadastrar vendedor
+                    </a>
+
+                </div>
+
+
+                <!-- TABELA -->
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Nome
+                                </th>
+
+                                <th>
+                                    Usuário
+                                </th>
+
+                                <th>
+                                    Alçada
+                                </th>
+
+                                <th>
+                                    Comissão
+                                </th>
+
+                                <th>
+                                    Status
+                                </th>
+
+                                <th>
+                                    Ação
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for v in vendedores %}
+
+                            <tr>
+
+                                <!-- NOME -->
+                                <td>
+
+                                    <div class="seller">
+
+                                        <div class="seller-icon">
+                                            {{ v.usuario.first_name|first|upper }}
+                                        </div>
+
+                                        <div>
+
+                                            <strong>
+                                                {{ v.usuario.get_full_name|default:v.usuario.username }}
+                                            </strong>
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- USUÁRIO -->
+                                <td>
+
+                                    <span class="seller-username">
+                                        @{{ v.usuario.username }}
+                                    </span>
+
+                                </td>
+
+
+                                <!-- ALÇADA -->
+                                <td>
+
+                                    <span class="percentage">
+                                        {{ v.alcada_desconto }}%
+                                    </span>
+
+                                </td>
+
+
+                                <!-- COMISSÃO -->
+                                <td>
+
+                                    <span class="percentage">
+                                        {{ v.percentual_comissao }}%
+                                    </span>
+
+                                </td>
+
+
+                                <!-- STATUS -->
+                                <td>
+
+                                    {% if v.usuario.ativo %}
+
+                                        <span class="status-active">
+                                            Ativo
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="status-inactive">
+                                            Inativo
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- AÇÃO -->
+                                <td>
+
+                                    <a
+                                        href="{% url 'editar_vendedor' v.id %}"
+                                        class="edit-button"
+                                    >
+                                        Editar
+                                    </a>
+
+                                </td>
+
+                            </tr>
+
+                            {% empty %}
+
+                            <tr>
+
+                                <td
+                                    colspan="6"
+                                    class="empty"
+                                >
+                                    Nenhum vendedor cadastrado.
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+{% endblock content %}

@@ -35,7 +35,7 @@
 
             <a href="#" class="ativo">
                 <span>⌂</span>
-                Dashboard
+                Início
             </a>
 
             <a href="#">
@@ -63,11 +63,13 @@
         <div class="menu-inferior">
 
             <a href="#">
-                ⚙ Configurações
+                <span>⚙</span>
+                Configurações
             </a>
 
             <a href="{% url 'logout' %}" class="sair">
-                ↪ Sair
+                <span>↪</span>
+                Sair
             </a>
 
         </div>
@@ -171,6 +173,124 @@
                     </div>
 
                 </a>
+
+            </div>
+
+        </section>
+
+        <section class="atividade-section">
+
+            <div class="titulo-secao">
+                <h2>Minhas propostas</h2>
+                <p>Acompanhe suas propostas e o andamento das negociações.</p>
+            </div>
+
+            <div class="propostas-card">
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>João da Silva</strong>
+                        <span>Honda Civic 2022</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 85.000,00</strong>
+                        <span class="status pendente">Pendente</span>
+                    </div>
+
+                </div>
+
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>Maria Oliveira</strong>
+                        <span>Toyota Corolla 2023</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 112.000,00</strong>
+                        <span class="status aprovada">Aprovada</span>
+                    </div>
+
+                </div>
+
+
+                <div class="proposta">
+
+                    <div class="proposta-info">
+                        <strong>Carlos Souza</strong>
+                        <span>Volkswagen T-Cross 2023</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ 98.500,00</strong>
+                        <span class="status recusada">Recusada</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="atividade-section">
+
+            <div class="titulo-secao">
+                <h2>Fila de hoje</h2>
+                <p>Clientes e negociações que precisam de atenção hoje.</p>
+            </div>
+
+            <div class="fila-card">
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>09:00</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>João da Silva</strong>
+                        <span>Retorno sobre proposta do Honda Civic</span>
+                    </div>
+
+                    <span class="fila-status">Aguardando</span>
+
+                </div>
+
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>11:30</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>Maria Oliveira</strong>
+                        <span>Apresentação do Toyota Corolla</span>
+                    </div>
+
+                    <span class="fila-status">Agendado</span>
+
+                </div>
+
+
+                <div class="fila-item">
+
+                    <div class="fila-horario">
+                        <strong>15:00</strong>
+                    </div>
+
+                    <div class="fila-info">
+                        <strong>Carlos Souza</strong>
+                        <span>Negociação de veículo</span>
+                    </div>
+
+                    <span class="fila-status">Agendado</span>
+
+                </div>
 
             </div>
 

@@ -1,90 +1,14 @@
+{% extends 'core/gerente_base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="pt-br">
+{% block title %}Painel do Gerente | VENDACERTA{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/gerente_painel_inicio.css' %}">
+{% endblock %}
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Painel do Gerente | VENDACERTA</title>
-
-    <link rel="stylesheet" href="{% static 'core/css/painel_gerente.css' %}">
-</head>
-
-<body>
-
-    <div class="layout">
-
-        <!-- BARRA LATERAL -->
-        <aside class="sidebar">
-
-            <div class="logo">
-                <span>VENDA</span>CERTA
-            </div>
-
-            <div class="perfil">
-                <div class="perfil-icon">
-                    {{ request.user.first_name|first|upper }}
-                </div>
-
-                <div>
-                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-                    <small>Gerente</small>
-                </div>
-            </div>
-
-            <nav class="menu">
-
-                <a href="#" class="menu-item active">
-                    <span>⌂</span>
-                    Dashboard
-                </a>
-
-                <a href="#" class="menu-item">
-                    <span>🚗</span>
-                    Veículos
-                </a>
-
-                <a href="#" class="menu-item">
-                    <span>💰</span>
-                    Negociações
-                </a>
-
-                <a href="#" class="menu-item">
-                    <span>👥</span>
-                    Vendedores
-                </a>
-
-                <a href="#" class="menu-item">
-                    <span>🔄</span>
-                    Avaliar troca
-                </a>
-
-            </nav>
-
-            <div class="sidebar-bottom">
-
-                <a href="#" class="menu-item">
-                    <span>⚙</span>
-                    Configurações
-                </a>
-
-                <a href="{% url 'logout' %}" class="menu-item logout">
-                    <span>↪</span>
-                    Sair
-                </a>
-
-            </div>
-
-        </aside>
-
-
-        <!-- CONTEÚDO PRINCIPAL -->
-        <main class="main-content">
-
-            <!-- CABEÇALHO -->
+{% block content %}
+<!-- CABEÇALHO -->
             <header class="topbar">
 
                 <div>
@@ -128,7 +52,7 @@
 
                 <div class="actions-grid">
 
-                    <a href="#" class="action-card">
+                    <a href="{% url 'cadastrar_veiculo' %}" class="action-card">
 
                         <div class="action-icon">
                             🚗
@@ -139,6 +63,24 @@
 
                             <p>
                                 Adicione um novo veículo ao estoque.
+                            </p>
+                        </div>
+
+                        <span class="arrow">→</span>
+
+                    </a>
+
+                    <a href="{% url 'cadastrar_vendedor' %}" class="action-card">
+
+                        <div class="action-icon">
+                            👤
+                        </div>
+
+                        <div>
+                            <h3>Cadastrar vendedor</h3>
+
+                            <p>
+                                Adicione um novo vendedor à equipe.
                             </p>
                         </div>
 
@@ -283,10 +225,10 @@
                                 <td>
 
                                     <a
-                                        href="{% url 'editar_alcada_comissao' v.id %}"
-                                        class="edit-button"
+                                        href="#"
+                                        class="negociacoes-button"
                                     >
-                                        Editar
+                                        Ver negociações
                                     </a>
 
                                 </td>
@@ -314,11 +256,4 @@
                 </div>
 
             </section>
-
-        </main>
-
-    </div>
-
-</body>
-
-</html>
+{% endblock content %}
