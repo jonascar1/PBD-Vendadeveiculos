@@ -1,0 +1,318 @@
+/* =========================
+   CABEÇALHO
+========================= */
+
+.despesa-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.despesa-header h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.veiculo-identificacao {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.badge-perfil {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 10px 16px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #334155;
+}
+
+
+/* =========================
+   RESUMO DO VEÍCULO
+========================= */
+
+.despesa-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-bottom: 32px;
+}
+
+.despesa-resumo-card {
+    background: #fff;
+    border: 1px solid #e1e5eb;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.despesa-resumo-card span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.despesa-resumo-card strong {
+    font-size: 24px;
+}
+
+
+/* =========================
+   SEÇÃO DE DESPESAS
+========================= */
+
+.despesas-secao {
+    margin-top: 10px;
+}
+
+.despesas-titulo {
+    margin-bottom: 16px;
+}
+
+.despesas-titulo h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.despesas-titulo p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.despesa-resumo-card small {
+    display: block;
+    margin-top: 6px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.despesa-resumo-card.custo-total {
+    border-color: #bfdbfe;
+    background: #f8fbff;
+}
+
+.despesa-resumo-card.custo-total strong {
+    font-size: 24px;
+    color: #2563eb;
+}
+
+
+/* =========================
+   BOTÃO ADICIONAR
+========================= */
+
+.despesa-acoes {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
+.btn-adicionar-despesa {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+
+    background: #2864e8;
+    color: white;
+
+    padding: 10px 15px;
+
+    border-radius: 7px;
+
+    text-decoration: none;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition: 0.2s;
+}
+
+.btn-adicionar-despesa:hover {
+    background: #1f56d0;
+    transform: translateY(-1px);
+}
+
+.btn-excluidas-despesas {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 9px 14px;
+    border-radius: 8px;
+
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: 0.2s ease;
+    margin-right: 10px;
+}
+
+.btn-excluidas-despesas:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* ================================
+   AÇÕES DA DESPESA
+================================ */
+
+.despesa-item > div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.despesa-acoes-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-editar-despesa,
+.btn-excluir-despesa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 8px 14px;
+    border-radius: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: 0.2s ease;
+}
+
+.btn-editar-despesa {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.btn-editar-despesa:hover {
+    background: #dbeafe;
+}
+
+.btn-excluir-despesa {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.btn-excluir-despesa:hover {
+    background: #fee2e2;
+}
+
+
+/* =========================
+   LISTA DE DESPESAS
+========================= */
+
+.despesas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.despesa-item {
+    background: #fff;
+
+    border: 1px solid #e1e5eb;
+
+    border-radius: 10px;
+
+    padding: 17px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    transition: 0.2s;
+}
+
+.despesa-item:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.despesa-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.despesa-descricao {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.despesa-meta {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.despesa-valor {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+/* =========================
+   ESTADO VAZIO
+========================= */
+
+.despesas-vazio {
+    background: #fff;
+
+    border: 1px solid #e1e5eb;
+
+    border-radius: 10px;
+
+    padding: 35px 20px;
+
+    text-align: center;
+}
+
+.despesas-vazio strong {
+    display: block;
+
+    font-size: 15px;
+
+    margin-bottom: 6px;
+}
+
+.despesas-vazio p {
+    color: #64748b;
+
+    font-size: 13px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+    .despesa-resumo {
+        grid-template-columns: 1fr;
+    }
+
+    .despesa-item {
+        gap: 15px;
+    }
+}

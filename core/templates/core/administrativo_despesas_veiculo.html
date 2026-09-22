@@ -1,0 +1,164 @@
+    {% extends "core/administrativo_base.html" %}
+
+    {% load static %}
+
+    {% block title %}
+    Despesas | {{ veiculo.marca }} {{ veiculo.modelo }}
+    {% endblock %}
+
+    {% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/administrativo_despesas_veiculo.css' %}">
+    {% endblock %}
+
+    {% block content %}
+
+    <div class="despesa-header">
+        <h1>Despesas</h1>
+
+        <div class="veiculo-identificacao">
+            {{ veiculo.marca }} {{ veiculo.modelo }} · {{ veiculo.placa }}
+        </div>
+
+        <div class="badge-perfil">
+            Administrativo
+        </div>
+    </div>
+
+
+    <div class="despesa-resumo">
+
+    <div class="despesa-resumo-card">
+        <span>Custo de aquisição</span>
+        <strong>
+            R$ {{ custo_aquisicao|floatformat:2 }}
+        </strong>
+        <small>
+            Valor pago pelo veículo
+        </small>
+    </div>
+
+
+    <div class="despesa-resumo-card">
+        <span>Total de despesas</span>
+        <strong>
+            R$ {{ total_despesas|floatformat:2 }}
+        </strong>
+        <small>
+            {{ despesas|length }} despesa(s) registrada(s)
+        </small>
+    </div>
+
+
+    <div class="despesa-resumo-card custo-total">
+        <span>Custo total</span>
+        <strong>
+            R$ {{ custo_total|floatformat:2 }}
+        </strong>
+        <small>
+            Aquisição + despesas
+        </small>
+    </div>
+
+</div>
+
+
+    <div class="despesas-secao">
+
+        <div class="despesas-titulo">
+            <h2>Despesas registradas</h2>
+            <p>Histórico de despesas deste veículo.</p>
+        </div>
+
+        <div class="despesa-acoes">
+
+            <a
+                href="{% url 'despesas_excluidas_veiculo' veiculo.id %}"
+                class="btn-excluidas-despesas"
+            >
+                Ver despesas excluídas
+            </a>
+
+            <a
+                href="{% url 'adicionar_despesa' veiculo.id %}"
+                class="btn-adicionar-despesa"
+            >
+                + Adicionar despesa
+            </a>
+
+        </div>
+
+
+        {% if despesas %}
+
+            <div class="despesas-lista">
+
+                {% for despesa in despesas %}
+
+                    <div class="despesa-item">
+
+                        <div class="despesa-info">
+
+                            <span class="despesa-descricao">
+                                {{ despesa.descricao }}
+                            </span>
+
+                            <span class="despesa-meta">
+                                {{ despesa.data_lancamento|date:"d/m/Y" }}
+                                · Registrado por:
+                                {{ despesa.registrado_por.get_full_name|default:despesa.registrado_por.username }}
+
+                                {% if despesa.editado_por %}
+                                    · Editado por:
+                                    {{ despesa.editado_por.get_full_name|default:despesa.editado_por.username }}
+
+                                    {% if despesa.editado_em %}
+                                        · em {{ despesa.editado_em|date:"d/m/Y H:i" }}
+                                    {% endif %}
+                                {% endif %}
+                            </span>
+
+                        </div>
+
+                        <div class="despesa-acoes-item">
+
+                            <span class="despesa-valor">
+                                R$ {{ despesa.valor|floatformat:2 }}
+                            </span>
+
+                            <a
+                                href="{% url 'editar_despesa' despesa.id %}"
+                                class="btn-editar-despesa"
+                            >
+                                Editar
+                            </a>
+
+                            <a
+                                href="{% url 'excluir_despesa' despesa.id %}"
+                                class="btn-excluir-despesa"
+                            >
+                                Excluir
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="despesas-vazio">
+                <strong>Nenhuma despesa registrada</strong>
+
+                <p>
+                    Este veículo ainda não possui despesas.
+                </p>
+            </div>
+
+        {% endif %}
+
+    </div>
+
+    {% endblock %}

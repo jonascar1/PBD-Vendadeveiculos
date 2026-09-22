@@ -1,0 +1,128 @@
+{% extends "core/gerente_base.html" %}
+
+{% load static %}
+
+{% block title %}
+    Preço de venda | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet"
+    href="{% static 'core/css/gerente_alterar_preco.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="preco-container">
+
+    <div class="preco-card">
+
+        <div class="preco-header">
+            <span class="label-veiculo">VEÍCULO</span>
+
+            <h1>
+                {{ veiculo.marca }} {{ veiculo.modelo }}
+            </h1>
+
+            <p>
+                {{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}
+                · {{ veiculo.placa }}
+            </p>
+        </div>
+
+
+        <div class="preco-info">
+
+            <div>
+                <span>Custo de aquisição</span>
+
+                <strong>
+                    {% if veiculo.custo_aquisicao %}
+                        R$ {{ veiculo.custo_aquisicao|floatformat:2 }}
+                    {% else %}
+                        Não informado
+                    {% endif %}
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Preço atual de venda</span>
+
+                <strong>
+                    {% if veiculo.preco_venda %}
+                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                    {% else %}
+                        Ainda não definido
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <form method="post" class="preco-form">
+
+            {% csrf_token %}
+
+            {% if custo_total %}
+                <div class="custo-atual">
+                    <span>Custo total acumulado</span>
+                    <strong>
+                        R$ {{ custo_total|floatformat:2 }}
+                    </strong>
+                </div>
+            {% endif %}
+
+            {% if erro_preco %}
+                <div class="alerta-preco">
+                    {{ erro_preco }}
+                </div>
+            {% endif %}
+
+            <div class="campo-preco">
+
+                <label for="preco_venda">
+                    Novo preço de venda
+                </label>
+
+                <input
+                    type="number"
+                    id="preco_venda"
+                    name="preco_venda"
+                    step="0.01"
+                    min="0"
+                    value="{{ veiculo.preco_venda|default:'' }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="preco-acoes">
+
+                <a
+                    href="{% url 'detalhes_veiculo' veiculo.id %}"
+                    class="btn-cancelar-preco"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn-salvar-preco"
+                >
+                    Salvar preço
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

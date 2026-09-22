@@ -64,7 +64,7 @@
 
                 <a href="{% url 'veiculos' %}"
                 class="menu-item
-                {% if request.resolver_match.url_name == 'veiculos' or request.resolver_match.url_name == 'cadastrar_veiculo' or request.resolver_match.url_name == 'detalhes_veiculo' %}active{% endif %}">
+                {% if request.resolver_match.url_name == 'veiculos' or request.resolver_match.url_name == 'cadastrar_veiculo' or request.resolver_match.url_name == 'detalhes_veiculo' or request.resolver_match.url_name == 'alterar_preco_veiculo'  %}active{% endif %}">
                     <span>🚗</span>
                     Veículos
                 </a>

@@ -1,0 +1,107 @@
+{% extends "core/administrativo_base.html" %}
+{% load static %}
+
+{% block title %}
+Despesas excluídas | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo_despesas_excluidas_veiculo.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="excluidas-container">
+
+    <div class="excluidas-header">
+
+        <div>
+            <span class="excluidas-label">HISTÓRICO</span>
+
+            <h1>Despesas excluídas</h1>
+
+            <p>
+                {{ veiculo.marca }} {{ veiculo.modelo }}
+                <span>·</span>
+                {{ veiculo.placa }}
+            </p>
+        </div>
+
+         
+
+        <a
+            href="{% url 'despesas_veiculo' veiculo.id %}"
+            class="btn-voltar-excluidas">
+                Voltar para despesas
+        </a>
+
+        
+
+    </div>
+
+   
+
+    {% if despesas %}
+
+        <div class="excluidas-lista">
+
+            {% for despesa in despesas %}
+
+                <div class="excluida-item">
+
+                    <div class="excluida-info">
+
+                        <strong>
+                            {{ despesa.descricao|default:"Despesa sem descrição" }}
+                        </strong>
+
+                        <span>
+                            Data da despesa:
+                            {{ despesa.data_lancamento|date:"d/m/Y" }}
+                        </span>
+
+                        <span>
+                            Excluída por:
+                            {{ despesa.excluido_por.get_full_name|default:despesa.excluido_por.username }}
+                        </span>
+
+                        {% if despesa.excluido_em %}
+                            <span>
+                                Data da exclusão:
+                                {{ despesa.excluido_em|date:"d/m/Y H:i" }}
+                            </span>
+                        {% endif %}
+
+                    </div>
+
+                    <div class="excluida-valor">
+                        R$ {{ despesa.valor|floatformat:2 }}
+                    </div>
+
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="excluidas-vazio">
+
+            <strong>Nenhuma despesa excluída</strong>
+
+            <p>
+                Este veículo ainda não possui despesas excluídas.
+            </p>
+
+        </div>
+
+    {% endif %}
+
+   
+
+</div>
+
+ 
+
+{% endblock %}

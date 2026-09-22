@@ -1,0 +1,112 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        {% block title %}
+        Painel Administrativo | VENDACERTA
+        {% endblock %}
+    </title>
+
+    <!-- CSS PADRÃO DO PAINEL -->
+    <link rel="stylesheet" href="{% static 'core/css/administrativo_base.css' %}">
+
+    <!-- CSS ESPECÍFICO DE CADA PÁGINA -->
+    {% block extra_css %}
+    {% endblock %}
+
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <span>VENDA</span>CERTA
+            </div>
+
+            <!-- PERFIL -->
+            <div class="perfil">
+                <div class="perfil-avatar">
+                    {{ request.user.first_name|first|upper }}
+                </div>
+
+                <div class="perfil-info">
+                    <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                    <span>Administrativo</span>
+                </div>
+            </div>
+
+            <!-- MENU -->
+            <nav class="menu">
+
+                <a href="{% url 'painel_administrativo' %}" class="menu-item
+                {% if request.resolver_match.url_name == 'painel_administrativo' %}ativo{% endif %}">
+                    <span class="icone">⌂</span>
+                    Início
+                </a>
+
+                <a href="{% url 'despesas' %}" class="menu-item
+                {% if request.resolver_match.url_name == 'despesas' or request.resolver_match.url_name == 'adicionar_despesa' or request.resolver_match.url_name == 'despesas_veiculo' or request.resolver_match.url_name == 'excluir_despesa' or request.resolver_match.url_name == 'editar_despesa' or request.resolver_match.url_name == 'despesas_excluidas_veiculo' %}ativo{% endif %}">
+                    <span class="icone">💰</span>
+                    Despesas
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span class="icone">📄</span>
+                    Documentação
+                </a>
+
+                <a href="#" class="menu-item">
+                    <span class="icone">🚗</span>
+                    Entrega do veículo
+                </a>
+
+            </nav>
+
+            <!-- RODAPÉ SIDEBAR -->
+            <div class="sidebar-bottom">
+
+                <a href="#" class="menu-item">
+                    <span class="icone">⚙</span>
+                    Configurações
+                </a>
+
+                <a href="{% url 'logout' %}" class="menu-item sair">
+                    <span class="icone">↪</span>
+                    Sair
+                </a>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTEÚDO DA PÁGINA -->
+        <main class="conteudo">
+
+            {% block content %}
+            {% endblock %}
+
+        </main>
+
+    </div>
+
+
+    <!-- JAVASCRIPT ESPECÍFICO DA PÁGINA -->
+
+    {% block extra_js %}
+    {% endblock %}
+
+</body>
+
+</html>

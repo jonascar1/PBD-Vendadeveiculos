@@ -1,0 +1,90 @@
+{% extends "core/administrativo_base.html" %}
+{% load static %}
+
+{% block title %}
+Excluir despesa | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo_excluir_despesa.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<header class="topo">
+
+    <div>
+        <h1>Excluir Despesa</h1>
+
+        <p>
+            {{ veiculo.marca }} {{ veiculo.modelo }}
+            <span>·</span>
+            {{ veiculo.placa }}
+        </p>
+    </div>
+
+    <div class="badge-perfil">
+        Administrativo
+    </div>
+
+</header>
+
+<div class="excluir-despesa-container">
+
+    <div class="excluir-despesa-card">
+
+        <div class="excluir-despesa-info">
+
+            <strong>
+                {{ despesa.descricao|default:"Despesa sem descrição" }}
+            </strong>
+
+            <span class="excluir-despesa-meta">
+                Data: {{ despesa.data_lancamento|date:"d/m/Y" }}
+            </span>
+
+            <span class="excluir-despesa-valor">
+                R$ {{ despesa.valor|floatformat:2 }}
+            </span>
+
+        </div>
+
+        <div class="excluir-despesa-alerta">
+
+            <strong>Atenção</strong>
+
+            Esta despesa será removida da lista de despesas ativas.
+            O registro permanecerá armazenado no sistema para fins
+            de auditoria.
+
+        </div>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            <div class="excluir-despesa-acoes">
+
+                <a
+                    href="{% url 'despesas_veiculo' veiculo.id %}"
+                    class="btn-cancelar-exclusao"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn-confirmar-exclusao"
+                >
+                    Confirmar exclusão
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}  

@@ -1,0 +1,235 @@
+/* =========================
+   TOPO
+========================= */
+
+.topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+}
+
+.topo h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.topo p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.badge-perfil {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 10px 16px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #334155;
+}
+
+
+/* =========================
+   SEÇÕES
+========================= */
+
+.secao {
+    margin-bottom: 32px;
+}
+
+.titulo-secao {
+    margin-bottom: 16px;
+}
+
+.titulo-secao h2 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.titulo-secao p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+
+/* =========================
+   CARDS DE RESUMO
+========================= */
+
+.resumo {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.resumo-card {
+    background: white;
+    border: 1px solid #e1e5eb;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.resumo-titulo {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+    margin-bottom: 10px;
+}
+
+.resumo-card strong {
+    font-size: 28px;
+    color: #142033;
+}
+
+
+/* =========================
+   VEÍCULOS
+========================= */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.card {
+    background: white;
+    border: 1px solid #e1e5eb;
+    border-radius: 10px;
+    min-height: 105px;
+    padding: 18px;
+
+    display: flex;
+    align-items: center;
+
+    text-decoration: none;
+    color: inherit;
+
+    transition: 0.2s;
+}
+
+.card:hover {
+    border-color: #2864e8;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+
+/* ÍCONE */
+
+.veiculo-icone {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef4ff;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.veiculo-icone img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.veiculo-icone span {
+    font-size: 20px;
+}
+
+
+/* TEXTO */
+
+.card-texto {
+    flex: 1;
+}
+
+.card-texto h3 {
+    font-size: 14px;
+    margin-bottom: 6px;
+}
+
+.card-texto p {
+    font-size: 12px;
+    color: #64748b;
+}
+
+
+/* SETA */
+
+.seta {
+    color: #94a3b8;
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+
+/* =========================
+   VAZIO
+========================= */
+
+.vazio {
+    background: white;
+    border: 1px solid #e1e5eb;
+    border-radius: 10px;
+
+    padding: 35px;
+
+    text-align: center;
+
+    grid-column: 1 / -1;
+}
+
+.vazio-icone {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.vazio strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.vazio p {
+    color: #64748b;
+    font-size: 12px;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .resumo {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .topo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+}

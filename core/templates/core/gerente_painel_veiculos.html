@@ -165,22 +165,34 @@ Veículos | VENDACERTA
 
                     <td>
 
-                        {% if v.status == "DISPONIVEL" %}
+                        {% if v.situacao == "PREPARACAO" %}
+
+                            <span class="status preparacao">
+                                Em preparação
+                            </span>
+
+                        {% elif v.situacao == "DISPONIVEL" %}
 
                             <span class="status disponivel">
                                 Disponível
                             </span>
 
-                        {% elif v.status == "RESERVADO" %}
+                        {% elif v.situacao == "RESERVADO" %}
 
                             <span class="status reservado">
                                 Reservado
                             </span>
 
-                        {% elif v.status == "VENDIDO" %}
+                        {% elif v.situacao == "VENDIDO" %}
 
                             <span class="status vendido">
                                 Vendido
+                            </span>
+
+                        {% elif v.situacao == "ENTREGUE" %}
+
+                            <span class="status entregue">
+                                Entregue
                             </span>
 
                         {% endif %}
