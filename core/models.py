@@ -138,15 +138,17 @@ class Veiculo(models.Model):
     quilometragem = models.PositiveIntegerField()
     opcionais = models.TextField(blank=True)
     
+    
     situacao = models.CharField(max_length=20,choices=Situacao.choices,default=Situacao.PREPARACAO,)
 
     origem = models.CharField(max_length=20, choices=Origem.choices)
 
     # Custo de aquisição: obrigatório para COMPRADO/TROCA, zero para CONSIGNADO.
     custo_aquisicao = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    preco_venda = models.DecimalField(max_digits=12,decimal_places=2,null=True,blank=True,)
     # Só usado quando origem == CONSIGNADO.
     valor_repasse = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-
+    
     # Trava: depois que a venda fecha, custo não pode mais mudar.
     venda_fechada = models.BooleanField(default=False)
 

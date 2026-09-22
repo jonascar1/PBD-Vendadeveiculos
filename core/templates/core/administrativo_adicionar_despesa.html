@@ -1,0 +1,86 @@
+{% extends "core/administrativo_base.html" %}
+
+{% load static %}
+
+{% block title %}
+Adicionar despesa | {{ veiculo.marca }} {{ veiculo.modelo }}
+{% endblock %}
+
+{% block extra_css %}
+<link
+    rel="stylesheet" href="{% static 'core/css/administrativo_adicionar_despesa.css' %}"
+>
+{% endblock %}
+
+{% block content %}
+
+<div class="titulo-secao">
+    <h1>Adicionar despesa</h1>
+
+    <p>
+        {{ veiculo.marca }} {{ veiculo.modelo }}
+        · {{ veiculo.placa }}
+    </p>
+</div>
+
+<div class="formulario-card">
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <div class="campo">
+            <label for="valor">Valor</label>
+
+            <input
+                type="number"
+                id="valor"
+                name="valor"
+                step="0.01"
+                min="0"
+                required
+            >
+        </div>
+
+        <div class="campo">
+            <label for="data_lancamento">Data do lançamento</label>
+
+            <input
+                type="date"
+                id="data_lancamento"
+                name="data_lancamento"
+                required
+            >
+        </div>
+
+        <div class="campo">
+            <label for="descricao">Descrição</label>
+
+            <textarea
+                id="descricao"
+                name="descricao"
+                rows="4"
+                placeholder="Ex.: Funilaria, documentação, limpeza..."
+            ></textarea>
+        </div>
+
+        <div class="acoes-formulario">
+
+            <a
+                href="{% url 'despesas_veiculo' veiculo.id %}"
+                class="botao-secundario"
+            >
+                Cancelar
+            </a>
+
+            <button type="submit" class="botao-principal">
+                Salvar despesa
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -245,15 +245,13 @@ def cadastrar_veiculo_view(request):
 
         origem = request.POST.get("origem", "").strip()
 
-        custo_aquisicao = request.POST.get(
-            "custo_aquisicao",
-            ""
-        ).strip()
+        custo_aquisicao = request.POST.get("custo_aquisicao","").strip()
 
-        valor_repasse = request.POST.get(
-            "valor_repasse",
-            ""
-        ).strip()
+        valor_repasse = request.POST.get("valor_repasse","").strip()
+        
+        preco_venda = request.POST.get("preco_venda","").strip()
+        
+        
 
 
         # CAMPOS OBRIGATÓRIOS
@@ -300,6 +298,7 @@ def cadastrar_veiculo_view(request):
                 origem=origem,
                 custo_aquisicao=custo_aquisicao or None,
                 valor_repasse=valor_repasse or None,
+                preco_venda=preco_venda or None,
                 criado_por=request.user
             )
 

@@ -1,0 +1,167 @@
+{% extends "core/administrativo_base.html" %}
+
+{% load static %}
+
+{% block title %}
+Despesas | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo_painel_despesas.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topo">
+
+    <div>
+        <h1>Despesas</h1>
+
+        <p>
+            Consulte e acompanhe as despesas relacionadas aos veículos.
+        </p>
+    </div>
+
+    <div class="badge-perfil">
+        Administrativo
+    </div>
+
+</header>
+
+
+<!-- =========================
+     RESUMO
+========================= -->
+
+<section class="secao">
+
+    <div class="titulo-secao">
+
+        <h2>Resumo</h2>
+
+        <p>
+            Visão geral das despesas registradas no sistema.
+        </p>
+
+    </div>
+
+
+    <div class="resumo">
+
+        <div class="resumo-card">
+
+            <span class="resumo-titulo">
+                Total de despesas
+            </span>
+
+            <strong>
+                {{ total_despesas }}
+            </strong>
+
+        </div>
+
+
+        <div class="resumo-card">
+
+            <span class="resumo-titulo">
+                Valor total
+            </span>
+
+            <strong>
+                R$ {{ valor_total|floatformat:2 }}
+            </strong>
+
+        </div>
+
+
+        <div class="resumo-card">
+
+            <span class="resumo-titulo">
+                Veículos com despesas
+            </span>
+
+            <strong>
+                {{ veiculos_com_despesas }}
+            </strong>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================
+     VEÍCULOS
+========================= -->
+
+<section class="secao">
+
+    <div class="titulo-secao">
+
+        <h2>Veículos</h2>
+
+        <p>
+            Selecione um veículo para consultar suas despesas.
+        </p>
+
+    </div>
+
+
+    <div class="cards">
+
+        {% for veiculo in veiculos %}
+
+            <a href="{% url 'despesas_veiculo' veiculo.id %}" class="card">
+
+                <div class="card-icone">
+                    🚗
+                </div>
+
+
+                <div class="card-texto">
+
+                    <h3>
+                        {{ veiculo.marca }} {{ veiculo.modelo }}
+                    </h3>
+
+                    <p>
+                        Placa: {{ veiculo.placa }}
+                        · {{ veiculo.ano_modelo }}
+                    </p>
+
+                </div>
+
+
+                <div class="seta">
+                    →
+                </div>
+
+            </a>
+
+        {% empty %}
+
+            <div class="vazio">
+
+                <div class="vazio-icone">
+                    🚗
+                </div>
+
+                <strong>
+                    Nenhum veículo cadastrado
+                </strong>
+
+                <p>
+                    Ainda não existem veículos disponíveis no sistema.
+                </p>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

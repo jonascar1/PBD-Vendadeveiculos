@@ -1,0 +1,100 @@
+{% extends "core/administrativo_base.html" %}
+
+{% load static %}
+
+{% block title %}
+Editar despesa | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/administrativo_editar_despesa.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<header class="topo">
+
+    <div>
+        <h1>Editar Despesa</h1>
+
+        <p>
+            {{ veiculo.marca }} {{ veiculo.modelo }}
+            <span>·</span>
+            {{ veiculo.placa }}
+        </p>
+    </div>
+
+    <div class="badge-perfil">
+        Administrativo
+    </div>
+
+</header>
+
+<div class="editar-despesa-container">
+
+    <div class="editar-despesa-card">
+
+        <form method="post" class="editar-form">
+            {% csrf_token %}
+
+            <div>
+                <label for="valor">Valor</label>
+                <input
+                    type="number"
+                    name="valor"
+                    id="valor"
+                    step="0.01"
+                    value="{{ despesa.valor|floatformat:'2u' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="data_lancamento">Data</label>
+                <input
+                    type="date"
+                    name="data_lancamento"
+                    id="data_lancamento"
+                    value="{{ despesa.data_lancamento|date:'Y-m-d' }}"
+                    required
+                >
+            </div>
+
+            <div>
+                <label for="descricao">Descrição</label>
+                <input
+                    type="text"
+                    name="descricao"
+                    id="descricao"
+                    value="{{ despesa.descricao }}"
+                    maxlength="200"
+                >
+            </div>
+
+            <div class="editar-acoes">
+
+                <a
+                    href="{% url 'despesas_veiculo' veiculo.id %}"
+                    class="btn-cancelar-despesa"
+                >
+                    Cancelar
+                </a>
+
+                <button
+                    type="submit"
+                    class="btn-salvar-despesa"
+                >
+                    Salvar alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+ 

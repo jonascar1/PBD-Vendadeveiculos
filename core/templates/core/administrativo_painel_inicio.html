@@ -1,0 +1,168 @@
+{% extends "core/administrativo_base.html" %}
+
+{% load static %}
+
+{% block title %}Painel Administrativo | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/administrativo_painel_inicio.css' %}">
+{% endblock %}
+
+{% block content %}
+    <!-- CABEÇALHO -->
+            <header class="cabecalho">
+
+                <div>
+                    <h1>Painel Administrativo</h1>
+                    <p>Olá, {{ request.user.get_full_name|default:request.user.username }}!</p>
+                </div>
+
+                <div class="badge-perfil">
+                    Administrativo
+                </div>
+
+            </header>
+
+
+            <!-- AÇÕES RÁPIDAS -->
+            <section class="secao">
+
+                <div class="titulo-secao">
+                    <h2>Ações rápidas</h2>
+
+                    <p>
+                        Acesse rapidamente as principais funções.
+                    </p>
+                </div>
+
+
+                <div class="cards">
+
+                    <!-- DESPESAS -->
+                    <a href="#" class="card">
+
+                        <div class="card-icone">
+                            💰
+                        </div>
+
+                        <div class="card-texto">
+                            <h3>Despesas</h3>
+
+                            <p>
+                                Registre e acompanhe despesas dos veículos.
+                            </p>
+                        </div>
+
+                        <span class="seta">→</span>
+
+                    </a>
+
+
+                    <!-- DOCUMENTAÇÃO -->
+                    <a href="#" class="card">
+
+                        <div class="card-icone">
+                            📄
+                        </div>
+
+                        <div class="card-texto">
+                            <h3>Documentação</h3>
+
+                            <p>
+                                Gerencie a documentação dos veículos.
+                            </p>
+                        </div>
+
+                        <span class="seta">→</span>
+
+                    </a>
+
+
+                    <!-- ENTREGA -->
+                    <a href="#" class="card">
+
+                        <div class="card-icone">
+                            🚗
+                        </div>
+
+                        <div class="card-texto">
+                            <h3>Entrega do veículo</h3>
+
+                            <p>
+                                Controle os veículos prontos para entrega.
+                            </p>
+                        </div>
+
+                        <span class="seta">→</span>
+
+                    </a>
+
+
+                    <!-- HISTÓRICO -->
+                    <a href="#" class="card">
+
+                        <div class="card-icone">
+                            ✓
+                        </div>
+
+                        <div class="card-texto">
+                            <h3>Entregas realizadas</h3>
+
+                            <p>
+                                Consulte o histórico de veículos entregues.
+                            </p>
+                        </div>
+
+                        <span class="seta">→</span>
+
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <!-- RESUMO -->
+            <section class="secao">
+
+                <div class="titulo-secao">
+                    <h2>Resumo</h2>
+
+                    <p>
+                        Informações gerais do setor administrativo.
+                    </p>
+                </div>
+
+
+                <div class="resumo">
+
+                    <div class="resumo-card">
+                        <span class="resumo-titulo">
+                            Despesas pendentes
+                        </span>
+
+                        <strong>0</strong>
+                    </div>
+
+
+                    <div class="resumo-card">
+                        <span class="resumo-titulo">
+                            Documentações pendentes
+                        </span>
+
+                        <strong>0</strong>
+                    </div>
+
+
+                    <div class="resumo-card">
+                        <span class="resumo-titulo">
+                            Veículos aguardando entrega
+                        </span>
+
+                        <strong>0</strong>
+                    </div>
+
+                </div>
+
+            </section>
+{% endblock %}
