@@ -76,9 +76,166 @@
     <!-- INFORMAÇÕES -->
     <div class="informacoes">
 
+        <!-- SITUAÇÃO -->
+        <div class="card-info">
+
+            <h3>Situação do veículo</h3>
+
+            <p>
+                Situação atual:
+                <strong>{{ veiculo.get_situacao_display }}</strong>
+            </p>
+
+
+            {% if veiculo.situacao == "PREPARACAO" %}
+
+                <form
+                    method="post"
+                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="situacao"
+                        value="DISPONIVEL"
+                    >
+
+                    <input
+                        type="text"
+                        name="motivo"
+                        placeholder="Motivo da alteração"
+                    >
+
+                    <button type="submit">
+                        Marcar como disponível
+                    </button>
+                </form>
+
+
+            {% elif veiculo.situacao == "DISPONIVEL" %}
+
+                <form
+                    method="post"
+                    action="{% url 'reservar_veiculo' veiculo.id %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="text"
+                        name="cliente_nome"
+                        placeholder="Nome do cliente"
+                        required
+                    >
+
+                    <input
+                        type="text"
+                        name="cliente_contato"
+                        placeholder="Contato do cliente"
+                        required
+                    >
+
+                    <button type="submit">
+                        Reservar veículo
+                    </button>
+                </form>
+
+
+            {% elif veiculo.situacao == "RESERVADO" %}
+
+                <form
+                    method="post"
+                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="situacao"
+                        value="VENDIDO"
+                    >
+
+                    <input
+                        type="text"
+                        name="motivo"
+                        placeholder="Motivo da alteração"
+                    >
+
+                    <button type="submit">
+                        Registrar venda
+                    </button>
+                </form>
+
+
+                <form
+                    method="post"
+                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="situacao"
+                        value="DISPONIVEL"
+                    >
+
+                    <input
+                        type="text"
+                        name="motivo"
+                        placeholder="Motivo da alteração"
+                    >
+
+                    <button type="submit">
+                        Liberar reserva
+                    </button>
+                </form>
+
+
+            {% elif veiculo.situacao == "VENDIDO" %}
+
+                <form
+                    method="post"
+                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                >
+                    {% csrf_token %}
+
+                    <input
+                        type="hidden"
+                        name="situacao"
+                        value="ENTREGUE"
+                    >
+
+                    <input
+                        type="text"
+                        name="motivo"
+                        placeholder="Motivo da alteração"
+                    >
+
+                    <button type="submit">
+                        Registrar entrega
+                    </button>
+                </form>
+
+
+            {% elif veiculo.situacao == "ENTREGUE" %}
+
+                <p>
+                    Veículo entregue.
+                </p>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- CABEÇALHO DO VEÍCULO -->
         <div class="titulo-veiculo">
+
             <div>
-                <span class="label-veiculo">VEÍCULO</span>
+
+                <span class="label-veiculo">
+                    VEÍCULO
+                </span>
 
                 <h2>
                     {{ veiculo.marca }} {{ veiculo.modelo }}
@@ -87,11 +244,13 @@
                 <p>
                     {{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}
                 </p>
+
             </div>
 
-            <span class="status status-{{ veiculo.status|lower }}">
-                {{ veiculo.get_status_display }}
+            <span class="status status-{{ veiculo.situacao|lower }}">
+                {{ veiculo.get_situacao_display }}
             </span>
+
         </div>
 
 
@@ -157,7 +316,7 @@
         </div>
 
 
-        <!-- ORIGEM -->
+        <!-- ORIGEM E VALORES -->
         <div class="card-info">
 
             <h3>Origem e valores</h3>
@@ -170,6 +329,7 @@
                 </div>
 
                 <div class="info-item">
+
                     <span>Custo de aquisição</span>
 
                     <strong>
@@ -179,9 +339,11 @@
                             Não informado
                         {% endif %}
                     </strong>
+
                 </div>
 
                 <div class="info-item">
+
                     <span>Valor de repasse</span>
 
                     <strong>
@@ -191,6 +353,7 @@
                             Não informado
                         {% endif %}
                     </strong>
+
                 </div>
 
             </div>
@@ -204,13 +367,17 @@
             <h3>Opcionais</h3>
 
             {% if veiculo.opcionais %}
+
                 <p class="opcionais">
                     {{ veiculo.opcionais }}
                 </p>
+
             {% else %}
+
                 <p class="sem-informacao">
                     Nenhum opcional informado.
                 </p>
+
             {% endif %}
 
         </div>
@@ -221,10 +388,11 @@
 
 {% endblock content %}
 
+
 {% block extra_js %}
 
-
 <script>
+
 function trocarFoto(url, elemento) {
 
     const fotoPrincipal = document.getElementById("foto-principal");
@@ -239,6 +407,7 @@ function trocarFoto(url, elemento) {
 
     elemento.classList.add("ativa");
 }
+
 </script>
 
 {% endblock extra_js %}

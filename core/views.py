@@ -1,17 +1,21 @@
 
 
+
+from datetime import timedelta
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 
 from .decorators import perfil_requerido
-from .models import Usuario, PerfilVendedor, Veiculo, FotoVeiculo
+from .models import HistoricoSituacaoVeiculo, Usuario, PerfilVendedor, Veiculo, FotoVeiculo
+from .models import (HistoricoSituacaoVeiculo,Usuario,PerfilVendedor,Veiculo,FotoVeiculo,ReservaVeiculo,)
 
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-
+from django.utils import timezone
 
 def login_view(request):
     if request.method == "POST":
@@ -357,6 +361,8 @@ def cadastrar_veiculo_view(request):
     
 @perfil_requerido("GERENTE")
 def veiculos_view(request):
+    for reserva in ReservaVeiculo.objects.filter(cancelada=False,expira_em__lte=timezone.now(),):
+        reserva.expirar()
     veiculos = Veiculo.objects.prefetch_related("fotos").all().order_by("-criado_em")
 
     return render(
@@ -381,4 +387,129 @@ def detalhes_veiculo_view(request, veiculo_id):
             "veiculo": veiculo,
             "fotos": fotos,
         }
+        
+    )
+@perfil_requerido("GERENTE")
+def reservar_veiculo_view(request, veiculo_id):
+    veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
+
+    if request.method != "POST":
+        return redirect(
+            "detalhes_veiculo",
+            veiculo_id=veiculo.id,
+        )
+
+    cliente_nome = request.POST.get("cliente_nome", "").strip()
+    cliente_contato = request.POST.get("cliente_contato", "").strip()
+
+    if not cliente_nome or not cliente_contato:
+        messages.error(
+            request,
+            "Informe o nome e o contato do cliente."
+        )
+        return redirect(
+            "detalhes_veiculo",
+            veiculo_id=veiculo.id,
+        )
+
+    if veiculo.situacao != Veiculo.Situacao.DISPONIVEL:
+        messages.error(
+            request,
+            "Apenas veículos disponíveis podem ser reservados."
+        )
+        return redirect(
+            "detalhes_veiculo",
+            veiculo_id=veiculo.id,
+        )
+
+    reserva = ReservaVeiculo.objects.create(
+        veiculo=veiculo,
+        cliente_nome=cliente_nome,
+        cliente_contato=cliente_contato,
+        vendedor=request.user,
+        expira_em=timezone.now() + timedelta(hours=24),
+    )
+
+    veiculo.situacao = Veiculo.Situacao.RESERVADO
+    veiculo.save(update_fields=["situacao"])
+
+    HistoricoSituacaoVeiculo.objects.create(
+        veiculo=veiculo,
+        situacao_anterior=Veiculo.Situacao.DISPONIVEL,
+        situacao_nova=Veiculo.Situacao.RESERVADO,
+        alterado_por=request.user,
+        motivo="Reserva do veículo",
+    )
+
+    messages.success(
+        request,
+        "Veículo reservado com sucesso."
+    )
+
+    return redirect(
+        "detalhes_veiculo",
+        veiculo_id=veiculo.id,
+    )
+@perfil_requerido("GERENTE", "ADMINISTRATIVO")
+def alterar_situacao_veiculo_view(request, veiculo_id):
+    veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
+
+    if request.method != "POST":
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+
+    nova_situacao = request.POST.get("situacao")
+    motivo = request.POST.get("motivo", "").strip()
+
+    transicoes_permitidas = {
+        Veiculo.Situacao.PREPARACAO: [
+            Veiculo.Situacao.DISPONIVEL,
+        ],
+        Veiculo.Situacao.DISPONIVEL: [
+            Veiculo.Situacao.RESERVADO,
+        ],
+        Veiculo.Situacao.RESERVADO: [
+            Veiculo.Situacao.DISPONIVEL,
+            Veiculo.Situacao.VENDIDO,
+        ],
+        Veiculo.Situacao.VENDIDO: [
+            Veiculo.Situacao.ENTREGUE,
+        ],
+        Veiculo.Situacao.ENTREGUE: [],
+    }
+
+    situacoes_permitidas = transicoes_permitidas.get(
+        veiculo.situacao,
+        []
+    )
+
+    if nova_situacao not in situacoes_permitidas:
+        messages.error(
+            request,
+            "Essa transição de situação não é permitida."
+        )
+        return redirect(
+            "detalhes_veiculo",
+            veiculo_id=veiculo.id,
+        )
+
+    situacao_anterior = veiculo.situacao
+
+    veiculo.situacao = nova_situacao
+    veiculo.save(update_fields=["situacao"])
+
+    HistoricoSituacaoVeiculo.objects.create(
+        veiculo=veiculo,
+        situacao_anterior=situacao_anterior,
+        situacao_nova=nova_situacao,
+        alterado_por=request.user,
+        motivo=motivo or None,)
+
+    messages.success(
+        request,
+        "Situação do veículo alterada com sucesso."
+    )
+
+    return redirect(
+        "detalhes_veiculo",
+        veiculo_id=veiculo.id,
     )

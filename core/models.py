@@ -116,6 +116,14 @@ class Veiculo(models.Model):
         DISPONIVEL = "DISPONIVEL", "Disponível"
         RESERVADO = "RESERVADO", "Reservado"
         VENDIDO = "VENDIDO", "Vendido"
+    
+    class Situacao(models.TextChoices):
+        PREPARACAO = "PREPARACAO", "Em preparação"
+        DISPONIVEL = "DISPONIVEL", "Disponível"
+        RESERVADO = "RESERVADO", "Reservado"
+        VENDIDO = "VENDIDO", "Vendido"
+        ENTREGUE = "ENTREGUE", "Entregue"
+
 
     # --- Identificação única no estoque ativo ---
     placa = models.CharField(max_length=8)
@@ -129,6 +137,8 @@ class Veiculo(models.Model):
     combustivel = models.CharField(max_length=30)
     quilometragem = models.PositiveIntegerField()
     opcionais = models.TextField(blank=True)
+    
+    situacao = models.CharField(max_length=20,choices=Situacao.choices,default=Situacao.PREPARACAO,)
 
     origem = models.CharField(max_length=20, choices=Origem.choices)
 
@@ -150,16 +160,9 @@ class Veiculo(models.Model):
             # Unicidade de placa e chassi apenas no estoque ATIVO (não vendido).
             # Um veículo vendido não deveria travar o cadastro de outro igual
             # que reentre no estoque (ex: recomprado depois).
-            models.UniqueConstraint(
-                fields=["placa"],
-                condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),
-                name="placa_unica_estoque_ativo",
-            ),
-            models.UniqueConstraint(
-                fields=["chassi"],
-                condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),
-                name="chassi_unico_estoque_ativo",
-            ),
+            models.UniqueConstraint(fields=["placa"],condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),name="placa_unica_estoque_ativo",),
+            
+            models.UniqueConstraint(fields=["chassi"],condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),name="chassi_unico_estoque_ativo",),
         ]
 
     def clean(self):
@@ -196,7 +199,24 @@ class Veiculo(models.Model):
     def __str__(self):
         return f"{self.marca} {self.modelo} — {self.placa}"
 
+class HistoricoSituacaoVeiculo(models.Model):
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT,related_name="historico_situacoes",)
 
+    situacao_anterior = models.CharField(max_length=20,blank=True,null=True,)
+
+    situacao_nova = models.CharField(max_length=20,)
+
+    alterado_por = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name="alteracoes_situacao_veiculo",)
+
+    alterado_em = models.DateTimeField(auto_now_add=True,)
+
+    motivo = models.CharField(max_length=255,blank=True,null=True,)
+
+    def __str__(self):
+        return (
+            f"{self.veiculo} — "
+            f"{self.situacao_anterior} → {self.situacao_nova}"
+        )
 class FotoVeiculo(models.Model):
     veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE, related_name="fotos")
     imagem = models.ImageField(upload_to="veiculos/%Y/%m/")
@@ -221,10 +241,7 @@ class ReservaVeiculo(models.Model):
     fica com status RESERVADO.
     """
 
-    veiculo = models.OneToOneField(
-        Veiculo, on_delete=models.CASCADE, related_name="reserva_ativa",
-        limit_choices_to={"status": Veiculo.Status.DISPONIVEL},
-    )
+    veiculo = models.OneToOneField(Veiculo, on_delete=models.CASCADE, related_name="reserva_ativa",limit_choices_to={"status": Veiculo.Status.DISPONIVEL},)
     cliente_nome = models.CharField(max_length=120)
     cliente_contato = models.CharField(max_length=60)
     vendedor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="reservas_feitas")
@@ -236,7 +253,25 @@ class ReservaVeiculo(models.Model):
 
     def esta_valida(self):
         return not self.cancelada and timezone.now() < self.expira_em
+    
+    def expirar(self):
+        if self.cancelada or timezone.now() >= self.expira_em:
+            self.cancelada = True
+            self.save(update_fields=["cancelada"])
 
+            veiculo = Veiculo.objects.filter(pk=self.veiculo_id,situacao=Veiculo.Situacao.RESERVADO,).first()
+
+            if veiculo:
+                veiculo.situacao = Veiculo.Situacao.DISPONIVEL
+                veiculo.save(update_fields=["situacao"])
+
+                HistoricoSituacaoVeiculo.objects.create(
+                    veiculo=veiculo,
+                    situacao_anterior=Veiculo.Situacao.RESERVADO,
+                    situacao_nova=Veiculo.Situacao.DISPONIVEL,
+                    alterado_por=self.vendedor,
+                    motivo="Reserva expirada",)
+            
     def clean(self):
         if self.expira_em <= timezone.now():
             raise ValidationError({"expira_em": "O prazo da reserva deve ser no futuro."})
