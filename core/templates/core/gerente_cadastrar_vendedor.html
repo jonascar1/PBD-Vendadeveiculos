@@ -136,29 +136,66 @@
                                 </div>
                             </div>
 
-
-                            
-
-
                             <!-- ALÇADA -->
                             <div class="form-group">
 
-                                <label for="alcada_desconto">
-                                    Alçada de desconto (%)
+                                <label>
+                                    Tipo de alçada
                                 </label>
 
-                                <input
-                                    type="number"
-                                    id="alcada_desconto"
-                                    name="alcada_desconto"
-                                    step="0.01"
-                                    min="0"
-                                    max="100"
-                                    value="0"
-                                    required
-                                >
+                                <div class="radio-alcada">
 
-                                <small>
+                                    <label class="radio-opcao">
+                                        <input
+                                            type="radio"
+                                            name="tipo_alcada"
+                                            value="PERCENTUAL"
+                                            checked
+                                        >
+                                        <span>Percentual (%)</span>
+                                    </label>
+
+                                    <label class="radio-opcao">
+                                        <input
+                                            type="radio"
+                                            name="tipo_alcada"
+                                            value="VALOR"
+                                        >
+                                        <span>Valor (R$)</span>
+                                    </label>
+
+                                </div>
+
+                                <label
+                                    for="valor_alcada"
+                                    id="label-valor-alcada"
+                                    class="label-limite-alcada"
+                                >
+                                    Limite de desconto (%)
+                                </label>
+
+                                <div class="alcada-valor">
+
+                                    <input
+                                        type="number"
+                                        id="valor_alcada"
+                                        name="valor_alcada"
+                                        step="0.01"
+                                        min="0"
+                                        value="0"
+                                        required
+                                    >
+
+                                    <span
+                                        class="alcada-sufixo"
+                                        id="alcada-sufixo"
+                                    >
+                                        %
+                                    </span>
+
+                                </div>
+
+                                <small id="ajuda-alcada">
                                     Percentual máximo de desconto sem aprovação.
                                 </small>
 
@@ -227,5 +264,50 @@ function mostrarSenha(id, botao) {
         botao.textContent = "Mostrar";
     }
 }
+
+const radiosAlcada = document.querySelectorAll(
+    'input[name="tipo_alcada"]'
+);
+
+const labelAlcada = document.getElementById(
+    "label-valor-alcada"
+);
+
+const sufixoAlcada = document.getElementById(
+    "alcada-sufixo"
+);
+
+const ajudaAlcada = document.getElementById(
+    "ajuda-alcada"
+);
+
+radiosAlcada.forEach(function(radio) {
+
+    radio.addEventListener("change", function() {
+
+        if (this.value === "VALOR") {
+
+            labelAlcada.textContent =
+                "Limite de desconto (R$)";
+
+            sufixoAlcada.textContent = "R$";
+
+            ajudaAlcada.textContent =
+                "Valor máximo de desconto sem aprovação.";
+
+        } else {
+
+            labelAlcada.textContent =
+                "Limite de desconto (%)";
+
+            sufixoAlcada.textContent = "%";
+
+            ajudaAlcada.textContent =
+                "Percentual máximo de desconto sem aprovação.";
+        }
+
+    });
+
+});
 </script>
 {% endblock extra_js %}

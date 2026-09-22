@@ -24,6 +24,15 @@
         <a href="{% url 'veiculos' %}" class="btn-voltar">
             ← Voltar para veículos
         </a>
+
+        {% if veiculo.situacao != "VENDIDO" and veiculo.situacao != "ENTREGUE" %}
+            <a
+                href="{% url 'alterar_preco_veiculo' veiculo.id %}"
+                class="btn-preco"
+            >
+                Definir preço
+            </a>
+        {% endif %}
     </div>
 </header>
 
@@ -70,162 +79,241 @@
         </div>
         {% endif %}
 
+        <!-- SITUAÇÃO -->
+        <div class="card-info situacao-card">
+
+            <div class="situacao-cabecalho">
+
+                <div>
+                    <h3>Situação do veículo</h3>
+
+                    <p class="situacao-descricao">
+                        Acompanhe e atualize o status atual deste veículo.
+                    </p>
+                </div>
+
+                <span class="status status-{{ veiculo.situacao|lower }}">
+                    {{ veiculo.get_situacao_display }}
+                </span>
+
+            </div>
+
+
+            <div class="situacao-conteudo">
+
+                {% if veiculo.situacao == "PREPARACAO" %}
+
+                    <div class="situacao-mensagem">
+                        <span class="situacao-icone">🔧</span>
+
+                        <div>
+                            <strong>Veículo em preparação</strong>
+                            <p>
+                                O veículo ainda está sendo preparado para entrar em estoque.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                        class="form-situacao"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="situacao"
+                            value="DISPONIVEL"
+                        >
+
+                        <input
+                            type="text"
+                            name="motivo"
+                            placeholder="Motivo da alteração"
+                        >
+
+                        <button type="submit" class="btn-situacao btn-disponivel">
+                            ✓ Marcar como disponível
+                        </button>
+                    </form>
+
+
+                {% elif veiculo.situacao == "DISPONIVEL" %}
+
+                    <div class="situacao-mensagem">
+                        <span class="situacao-icone">✓</span>
+
+                        <div>
+                            <strong>Veículo disponível</strong>
+                            <p>
+                                Este veículo está disponível para negociação e pode ser reservado.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{% url 'reservar_veiculo' veiculo.id %}"
+                        class="form-situacao"
+                    >
+                        {% csrf_token %}
+
+                        <div class="form-linha">
+                            <input
+                                type="text"
+                                name="cliente_nome"
+                                placeholder="Nome do cliente"
+                                required
+                            >
+
+                            <input
+                                type="text"
+                                name="cliente_contato"
+                                placeholder="Contato do cliente"
+                                required
+                            >
+                        </div>
+
+                        <button type="submit" class="btn-situacao btn-reservar">
+                            📌 Reservar veículo
+                        </button>
+                    </form>
+
+
+                {% elif veiculo.situacao == "RESERVADO" %}
+
+                    <div class="situacao-mensagem">
+                        <span class="situacao-icone">📌</span>
+
+                        <div>
+                            <strong>Veículo reservado</strong>
+                            <p>
+                                Este veículo está reservado para um cliente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="acoes-situacao">
+
+                        <form
+                            method="post"
+                            action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                            class="form-situacao acao-venda"
+                        >
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="situacao"
+                                value="VENDIDO"
+                            >
+
+                            <input
+                                type="text"
+                                name="motivo"
+                                placeholder="Motivo da venda"
+                            >
+
+                            <button type="submit" class="btn-situacao btn-vendido">
+                                💰 Registrar venda
+                            </button>
+                        </form>
+
+
+                        <form
+                            method="post"
+                            action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                            class="form-situacao"
+                        >
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="situacao"
+                                value="DISPONIVEL"
+                            >
+
+                            <input
+                                type="text"
+                                name="motivo"
+                                placeholder="Motivo da liberação"
+                            >
+
+                            <button type="submit" class="btn-situacao btn-liberar">
+                                ↩ Liberar reserva
+                            </button>
+                        </form>
+
+                    </div>
+
+
+                {% elif veiculo.situacao == "VENDIDO" %}
+
+                    <div class="situacao-mensagem">
+                        <span class="situacao-icone">💰</span>
+
+                        <div>
+                            <strong>Veículo vendido</strong>
+                            <p>
+                                A venda foi registrada. O próximo passo é realizar a entrega.
+                            </p>
+                        </div>
+                    </div>
+
+                    <form
+                        method="post"
+                        action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
+                        class="form-situacao"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="situacao"
+                            value="ENTREGUE"
+                        >
+
+                        <input
+                            type="text"
+                            name="motivo"
+                            placeholder="Motivo da entrega"
+                        >
+
+                        <button type="submit" class="btn-situacao btn-entregue">
+                            ✓ Registrar entrega
+                        </button>
+                    </form>
+
+
+                {% elif veiculo.situacao == "ENTREGUE" %}
+
+                    <div class="situacao-mensagem entregue">
+                        <span class="situacao-icone">✓</span>
+
+                        <div>
+                            <strong>Veículo entregue</strong>
+                            <p>
+                                A venda foi concluída e o veículo já foi entregue ao cliente.
+                            </p>
+                        </div>
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+        </div>
+
     </div>
+
+    
 
 
     <!-- INFORMAÇÕES -->
     <div class="informacoes">
 
-        <!-- SITUAÇÃO -->
-        <div class="card-info">
-
-            <h3>Situação do veículo</h3>
-
-            <p>
-                Situação atual:
-                <strong>{{ veiculo.get_situacao_display }}</strong>
-            </p>
-
-
-            {% if veiculo.situacao == "PREPARACAO" %}
-
-                <form
-                    method="post"
-                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
-                >
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="situacao"
-                        value="DISPONIVEL"
-                    >
-
-                    <input
-                        type="text"
-                        name="motivo"
-                        placeholder="Motivo da alteração"
-                    >
-
-                    <button type="submit">
-                        Marcar como disponível
-                    </button>
-                </form>
-
-
-            {% elif veiculo.situacao == "DISPONIVEL" %}
-
-                <form
-                    method="post"
-                    action="{% url 'reservar_veiculo' veiculo.id %}"
-                >
-                    {% csrf_token %}
-
-                    <input
-                        type="text"
-                        name="cliente_nome"
-                        placeholder="Nome do cliente"
-                        required
-                    >
-
-                    <input
-                        type="text"
-                        name="cliente_contato"
-                        placeholder="Contato do cliente"
-                        required
-                    >
-
-                    <button type="submit">
-                        Reservar veículo
-                    </button>
-                </form>
-
-
-            {% elif veiculo.situacao == "RESERVADO" %}
-
-                <form
-                    method="post"
-                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
-                >
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="situacao"
-                        value="VENDIDO"
-                    >
-
-                    <input
-                        type="text"
-                        name="motivo"
-                        placeholder="Motivo da alteração"
-                    >
-
-                    <button type="submit">
-                        Registrar venda
-                    </button>
-                </form>
-
-
-                <form
-                    method="post"
-                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
-                >
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="situacao"
-                        value="DISPONIVEL"
-                    >
-
-                    <input
-                        type="text"
-                        name="motivo"
-                        placeholder="Motivo da alteração"
-                    >
-
-                    <button type="submit">
-                        Liberar reserva
-                    </button>
-                </form>
-
-
-            {% elif veiculo.situacao == "VENDIDO" %}
-
-                <form
-                    method="post"
-                    action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
-                >
-                    {% csrf_token %}
-
-                    <input
-                        type="hidden"
-                        name="situacao"
-                        value="ENTREGUE"
-                    >
-
-                    <input
-                        type="text"
-                        name="motivo"
-                        placeholder="Motivo da alteração"
-                    >
-
-                    <button type="submit">
-                        Registrar entrega
-                    </button>
-                </form>
-
-
-            {% elif veiculo.situacao == "ENTREGUE" %}
-
-                <p>
-                    Veículo entregue.
-                </p>
-
-            {% endif %}
-
-        </div>
+        
 
 
         <!-- CABEÇALHO DO VEÍCULO -->
@@ -247,9 +335,7 @@
 
             </div>
 
-            <span class="status status-{{ veiculo.situacao|lower }}">
-                {{ veiculo.get_situacao_display }}
-            </span>
+            
 
         </div>
 
@@ -356,9 +442,99 @@
 
                 </div>
 
+                <div class="info-item">
+                    <span>Preço de venda</span>
+
+                    <strong>
+                        {% if veiculo.preco_venda %}
+                            R$ {{ veiculo.preco_venda|floatformat:2 }}
+                        {% else %}
+                            Ainda não definido
+                        {% endif %}
+                    </strong>
+                </div>
+
             </div>
 
         </div>
+
+        <!-- CUSTOS -->
+        <div class="card-info">
+
+            <h3>Custos do veículo</h3>
+
+            <div class="info-grid">
+
+                <div class="info-item">
+                    <span>Custo de aquisição</span>
+
+                    <strong>
+                        {% if veiculo.custo_aquisicao %}
+                            R$ {{ veiculo.custo_aquisicao|floatformat:2 }}
+                        {% else %}
+                            Não informado
+                        {% endif %}
+                    </strong>
+                </div>
+
+
+                <div class="info-item">
+                    <span>Despesas registradas</span>
+
+                    <strong>
+                        R$ {{ total_despesas|floatformat:2 }}
+                    </strong>
+                </div>
+
+
+                <div class="info-item custo-total">
+                    <span>Custo total acumulado</span>
+
+                    <strong>
+                        R$ {{ custo_total|floatformat:2 }}
+                    </strong>
+                </div>
+
+        </div>
+
+        {% if ultimo_historico_preco and ultimo_historico_preco.abaixo_do_custo %}
+            <div class="alerta-preco-custo">
+                <strong>⚠️ Atenção</strong>
+                <p>
+                    O preço de venda está abaixo do custo total acumulado
+                    do veículo.
+                </p>
+            </div>
+        {% endif %}
+
+
+        {% if ultimo_lancamento %}
+
+            <div class="ultimo-lancamento">
+
+                <span>Último lançamento</span>
+
+                <strong>
+                    {{ ultimo_lancamento.data_lancamento|date:"d/m/Y" }}
+                </strong>
+
+            </div>
+
+        {% else %}
+
+            <p class="sem-lancamento">
+                Nenhuma despesa registrada até o momento.
+            </p>
+
+        {% endif %}
+
+
+        <p class="custo-explicacao">
+            O custo total acumulado corresponde ao custo de aquisição
+            somado às despesas ativas registradas para este veículo.
+        </p>
+
+    </div>
 
 
         <!-- OPCIONAIS -->

@@ -1,9 +1,34 @@
+"""
+T01 - Perfis, vendedores e o painel de cada um
+T02 - O veículo: ficha, fotos, custo de aquisição e origem
 
+Cobre os critérios de aceite:
+- Login com usuário/senha (senha cifrada via AbstractUser do Django)
+- Três perfis: gerente, vendedor, administrativo
+- Vendedor tem alçada de desconto e percentual de comissão
+- Só gerente edita alçada/comissão (regra fica no lado de permissões/views, aqui
+  deixamos o campo protegido por um método de validação)
+- Vendedor desativado não entra, mas vendas dele continuam no sistema
+  (usamos soft delete: campo `ativo`, nunca deletamos o registro)
+- Unicidade do veículo (placa/chassi) no estoque ativo
+- Reserva exclusiva com prazo, com expiração automática
+- Histórico de situação e de preço do veículo
+- Margem derivada dos lançamentos financeiros (nunca um campo digitado)
+- Auditoria simples de edição/exclusão de lançamentos financeiros
+"""
+
+import re
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
+
+
+PLACA_REGEX = re.compile(r"^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$")  # antiga e Mercosul
+CHASSI_REGEX = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")  # 17 chars, sem I/O/Q (padrão VIN)
 
 
 class Usuario(AbstractUser):
@@ -44,6 +69,10 @@ class PerfilVendedor(models.Model):
     tem esses dois campos — administrativo e gerente não.
     """
 
+    class TipoAlcada(models.TextChoices):
+            PERCENTUAL = "PERCENTUAL", "Percentual (%)"
+            VALOR = "VALOR", "Valor (R$)"
+
     usuario = models.OneToOneField(
         Usuario,
         on_delete=models.PROTECT,  # nunca deletar em cascata: histórico de vendas depende disso
@@ -51,11 +80,17 @@ class PerfilVendedor(models.Model):
         limit_choices_to={"perfil": Usuario.Perfil.VENDEDOR},
     )
 
-    alcada_desconto = models.DecimalField(
-        max_digits=5,
+    tipo_alcada = models.CharField(
+        max_length=20,
+        choices=TipoAlcada.choices,
+        default=TipoAlcada.PERCENTUAL,
+    )
+
+    valor_alcada = models.DecimalField(
+        max_digits=12,
         decimal_places=2,
         default=0,
-        help_text="Percentual máximo de desconto que este vendedor pode aplicar sem aprovação.",
+        help_text="Limite máximo de desconto permitido ao vendedor.",
     )
 
     percentual_comissao = models.DecimalField(
@@ -87,23 +122,6 @@ class PerfilVendedor(models.Model):
 
     def __str__(self):
         return f"Vendedor: {self.usuario} — alçada {self.alcada_desconto}% / comissão {self.percentual_comissao}%"
-    
-    """
-T02 - O veículo: ficha, fotos, custo de aquisição e origem
-+ requisitos da rubrica: unicidade do veículo, reserva exclusiva com prazo,
-  troca virando estoque, margem derivada dos lançamentos.
-"""
-
-import re
-from decimal import Decimal
-
-from django.core.exceptions import ValidationError
-from django.db import models
-from django.utils import timezone
-
-
-PLACA_REGEX = re.compile(r"^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$")  # antiga e Mercosul
-CHASSI_REGEX = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")  # 17 chars, sem I/O/Q (padrão VIN)
 
 
 class Veiculo(models.Model):
@@ -116,14 +134,13 @@ class Veiculo(models.Model):
         DISPONIVEL = "DISPONIVEL", "Disponível"
         RESERVADO = "RESERVADO", "Reservado"
         VENDIDO = "VENDIDO", "Vendido"
-    
+
     class Situacao(models.TextChoices):
         PREPARACAO = "PREPARACAO", "Em preparação"
         DISPONIVEL = "DISPONIVEL", "Disponível"
         RESERVADO = "RESERVADO", "Reservado"
         VENDIDO = "VENDIDO", "Vendido"
         ENTREGUE = "ENTREGUE", "Entregue"
-
 
     # --- Identificação única no estoque ativo ---
     placa = models.CharField(max_length=8)
@@ -137,18 +154,21 @@ class Veiculo(models.Model):
     combustivel = models.CharField(max_length=30)
     quilometragem = models.PositiveIntegerField()
     opcionais = models.TextField(blank=True)
-    
-    
-    situacao = models.CharField(max_length=20,choices=Situacao.choices,default=Situacao.PREPARACAO,)
+
+    # Situação operacional (fluxo de preparo/entrega) — granularidade maior
+    # que `status`, que controla apenas disponibilidade comercial.
+    situacao = models.CharField(
+        max_length=20, choices=Situacao.choices, default=Situacao.PREPARACAO,
+    )
 
     origem = models.CharField(max_length=20, choices=Origem.choices)
 
     # Custo de aquisição: obrigatório para COMPRADO/TROCA, zero para CONSIGNADO.
     custo_aquisicao = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    preco_venda = models.DecimalField(max_digits=12,decimal_places=2,null=True,blank=True,)
+    preco_venda = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     # Só usado quando origem == CONSIGNADO.
     valor_repasse = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
+
     # Trava: depois que a venda fecha, custo não pode mais mudar.
     venda_fechada = models.BooleanField(default=False)
 
@@ -162,9 +182,16 @@ class Veiculo(models.Model):
             # Unicidade de placa e chassi apenas no estoque ATIVO (não vendido).
             # Um veículo vendido não deveria travar o cadastro de outro igual
             # que reentre no estoque (ex: recomprado depois).
-            models.UniqueConstraint(fields=["placa"],condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),name="placa_unica_estoque_ativo",),
-            
-            models.UniqueConstraint(fields=["chassi"],condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),name="chassi_unico_estoque_ativo",),
+            models.UniqueConstraint(
+                fields=["placa"],
+                condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),
+                name="placa_unica_estoque_ativo",
+            ),
+            models.UniqueConstraint(
+                fields=["chassi"],
+                condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),
+                name="chassi_unico_estoque_ativo",
+            ),
         ]
 
     def clean(self):
@@ -201,24 +228,22 @@ class Veiculo(models.Model):
     def __str__(self):
         return f"{self.marca} {self.modelo} — {self.placa}"
 
+
 class HistoricoSituacaoVeiculo(models.Model):
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT,related_name="historico_situacoes",)
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="historico_situacoes")
 
-    situacao_anterior = models.CharField(max_length=20,blank=True,null=True,)
+    situacao_anterior = models.CharField(max_length=20, blank=True, null=True)
+    situacao_nova = models.CharField(max_length=20)
 
-    situacao_nova = models.CharField(max_length=20,)
+    alterado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="alteracoes_situacao_veiculo")
+    alterado_em = models.DateTimeField(auto_now_add=True)
 
-    alterado_por = models.ForeignKey(Usuario,on_delete=models.PROTECT,related_name="alteracoes_situacao_veiculo",)
-
-    alterado_em = models.DateTimeField(auto_now_add=True,)
-
-    motivo = models.CharField(max_length=255,blank=True,null=True,)
+    motivo = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
-        return (
-            f"{self.veiculo} — "
-            f"{self.situacao_anterior} → {self.situacao_nova}"
-        )
+        return f"{self.veiculo} — {self.situacao_anterior} → {self.situacao_nova}"
+
+
 class FotoVeiculo(models.Model):
     veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE, related_name="fotos")
     imagem = models.ImageField(upload_to="veiculos/%Y/%m/")
@@ -243,7 +268,10 @@ class ReservaVeiculo(models.Model):
     fica com status RESERVADO.
     """
 
-    veiculo = models.OneToOneField(Veiculo, on_delete=models.CASCADE, related_name="reserva_ativa",limit_choices_to={"status": Veiculo.Status.DISPONIVEL},)
+    veiculo = models.OneToOneField(
+        Veiculo, on_delete=models.CASCADE, related_name="reserva_ativa",
+        limit_choices_to={"status": Veiculo.Status.DISPONIVEL},
+    )
     cliente_nome = models.CharField(max_length=120)
     cliente_contato = models.CharField(max_length=60)
     vendedor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="reservas_feitas")
@@ -255,25 +283,25 @@ class ReservaVeiculo(models.Model):
 
     def esta_valida(self):
         return not self.cancelada and timezone.now() < self.expira_em
-    
+
     def expirar(self):
         if self.cancelada or timezone.now() >= self.expira_em:
             self.cancelada = True
             self.save(update_fields=["cancelada"])
 
-            veiculo = Veiculo.objects.filter(pk=self.veiculo_id,situacao=Veiculo.Situacao.RESERVADO,).first()
+            veiculo = Veiculo.objects.filter(pk=self.veiculo_id, situacao=Veiculo.Situacao.RESERVADO,).first()
 
             if veiculo:
-                veiculo.situacao = Veiculo.Situacao.DISPONIVEL
-                veiculo.save(update_fields=["situacao"])
+                veiculo.situacao = Veiculo.Situacao.DISPONIVELveiculo.save(update_fields=["situacao"])
 
                 HistoricoSituacaoVeiculo.objects.create(
                     veiculo=veiculo,
                     situacao_anterior=Veiculo.Situacao.RESERVADO,
                     situacao_nova=Veiculo.Situacao.DISPONIVEL,
                     alterado_por=self.vendedor,
-                    motivo="Reserva expirada",)
-            
+                    motivo="Reserva expirada",
+                )
+
     def clean(self):
         if self.expira_em <= timezone.now():
             raise ValidationError({"expira_em": "O prazo da reserva deve ser no futuro."})
@@ -306,6 +334,18 @@ class LancamentoFinanceiro(models.Model):
     descricao = models.CharField(max_length=200, blank=True)
     registrado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT)
     criado_em = models.DateTimeField(auto_now_add=True)
+    data_lancamento = models.DateField(default=timezone.now)
+
+    # Auditoria de edição/exclusão (soft delete, igual ao Usuario).
+    editado_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, null=True, blank=True, related_name="despesas_editadas",
+    )
+    editado_em = models.DateTimeField(null=True, blank=True)
+    excluido = models.BooleanField(default=False)
+    excluido_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, null=True, blank=True, related_name="despesas_excluidas",
+    )
+    excluido_em = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.get_tipo_display()}: R$ {self.valor} — {self.veiculo}"
@@ -317,8 +357,9 @@ def calcular_margem(veiculo: Veiculo) -> Decimal:
 
     Isso é o que alimenta os relatórios (item da rubrica "qualidade das
     consultas e relatórios") — nunca ler um campo "margem" salvo direto.
+    Lançamentos excluídos (soft delete) não entram na conta.
     """
-    lancamentos = veiculo.lancamentos.all()
+    lancamentos = veiculo.lancamentos.filter(excluido=False)
 
     entradas = sum(
         l.valor for l in lancamentos if l.tipo == LancamentoFinanceiro.Tipo.VENDA
@@ -333,3 +374,19 @@ def calcular_margem(veiculo: Veiculo) -> Decimal:
         )
     )
     return Decimal(entradas) - Decimal(saidas)
+
+
+class HistoricoPrecoVeiculo(models.Model):
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="historico_precos")
+
+    valor_anterior = models.DecimalField(max_digits=12, decimal_places=2)
+    valor_novo = models.DecimalField(max_digits=12, decimal_places=2)
+
+    custo_total_no_momento = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    abaixo_do_custo = models.BooleanField(default=False)
+
+    alterado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="alteracoes_preco_veiculo")
+    alterado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.veiculo} — R$ {self.valor_anterior} → R$ {self.valor_novo}"

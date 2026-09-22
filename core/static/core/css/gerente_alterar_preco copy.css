@@ -1,0 +1,129 @@
+.preco-container {
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+}
+
+.preco-card {
+    width: 100%;
+    max-width: 650px;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+.preco-header {
+    margin-bottom: 28px;
+}
+
+.label-veiculo {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #7a8494;
+}
+
+.preco-header h1 {
+    margin: 0;
+    font-size: 28px;
+    color: #172033;
+}
+
+.preco-header p {
+    margin: 8px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.preco-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.preco-info > div {
+    padding: 18px;
+    border-radius: 12px;
+    background: #f5f7fb;
+}
+
+.preco-info span {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    color: #7a8494;
+}
+
+.preco-info strong {
+    font-size: 18px;
+    color: #172033;
+}
+
+.preco-form {
+    border-top: 1px solid #e6e9ef;
+    padding-top: 26px;
+}
+
+.campo-preco {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.campo-preco label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #273247;
+}
+
+.campo-preco input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 14px;
+    border: 1px solid #d5dae3;
+    border-radius: 9px;
+    font-size: 16px;
+    outline: none;
+}
+
+.campo-preco input:focus {
+    border-color: #2864e8;
+    box-shadow: 0 0 0 3px rgba(40, 100, 232, 0.12);
+}
+
+.preco-acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.btn-cancelar-preco,
+.btn-salvar-preco {
+    padding: 11px 20px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-cancelar-preco {
+    color: #4b5563;
+    background: #eef1f5;
+}
+
+.btn-salvar-preco {
+    border: none;
+    color: #ffffff;
+    background: #2864e8;
+}
+
+.btn-salvar-preco:hover {
+    opacity: 0.9;
+}

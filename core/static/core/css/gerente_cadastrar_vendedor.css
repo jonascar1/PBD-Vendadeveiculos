@@ -27,16 +27,80 @@
 }
 
 .form-group input {
-    padding: 11px 12px;
+    box-sizing: border-box;
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
     border: 1px solid #d1d5db;
     border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
     font-size: 14px;
     outline: none;
-    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus {
     border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.10);
+}
+
+.form-group select {
+    cursor: pointer;
+}
+
+.label-limite-alcada {
+    margin-top: 12px;
+}
+
+.radio-alcada {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.radio-opcao {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.radio-opcao input[type="radio"] {
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    accent-color: #2563eb;
+    cursor: pointer;
+}
+
+.alcada-valor {
+    display: flex;
+    width: 100%;
+}
+
+.alcada-valor input {
+    flex: 1;
+    width: 100%;
+    border-radius: 8px 0 0 8px;
+}
+
+.alcada-sufixo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 42px;
+    border: 1px solid #d1d5db;
+    border-left: none;
+    border-radius: 0 8px 8px 0;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 .form-actions {

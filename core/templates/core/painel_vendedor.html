@@ -298,7 +298,70 @@
 
 
         <section class="dados-section">
+            <section class="dados-section">
 
+    <div class="titulo-secao">
+        <h2>Veículos disponíveis</h2>
+        <p>Consulte o preço de venda e sua alçada de desconto.</p>
+    </div>
+
+        <div class="veiculos-grid">
+
+        {% for veiculo in veiculos %}
+
+            <div class="dado">
+
+                {% with foto_principal=veiculo.fotos.all|first %}
+                            {% if foto_principal %}
+                                <img
+                                    src="{{ foto_principal.imagem.url }}"
+                                    alt="{{ veiculo.marca }} {{ veiculo.modelo }}"
+                                >
+                            {% else %}
+                                <img
+                                    src="{% static 'core/img/sem-foto.webp' %}"
+                                    alt="Veículo sem foto"
+                                >
+                            {% endif %}
+                    {% endwith %}
+
+                        <span>
+                            {{ veiculo.marca }} {{ veiculo.modelo }}
+                        </span>
+
+                        <small class="veiculo-info">
+                            {{ veiculo.ano_fabricacao }} · {{ veiculo.get_situacao_display }}
+                        </small>
+
+                <strong>
+                    {% if veiculo.preco_venda %}
+                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                    {% else %}
+                        Preço não definido
+                    {% endif %}
+                </strong>
+
+                <small>
+                    Sua alçada:
+                    {% if dados.tipo_alcada == "PERCENTUAL" %}
+                        {{ dados.valor_alcada|floatformat:2 }}%
+                    {% else %}
+                        R$ {{ dados.valor_alcada|floatformat:2 }}
+                    {% endif %}
+                </small>
+
+            </div>
+
+        {% empty %}
+
+            <div class="aviso">
+                <strong>Nenhum veículo cadastrado</strong>
+                <p>Não há veículos para exibir no momento.</p>
+            </div>
+
+        {% endfor %}
+
+    </div>
             <div class="titulo-secao">
 
                 <h2>Meus dados</h2>
@@ -316,8 +379,12 @@
 
                     <span>Alçada de desconto</span>
 
-                    <strong>
-                        {{ dados.alcada_desconto }}%
+                   <strong>
+                            {% if dados.tipo_alcada == "PERCENTUAL" %}
+                                {{ dados.valor_alcada|floatformat:2 }}%
+                            {% else %}
+                                R$ {{ dados.valor_alcada|floatformat:2 }}
+                            {% endif %}
                     </strong>
 
                     <small>

@@ -1,0 +1,280 @@
+/* =========================
+   RESET
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f5f7fb;
+    color: #1f2937;
+}
+
+
+/* =========================
+   LAYOUT
+========================= */
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+
+    background: #111827;
+
+    padding: 25px 18px;
+
+    display: flex;
+    flex-direction: column;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    color: white;
+}
+
+
+
+
+/* LOGO */
+
+.logo {
+    font-size: 22px;
+    font-weight: 800;
+
+    color: #ffffff;
+
+    margin-left: 16px;
+    margin-bottom: 32px;
+
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: #2864e8;
+}
+
+
+/* =========================
+   PERFIL
+========================= */
+
+.perfil {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: #1f2937;
+
+    border-radius: 10px;
+
+    padding: 12px;
+
+    margin-bottom: 25px;
+}
+
+.perfil-avatar {
+    width: 40px;
+    height: 40px;
+    background: #2563eb;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.perfil-info {
+    display: block;
+    flex-direction: column;
+}
+
+.perfil-info strong {
+    display: block;
+    color: white;
+    font-size: 14px;
+}
+
+.perfil-info span {
+    color: #9ca3af;
+    font-size: 12px;
+
+    margin-top: 3px;
+}
+
+
+/* =========================
+   MENU
+========================= */
+
+.menu {
+    display: flex;
+    flex-direction: column;
+
+    gap: 5px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
+    text-decoration: none;
+
+    color: #d1d5db;
+
+    font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.menu-item:hover {
+    background: #1f2937;
+    color: white;
+}
+
+.menu-item.ativo {
+    background: #2563eb;
+    color: white;
+}
+
+.icone {
+    width: 20px;
+
+    text-align: center;
+
+}
+
+
+/* =========================
+   PARTE INFERIOR
+========================= */
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.menu-item.sair {
+    color: #fca5a5;
+}
+
+.menu-item.sair:hover {
+    background: #291b20;  
+}
+
+
+/* =========================
+   CONTEÚDO
+========================= */
+
+.conteudo {
+    flex: 1;
+
+    padding: 35px 45px;
+
+    max-width: 1500px;
+}
+
+
+/* =========================
+   CABEÇALHO
+========================= */
+
+.cabecalho {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 35px;
+}
+
+.cabecalho h1 {
+    font-size: 28px;
+
+    margin-bottom: 6px;
+}
+
+.cabecalho p {
+    color: #6b7280;
+
+    font-size: 14px;
+}
+
+.badge-perfil {
+    background: white;
+
+    border: 1px solid #e5e7eb;
+
+    border-radius: 8px;
+
+    padding: 10px 16px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    color: #334155;
+}
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        width: 210px;
+    }
+}
+
+
+@media (max-width: 650px) {
+
+    .layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        min-height: auto;
+    }
+
+    .sidebar-bottom {
+        margin-top: 20px;
+    }
+
+    .conteudo {
+        padding: 25px 20px;
+    }
+
+    .cabecalho {
+        flex-direction: column;
+
+        gap: 15px;
+    }
+}

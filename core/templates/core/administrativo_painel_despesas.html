@@ -115,8 +115,15 @@ Despesas | VENDACERTA
 
             <a href="{% url 'despesas_veiculo' veiculo.id %}" class="card">
 
-                <div class="card-icone">
-                    🚗
+                <div class="veiculo-icone">
+                    {% if veiculo.fotos.all %}
+                        <img
+                            src="{{ veiculo.fotos.all.0.imagem.url }}"
+                            alt="Foto do {{ veiculo.marca }} {{ veiculo.modelo }}"
+                        >
+                    {% else %}
+                        <span>🚗</span>
+                    {% endif %}
                 </div>
 
 

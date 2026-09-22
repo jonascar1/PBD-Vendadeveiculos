@@ -1,4 +1,4 @@
-{% extends 'core/gerente_base.html' %}
+    {% extends 'core/gerente_base.html' %}
 {% load static %}
 
 {% block title %}Painel do Gerente | VENDACERTA{% endblock %}
@@ -210,7 +210,11 @@
 
                                 <td>
                                     <span class="percentage">
-                                        {{ v.alcada_desconto }}%
+                                        {% if v.tipo_alcada == "VALOR" %}
+                                            R$ {{ v.valor_alcada }}
+                                        {% else %}
+                                            {{ v.valor_alcada }}%
+                                        {% endif %}
                                     </span>
                                 </td>
 

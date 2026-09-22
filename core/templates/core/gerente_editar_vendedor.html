@@ -1,385 +1,471 @@
-{% extends 'core/gerente_base.html' %}
+    {% extends 'core/gerente_base.html' %}
 
-{% load static %}
+    {% load static %}
 
-{% block title %}Editar vendedor | VENDACERTA{% endblock %}
+    {% load l10n %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'core/css/gerente_editar_vendedor.css' %}">
-{% endblock %}
+    {% block title %}Editar vendedor | VENDACERTA{% endblock %}
 
-{% block content %}
- <!-- TOPO -->
-            <div class="topo">
+    {% block extra_css %}
+        <link rel="stylesheet" href="{% static 'core/css/gerente_editar_vendedor.css' %}">
+    {% endblock %}
 
-                <div>
-
-                    <h1>Editar vendedor</h1>
-
-                    <p>
-                        Atualize os dados, acesso e configurações comerciais deste vendedor.
-                    </p>
-
-                </div>
-
-
-                <span class="badge">
-                    Gerente
-                </span>
-
-            </div>
-
-
-
-            <!-- CARD -->
-            <div class="card">
-
-
-                <!-- INFORMAÇÕES DO VENDEDOR -->
-                <div class="vendedor-info">
-
-                    <div class="avatar vendedor">
-                        {{ dados.usuario.first_name|first|upper }}
-                    </div>
-
+    {% block content %}
+    <!-- TOPO -->
+                <div class="topo">
 
                     <div>
 
-                        <h2>
-                            {{ dados.usuario.get_full_name|default:dados.usuario.username }}
-                        </h2>
+                        <h1>Editar vendedor</h1>
 
                         <p>
-                            @{{ dados.usuario.username }}
+                            Atualize os dados, acesso e configurações comerciais deste vendedor.
                         </p>
 
                     </div>
 
 
-                    {% if dados.usuario.ativo %}
-
-                        <span class="status ativo">
-                            Ativo
-                        </span>
-
-                    {% else %}
-
-                        <span class="status inativo">
-                            Inativo
-                        </span>
-
-                    {% endif %}
+                    <span class="badge">
+                        Gerente
+                    </span>
 
                 </div>
 
 
 
-                <form method="post">
+                <!-- CARD -->
+                <div class="card">
 
-                    {% csrf_token %}
+
+                    <!-- INFORMAÇÕES DO VENDEDOR -->
+                    <div class="vendedor-info">
+
+                        <div class="avatar vendedor">
+                            {{ dados.usuario.first_name|first|upper }}
+                        </div>
 
 
-                    <!-- ==========================
-                         DADOS PESSOAIS
-                    =========================== -->
+                        <div>
 
-                    <div class="secao">
-
-                        <div class="secao-titulo">
-
-                            <h3>
-                                Dados pessoais
-                            </h3>
+                            <h2>
+                                {{ dados.usuario.get_full_name|default:dados.usuario.username }}
+                            </h2>
 
                             <p>
-                                Informações básicas do vendedor.
+                                @{{ dados.usuario.username }}
                             </p>
 
                         </div>
 
 
-                        <div class="form-grid">
+                        {% if dados.usuario.ativo %}
 
+                            <span class="status ativo">
+                                Ativo
+                            </span>
 
-                            <div class="campo">
+                        {% else %}
 
-                                <label for="nome">
-                                    Nome
-                                </label>
+                            <span class="status inativo">
+                                Inativo
+                            </span>
 
-                                <input
-                                    type="text"
-                                    id="nome"
-                                    name="nome"
-                                    value="{{ dados.usuario.first_name }}"
-                                    placeholder="Digite o nome"
-                                    required
-                                >
-
-                            </div>
-
-
-                            <div class="campo">
-
-                                <label for="email">
-                                    E-mail
-                                </label>
-
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value="{{ dados.usuario.email }}"
-                                    placeholder="Digite o e-mail"
-                                >
-
-                            </div>
-
-                        </div>
+                        {% endif %}
 
                     </div>
 
 
 
-                    <!-- ==========================
-                         ACESSO
-                    =========================== -->
+                    <form method="post">
 
-                    <div class="secao">
-
-                        <div class="secao-titulo">
-
-                            <h3>
-                                Acesso
-                            </h3>
-
-                            <p>
-                                Controle de acesso do vendedor ao sistema.
-                            </p>
-
-                        </div>
+                        {% csrf_token %}
 
 
-                        <div class="form-grid">
+                        <!-- ==========================
+                            DADOS PESSOAIS
+                        =========================== -->
 
+                        <div class="secao">
 
-                            <div class="campo">
+                            <div class="secao-titulo">
 
-                                <label for="username">
-                                    Usuário
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="username"
-                                    value="{{ dados.usuario.username }}"
-                                    disabled
-                                >
-
-                                <small class="descricao">
-                                    O nome de usuário não pode ser alterado.
-                                </small>
-
-                            </div>
-
-
-                            <div class="campo">
-
-                                <label for="ativo">
-                                    Status
-                                </label>
-
-                                <select id="ativo" name="ativo">
-
-                                    <option
-                                        value="true"
-                                        {% if dados.usuario.ativo %}selected{% endif %}
-                                    >
-                                        Ativo
-                                    </option>
-
-                                    <option
-                                        value="false"
-                                        {% if not dados.usuario.ativo %}selected{% endif %}
-                                    >
-                                        Inativo
-                                    </option>
-
-                                </select>
-
-                                <small class="descricao">
-                                    Vendedores inativos não conseguem acessar o sistema.
-                                </small>
-
-                            </div>
-
-                        </div>
-
-
-
-                        <!-- SENHA -->
-
-                        <div class="senha-info">
-
-                            <div>
-
-                                <strong>
-                                    Senha de acesso
-                                </strong>
+                                <h3>
+                                    Dados pessoais
+                                </h3>
 
                                 <p>
-                                    A senha atual está protegida e não é exibida.
+                                    Informações básicas do vendedor.
                                 </p>
 
                             </div>
 
 
-                            <button
-                                type="button"
-                                class="btn-alterar-senha"
+                            <div class="form-grid">
+
+
+                                <div class="campo">
+
+                                    <label for="nome">
+                                        Nome
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="nome"
+                                        name="nome"
+                                        value="{{ dados.usuario.first_name }}"
+                                        placeholder="Digite o nome"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <div class="campo">
+
+                                    <label for="email">
+                                        E-mail
+                                    </label>
+
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value="{{ dados.usuario.email }}"
+                                        placeholder="Digite o e-mail"
+                                    >
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ==========================
+                            ACESSO
+                        =========================== -->
+
+                        <div class="secao">
+
+                            <div class="secao-titulo">
+
+                                <h3>
+                                    Acesso
+                                </h3>
+
+                                <p>
+                                    Controle de acesso do vendedor ao sistema.
+                                </p>
+
+                            </div>
+
+
+                            <div class="form-grid">
+
+
+                                <div class="campo">
+
+                                    <label for="username">
+                                        Usuário
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="username"
+                                        value="{{ dados.usuario.username }}"
+                                        disabled
+                                    >
+
+                                    <small class="descricao">
+                                        O nome de usuário não pode ser alterado.
+                                    </small>
+
+                                </div>
+
+
+                                <div class="campo">
+
+                                    <label for="ativo">
+                                        Status
+                                    </label>
+
+                                    <select id="ativo" name="ativo">
+
+                                        <option
+                                            value="true"
+                                            {% if dados.usuario.ativo %}selected{% endif %}
+                                        >
+                                            Ativo
+                                        </option>
+
+                                        <option
+                                            value="false"
+                                            {% if not dados.usuario.ativo %}selected{% endif %}
+                                        >
+                                            Inativo
+                                        </option>
+
+                                    </select>
+
+                                    <small class="descricao">
+                                        Vendedores inativos não conseguem acessar o sistema.
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+
+
+                            <!-- SENHA -->
+
+                            <div class="senha-info">
+
+                                <div>
+
+                                    <strong>
+                                        Senha de acesso
+                                    </strong>
+
+                                    <p>
+                                        A senha atual está protegida e não é exibida.
+                                    </p>
+
+                                </div>
+
+
+                                <button
+                                    type="button"
+                                    class="btn-alterar-senha"
+                                >
+                                    Alterar senha
+                                </button>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- ==========================
+                            CONFIGURAÇÕES COMERCIAIS
+                        =========================== -->
+
+                        <div class="secao">
+                            
+
+                            <div class="secao-titulo">
+
+                                <h3>
+                                    Configurações comerciais
+                                </h3>
+
+                                <p>
+                                    Defina os limites comerciais permitidos para este vendedor.
+                                </p>
+
+                            </div>
+
+
+                            <div class="form-grid">
+
+
+                            <!-- TIPO DE ALÇADA -->
+                                <div class="campo">
+
+                                    <label>
+                                        Tipo de alçada
+                                    </label>
+
+                                    <div class="radio-alcada">
+
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="tipo_alcada"
+                                                value="PERCENTUAL"
+                                                {% if dados.tipo_alcada == "PERCENTUAL" %}
+                                                    checked
+                                                {% endif %}
+                                            >
+                                            Percentual (%)
+                                        </label>
+
+                                        <label>
+                                            <input
+                                                type="radio"
+                                                name="tipo_alcada"
+                                                value="VALOR"
+                                                {% if dados.tipo_alcada == "VALOR" %}
+                                                    checked
+                                                {% endif %}
+                                            >
+                                            Valor (R$)
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- COMISSÃO -->
+                                <div class="campo">
+
+                                    <label for="percentual_comissao">
+                                        Percentual de comissão
+                                    </label>
+
+                                    <span class="descricao">
+                                        Percentual de comissão recebido pelo vendedor em uma venda.
+                                    </span>
+
+                                    <div class="input-percentual">
+
+                                        
+
+                                        <input
+                                            type="number"
+                                            id="percentual_comissao"
+                                            name="percentual_comissao"
+                                            value="{{ dados.percentual_comissao|unlocalize}}"
+                                            min="0"
+                                            max="100"
+                                            step="0.01"
+                                        >
+
+                                        <span>
+                                            %
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- LIMITE DE DESCONTO -->
+                                <div class="campo">
+
+                                    <label for="valor_alcada">
+                                        Limite de desconto
+                                    </label>
+
+                                    <span class="descricao" id="descricao-alcada">
+                                        {% if dados.tipo_alcada == "VALOR" %}
+                                            Valor máximo de desconto que o vendedor pode oferecer sem aprovação.
+                                        {% else %}
+                                            Percentual máximo de desconto que o vendedor pode oferecer sem aprovação.
+                                        {% endif %}
+                                    </span>
+
+                                    <div class="input-percentual">
+
+                                        <input
+                                            type="number"
+                                            id="valor_alcada"
+                                            name="valor_alcada"
+                                            value="{{ dados.valor_alcada|unlocalize }}"
+                                            min="0"
+                                            step="0.01"
+                                        >
+
+                                        <span id="sufixo-alcada">
+                                            {% if dados.tipo_alcada == "VALOR" %}
+                                                R$
+                                            {% else %}
+                                                %
+                                            {% endif %}
+                                        </span>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+
+                        <!-- AVISO -->
+
+                        <div class="aviso">
+
+                            🔒 Apenas o gerente pode alterar estes dados.
+
+                        </div>
+
+
+
+                        <!-- BOTÕES -->
+
+                        <div class="acoes">
+
+                            <a
+                                href="{% url 'vendedores' %}"
+                                class="btn-voltar"
                             >
-                                Alterar senha
+                                Cancelar
+                            </a>
+
+
+                            <button
+                                type="submit"
+                                class="btn-salvar"
+                            >
+                                Salvar alterações
                             </button>
 
                         </div>
 
-                    </div>
+
+                    </form>
+
+                </div>
+    {% endblock content %}
+
+    {% block extra_js %}
+    <script>
+    const radiosAlcada = document.querySelectorAll(
+        'input[name="tipo_alcada"]'
+    );
+
+    const sufixoAlcada = document.getElementById(
+        "sufixo-alcada"
+    );
+
+    const descricaoAlcada = document.getElementById(
+        "descricao-alcada"
+    );
+
+    function atualizarAlcada() {
+
+        const tipo = document.querySelector(
+            'input[name="tipo_alcada"]:checked'
+        ).value;
+
+        if (tipo === "VALOR") {
+
+            sufixoAlcada.textContent = "R$";
+
+            descricaoAlcada.textContent =
+                "Valor máximo de desconto que o vendedor pode oferecer sem aprovação.";
+
+        } else {
+
+            sufixoAlcada.textContent = "%";
+
+            descricaoAlcada.textContent =
+                "Percentual máximo de desconto que o vendedor pode oferecer sem aprovação.";
+        }
+    }
+
+    radiosAlcada.forEach(radio => {
+        radio.addEventListener("change", atualizarAlcada);
+    });
+
+    atualizarAlcada();
+    </script>
+    {% endblock %}
 
 
-
-                    <!-- ==========================
-                         CONFIGURAÇÕES COMERCIAIS
-                    =========================== -->
-
-                    <div class="secao">
-
-                        <div class="secao-titulo">
-
-                            <h3>
-                                Configurações comerciais
-                            </h3>
-
-                            <p>
-                                Defina os limites comerciais permitidos para este vendedor.
-                            </p>
-
-                        </div>
-
-
-                        <div class="form-grid">
-
-
-                            <!-- ALÇADA -->
-
-                            <div class="campo">
-
-                                <label for="alcada_desconto">
-                                    Alçada de desconto
-                                </label>
-
-                                <span class="descricao">
-                                    Percentual máximo de desconto que o vendedor pode oferecer sem aprovação.
-                                </span>
-
-
-                                <div class="input-percentual">
-
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        id="alcada_desconto"
-                                        name="alcada_desconto"
-                                        value="{{ dados.alcada_desconto }}"
-                                    >
-
-                                    <span>
-                                        %
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-
-
-                            <!-- COMISSÃO -->
-
-                            <div class="campo">
-
-                                <label for="percentual_comissao">
-                                    Percentual de comissão
-                                </label>
-
-                                <span class="descricao">
-                                    Percentual de comissão recebido pelo vendedor em uma venda.
-                                </span>
-
-
-                                <div class="input-percentual">
-
-                                    <input
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        id="percentual_comissao"
-                                        name="percentual_comissao"
-                                        value="{{ dados.percentual_comissao }}"
-                                    >
-
-                                    <span>
-                                        %
-                                    </span>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-
-
-                    <!-- AVISO -->
-
-                    <div class="aviso">
-
-                        🔒 Apenas o gerente pode alterar estes dados.
-
-                    </div>
-
-
-
-                    <!-- BOTÕES -->
-
-                    <div class="acoes">
-
-                        <a
-                            href="{% url 'vendedores' %}"
-                            class="btn-voltar"
-                        >
-                            Cancelar
-                        </a>
-
-
-                        <button
-                            type="submit"
-                            class="btn-salvar"
-                        >
-                            Salvar alterações
-                        </button>
-
-                    </div>
-
-
-                </form>
-
-            </div>
-{% endblock content %}
-
-
-           
+            
 

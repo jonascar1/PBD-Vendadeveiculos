@@ -21,6 +21,12 @@
     padding: 16px;
 }
 
+.galeria .situacao-card {
+    margin-top: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .foto-principal-container {
     width: 100%;
     height: 390px;
@@ -217,6 +223,71 @@
     word-break: break-word;
 }
 
+/* ==============================
+  CUSTOS
+============================== */
+
+.custo-total strong {
+    font-size: 18px;
+    color: #2563eb;
+}
+
+.custo-explicacao {
+    margin-top: 18px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.ultimo-lancamento {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 18px;
+    padding-top: 16px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+.ultimo-lancamento span {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.ultimo-lancamento strong {
+    font-size: 13px;
+    color: #334155;
+}
+
+.sem-lancamento {
+    margin-top: 18px;
+    padding-top: 16px;
+
+    border-top: 1px solid #e5e7eb;
+
+    font-size: 13px;
+    color: #64748b;
+}
+
+.alerta-preco-custo {
+    margin-top: 16px;
+    padding: 16px 20px;
+    border: 1px solid #e0b04b;
+    border-radius: 10px;
+    background: #fff8e6;
+}
+
+.alerta-preco-custo strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.alerta-preco-custo p {
+    margin: 0;
+    font-size: 14px;
+}
+
 
 /* ==============================
    OPCIONAIS
@@ -290,6 +361,253 @@
     border-color: #9ca3af;
 }
 
+.btn-preco {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border-radius: 8px;
+    background: #2864e8;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: opacity 0.2s ease;
+}
+
+.btn-preco:hover {
+    opacity: 0.9;
+}
+
+/* =========================================================
+   SITUAÇÃO DO VEÍCULO
+   ========================================================= */
+
+.situacao-card {
+    padding: 0;
+    overflow: hidden;
+}
+
+.situacao-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 22px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.situacao-cabecalho h3 {
+    margin: 0;
+    font-size: 15px;
+    color: #1f2937;
+}
+
+.situacao-descricao {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.situacao-conteudo {
+    padding: 20px 22px;
+}
+
+.situacao-mensagem {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+}
+
+.situacao-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #eef2ff;
+    font-size: 17px;
+}
+
+.situacao-mensagem strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #1f2937;
+    font-size: 13px;
+}
+
+.situacao-mensagem p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+/* FORMULÁRIOS */
+
+.form-situacao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-situacao input {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    padding: 0 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #fff;
+    color: #1f2937;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-situacao input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+.form-linha {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+}
+
+.form-linha input {
+    width: 50%;
+}
+
+
+/* BOTÕES */
+
+.btn-situacao {
+    height: 38px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.btn-disponivel {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.btn-disponivel:hover {
+    background: #bbf7d0;
+}
+
+.btn-reservar {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.btn-reservar:hover {
+    background: #dbeafe;
+}
+
+.btn-vendido {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.btn-vendido:hover {
+    background: #fde68a;
+}
+
+.btn-liberar {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-liberar:hover {
+    background: #e5e7eb;
+}
+
+.btn-entregue {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.btn-entregue:hover {
+    background: #bbf7d0;
+}
+
+
+/* DUAS AÇÕES */
+
+.acoes-situacao {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.acao-venda {
+    padding-right: 14px;
+    border-right: 1px solid #e5e7eb;
+}
+
+
+/* STATUS */
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-preparacao {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-disponivel {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-reservado {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-vendido {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.status-entregue {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.situacao-mensagem.entregue {
+    margin-bottom: 0;
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+
 
 /* ==============================
    RESPONSIVIDADE
@@ -323,6 +641,39 @@
 
     .foto-principal-container {
         height: 300px;
+    }
+
+    .situacao-cabecalho {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-situacao {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .form-linha {
+        flex-direction: column;
+    }
+
+    .form-linha input {
+        width: 100%;
+    }
+
+    .btn-situacao {
+        width: 100%;
+    }
+
+    .acoes-situacao {
+        grid-template-columns: 1fr;
+    }
+
+    .acao-venda {
+        padding-right: 0;
+        padding-bottom: 14px;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
     }
 }
 

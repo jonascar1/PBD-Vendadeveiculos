@@ -1,0 +1,201 @@
+/* =========================
+   TÍTULO DA PÁGINA
+========================= */
+
+.titulo-secao {
+    margin-bottom: 24px;
+}
+
+.titulo-secao h1 {
+    font-size: 28px;
+    margin: 0 0 6px 0;
+}
+
+.titulo-secao p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+.formulario-card {
+    background: white;
+
+    border: 1px solid #e1e5eb;
+
+    border-radius: 10px;
+
+    padding: 24px;
+
+    max-width: 700px;
+}
+
+
+/* =========================
+   CAMPOS
+========================= */
+
+.campo {
+    margin-bottom: 20px;
+}
+
+.campo label {
+    display: block;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    color: #1e293b;
+
+    margin-bottom: 7px;
+}
+
+.campo input,
+.campo textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 11px 12px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 7px;
+
+    background: white;
+
+    color: #1e293b;
+
+    font-family: inherit;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: 0.2s;
+}
+
+.campo input:focus,
+.campo textarea:focus {
+    border-color: #2864e8;
+
+    box-shadow: 0 0 0 2px rgba(40, 100, 232, 0.10);
+}
+
+.campo textarea {
+    resize: vertical;
+
+    min-height: 100px;
+}
+
+
+/* =========================
+   AÇÕES
+========================= */
+
+.acoes-formulario {
+    display: flex;
+
+    justify-content: flex-end;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 25px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #e5e7eb;
+}
+
+
+/* =========================
+   BOTÕES
+========================= */
+
+.botao-principal,
+.botao-secundario {
+    display: inline-flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 10px 16px;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+
+    font-weight: 600;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+
+/* Botão salvar */
+
+.botao-principal {
+    background: #2864e8;
+
+    color: white;
+
+    border: 1px solid #2864e8;
+}
+
+.botao-principal:hover {
+    background: #1f56d0;
+
+    border-color: #1f56d0;
+}
+
+
+/* Botão cancelar */
+
+.botao-secundario {
+    background: white;
+
+    color: #334155;
+
+    border: 1px solid #cbd5e1;
+}
+
+.botao-secundario:hover {
+    background: #f8fafc;
+
+    border-color: #94a3b8;
+}
+
+
+/* =========================
+   RESPONSIVIDADE
+========================= */
+
+@media (max-width: 700px) {
+
+    .formulario-card {
+        padding: 18px;
+    }
+
+    .acoes-formulario {
+        flex-direction: column-reverse;
+
+        align-items: stretch;
+    }
+
+    .botao-principal,
+    .botao-secundario {
+        width: 100%;
+    }
+
+}
