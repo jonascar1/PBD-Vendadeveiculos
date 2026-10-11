@@ -239,10 +239,18 @@ td {
     text-decoration: none;
     font-size: 12px;
     font-weight: bold;
+    background: #eff6ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: solid 1px #eff6ff;
+    transition: 0.3s;
 }
 
 .btn-ver:hover {
-    text-decoration: underline;
+    border: solid 1px #2563eb;
+    transition: 0.3s;
+    
+    
 }
 
 

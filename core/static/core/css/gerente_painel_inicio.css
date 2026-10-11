@@ -156,7 +156,7 @@ td {
 
 /* BOTÃO EDITAR */
 
-.negociacoes-button, .edit-button {
+.negociacoes-button{
     display: inline-block;
     padding: 7px 13px;
     border-radius: 6px;
@@ -165,12 +165,14 @@ td {
     text-decoration: none;
     font-size: 12px;
     font-weight: bold;
-    transition: 0.2s;
+    border: solid 1px #eff6ff;
+    transition: 0.3s;
+
 }
 
-.negociacoes-button:hover, .edit-button:hover {
-    background: #2563eb;
-    color: white;
+.negociacoes-button:hover{
+    border: solid 1px #2563eb;
+    transition: 0.3s;
 }
 
 /* SEM VENDEDORES */

@@ -16,10 +16,13 @@
 
     <!-- CSS PADRÃO DO PAINEL -->
     <link rel="stylesheet" href="{% static 'core/css/administrativo_base.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}">
 
     <!-- CSS ESPECÍFICO DE CADA PÁGINA -->
     {% block extra_css %}
     {% endblock %}
+
+    <script src="https://unpkg.com/lucide@latest"></script>
 
 </head>
 
@@ -51,23 +54,23 @@
 
                 <a href="{% url 'painel_administrativo' %}" class="menu-item
                 {% if request.resolver_match.url_name == 'painel_administrativo' %}ativo{% endif %}">
-                    <span class="icone">⌂</span>
+                    <span class="icone"><i data-lucide="home"></i></span>
                     Início
                 </a>
 
                 <a href="{% url 'despesas' %}" class="menu-item
                 {% if request.resolver_match.url_name == 'despesas' or request.resolver_match.url_name == 'adicionar_despesa' or request.resolver_match.url_name == 'despesas_veiculo' or request.resolver_match.url_name == 'excluir_despesa' or request.resolver_match.url_name == 'editar_despesa' or request.resolver_match.url_name == 'despesas_excluidas_veiculo' %}ativo{% endif %}">
-                    <span class="icone">💰</span>
+                    <span class="icone"><i data-lucide="circle-dollar-sign"></i></span>
                     Despesas
                 </a>
 
                 <a href="#" class="menu-item">
-                    <span class="icone">📄</span>
+                    <span class="icone"><i data-lucide="file-text"></i></span>
                     Documentação
                 </a>
 
                 <a href="#" class="menu-item">
-                    <span class="icone">🚗</span>
+                    <span class="icone"><i data-lucide="truck"></i></span>
                     Entrega do veículo
                 </a>
 
@@ -77,12 +80,12 @@
             <div class="sidebar-bottom">
 
                 <a href="#" class="menu-item">
-                    <span class="icone">⚙</span>
+                    <span class="icone"><i data-lucide="settings"></i></span>
                     Configurações
                 </a>
 
                 <a href="{% url 'logout' %}" class="menu-item sair">
-                    <span class="icone">↪</span>
+                    <span class="icone"><i data-lucide="log-out"></i></span>
                     Sair
                 </a>
 
@@ -103,6 +106,10 @@
 
 
     <!-- JAVASCRIPT ESPECÍFICO DA PÁGINA -->
+
+    <script>
+        lucide.createIcons();
+    </script>
 
     {% block extra_js %}
     {% endblock %}

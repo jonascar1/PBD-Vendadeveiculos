@@ -161,6 +161,13 @@
     margin-right: 10px;
 }
 
+.btn-excluidas-despesas svg {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+
+}
+
 .btn-excluidas-despesas:hover {
     background: #e2e8f0;
     color: #334155;

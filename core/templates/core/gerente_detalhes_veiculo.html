@@ -22,7 +22,7 @@
         <div class="badge">Gerente</div>
 
         <a href="{% url 'veiculos' %}" class="btn-voltar">
-            ← Voltar para veículos
+            <i data-lucide="chevron-left"></i> Voltar para veículos
         </a>
 
         {% if veiculo.situacao != "VENDIDO" and veiculo.situacao != "ENTREGUE" %}
@@ -52,7 +52,7 @@
                 >
             {% else %}
                 <div class="sem-foto">
-                    <span>📷</span>
+                    <span><i data-lucide="image-off"></i></span>
                     <p>Nenhuma foto cadastrada</p>
                 </div>
             {% endif %}
@@ -104,7 +104,7 @@
                 {% if veiculo.situacao == "PREPARACAO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">🔧</span>
+                        <span class="situacao-icone"><i data-lucide="wrench"></i></span>
 
                         <div>
                             <strong>Veículo em preparação</strong>
@@ -134,7 +134,7 @@
                         >
 
                         <button type="submit" class="btn-situacao btn-disponivel">
-                            ✓ Marcar como disponível
+                            <i data-lucide="check"></i> Marcar como disponível
                         </button>
                     </form>
 
@@ -142,7 +142,7 @@
                 {% elif veiculo.situacao == "DISPONIVEL" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">✓</span>
+                        <span class="situacao-icone"><i data-lucide="check"></i></span>
 
                         <div>
                             <strong>Veículo disponível</strong>
@@ -176,7 +176,7 @@
                         </div>
 
                         <button type="submit" class="btn-situacao btn-reservar">
-                            📌 Reservar veículo
+                            <i data-lucide="pin"></i> Reservar veículo
                         </button>
                     </form>
 
@@ -184,7 +184,7 @@
                 {% elif veiculo.situacao == "RESERVADO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">📌</span>
+                        <span class="situacao-icone"><i data-lucide="pin"></i></span>
 
                         <div>
                             <strong>Veículo reservado</strong>
@@ -216,7 +216,7 @@
                             >
 
                             <button type="submit" class="btn-situacao btn-vendido">
-                                💰 Registrar venda
+                                <i data-lucide="dollar-sign"></i> Registrar venda
                             </button>
                         </form>
 
@@ -251,7 +251,7 @@
                 {% elif veiculo.situacao == "VENDIDO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">💰</span>
+                        <span class="situacao-icone"><i data-lucide="dollar-sign"></i></span>
 
                         <div>
                             <strong>Veículo vendido</strong>
@@ -281,7 +281,7 @@
                         >
 
                         <button type="submit" class="btn-situacao btn-entregue">
-                            ✓ Registrar entrega
+                            <i data-lucide="check"></i> Registrar entrega
                         </button>
                     </form>
 
@@ -289,7 +289,7 @@
                 {% elif veiculo.situacao == "ENTREGUE" %}
 
                     <div class="situacao-mensagem entregue">
-                        <span class="situacao-icone">✓</span>
+                        <span class="situacao-icone"><i data-lucide="check-circle"></i></span>
 
                         <div>
                             <strong>Veículo entregue</strong>
@@ -312,9 +312,6 @@
 
     <!-- INFORMAÇÕES -->
     <div class="informacoes">
-
-        
-
 
         <!-- CABEÇALHO DO VEÍCULO -->
         <div class="titulo-veiculo">
@@ -499,7 +496,7 @@
 
         {% if ultimo_historico_preco and ultimo_historico_preco.abaixo_do_custo %}
             <div class="alerta-preco-custo">
-                <strong>⚠️ Atenção</strong>
+                <strong><i data-lucide="alert-triangle"></i> Atenção</strong>
                 <p>
                     O preço de venda está abaixo do custo total acumulado
                     do veículo.
