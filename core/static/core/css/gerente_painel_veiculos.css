@@ -297,10 +297,133 @@ td {
     font-weight: bold;
 }
 
+/* ==============================
+   Barra Pesquisa
+============================== */
+
+
+.barra-pesquisa-veiculos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.campo-pesquisa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 0 14px;
+    height: 42px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.campo-pesquisa svg {
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.campo-pesquisa input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: #111827;
+}
+
+.btn-pesquisar,
+.btn-limpar-busca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-pesquisar {
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+.btn-pesquisar:hover {
+    background: #1d4ed8;
+}
+
+.btn-limpar-busca {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* ==============================
+   FILTROS
+================================= */
+
+.barra-pesquisa-veiculos select {
+    height: 42px;
+    padding: 0 30px 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #374151;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.barra-pesquisa-veiculos select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.barra-pesquisa-veiculos select:hover {
+    border-color: #93aeea;
+}
 
 /* ==============================
    RESPONSIVIDADE
 ============================== */
+
+@media (max-width: 900px) {
+    .barra-pesquisa-veiculos {
+        flex-wrap: wrap;
+    }
+
+    .barra-pesquisa-veiculos .campo-pesquisa {
+        flex-basis: 100%;
+    }
+
+    .barra-pesquisa-veiculos select {
+        flex: 1;
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 600px) {
+    .barra-pesquisa-veiculos {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .campo-pesquisa {
+        flex-basis: 100%;
+    }
+}
 
 @media (max-width: 700px) {
 

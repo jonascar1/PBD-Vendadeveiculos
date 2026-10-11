@@ -11,26 +11,13 @@
 {% block content %}
 <!-- CABEÇALHO -->
             <header class="topbar">
-
                 <div>
-
-                    <h1>
-                        Vendedores
-                    </h1>
-
-                    <p>
-                        Gerencie os vendedores da revenda.
-                    </p>
-
+                    <h1>Vendedores</h1>
+                    <p>Gerencie os vendedores da revenda.</p>
                 </div>
 
-                
                 <div class="user-info">
-
-                    <span>
-                        Gerente
-                    </span>
-
+                    <span>Gerente</span>
                 </div>
 
                 {% if messages %}
@@ -42,37 +29,70 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-
             </header>
+
+            <div class="acoes-vendedores-topo">
+                <a href="{% url 'cadastrar_vendedor' %}" class="add-button">
+                    + Cadastrar vendedor
+                </a>
+            </div>
 
 
             <!-- SEÇÃO -->
             <section class="section">
 
-                <div class="section-header vendedores-header">
+                <div class="card vendedores-card">
 
-                    <div>
+                    <div class="section-header vendedores-header">
+                        <div>
+                            <h2>Vendedores cadastrados</h2>
+                            <p>Consulte e gerencie os vendedores do sistema.</p>
+                        </div>
 
-                        <h2>
-                            Vendedores cadastrados
-                        </h2>
-
-                        <p>
-                            Consulte e gerencie os vendedores do sistema.
-                        </p>
-
+                        <span class="contador-vendedores">
+                            {{ vendedores|length }}
+                            {% if vendedores|length == 1 %}
+                                vendedor
+                            {% else %}
+                                vendedores
+                            {% endif %}
+                        </span>
                     </div>
 
+                
 
-                    <a
-                        href="{% url 'cadastrar_vendedor' %}"
-                        class="add-button"
-                    >
-                        + Cadastrar vendedor
-                    </a>
+                
+                <form method="GET" class="barra-pesquisa-vendedores">
+                    <div class="campo-pesquisa-vendedores">
+                        <i data-lucide="search"></i>
+                        <input
+                            type="search"
+                            name="busca"
+                            placeholder="Pesquisar por nome, usuário ou e-mail..."
+                            value="{{ busca }}"
+                        >
+                    </div>
 
-                </div>
+                    <select name="status">
+                        <option value="">Todos os status</option>
+                        <option value="ativo" {% if status_selecionado == "ativo" %}selected{% endif %}>
+                            Ativos
+                        </option>
+                        <option value="inativo" {% if status_selecionado == "inativo" %}selected{% endif %}>
+                            Inativos
+                        </option>
+                    </select>
 
+                    <button type="submit" class="btn-pesquisar-vendedores">
+                        Pesquisar
+                    </button>
+
+                    {% if busca or status_selecionado %}
+                        <a href="{% url 'vendedores' %}" class="btn-limpar-vendedores">
+                            Limpar
+                        </a>
+                    {% endif %}
+                </form>
 
                 <!-- TABELA -->
                 <div class="table-container">

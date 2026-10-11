@@ -23,6 +23,58 @@
 }
 
 /* ==============================
+   CARDS RESUMO
+============================== */
+.cards-resumo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.card-resumo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e5eaf1;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(15, 35, 65, 0.04);
+}
+
+.card-resumo-icone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 10px;
+}
+
+.card-resumo-icone svg {
+    width: 24px;
+    height: 24px;
+}
+
+.card-resumo p {
+    margin: 0 0 6px;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.card-resumo h2 {
+    margin: 0;
+    color: #172b4d;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+
+
+/* ==============================
    AÇÕES
 ============================== */
 
@@ -216,6 +268,15 @@ td {
     }
 
     .actions-grid {
+        grid-template-columns: 1fr;
+    }
+     .cards-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .cards-resumo {
         grid-template-columns: 1fr;
     }
 }

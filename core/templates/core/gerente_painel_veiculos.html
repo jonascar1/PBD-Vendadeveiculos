@@ -84,6 +84,64 @@ Veículos | VENDACERTA
 
     </div>
 
+    <form method="GET" class="barra-pesquisa-veiculos">
+        <div class="campo-pesquisa">
+            <i data-lucide="search"></i>
+
+            <input
+                type="search"
+                name="busca"
+                placeholder="Pesquisar por marca, modelo ou placa..."
+                value="{{ busca }}"
+            >
+        </div>
+
+        <select name="situacao">
+            <option value="">Todas as situações</option>
+
+            {% for valor, texto in situacoes %}
+                <option value="{{ valor }}"
+                    {% if situacao_selecionada == valor %}selected{% endif %}>
+                    {{ texto }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="origem">
+            <option value="">Todas as origens</option>
+
+            {% for valor, texto in origens %}
+                <option value="{{ valor }}"
+                    {% if origem_selecionada == valor %}selected{% endif %}>
+                    {{ texto }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="ano_fabricacao">
+            <option value="">Todos os anos</option>
+
+            {% for ano in anos %}
+                <option value="{{ ano }}"
+                    {% if ano_fabricacao_selecionado == ano|stringformat:"s" %}selected{% endif %}>
+                    {{ ano }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn-pesquisar">
+            Pesquisar
+        </button>
+
+        {% if busca or situacao_selecionada or origem_selecionada or ano_fabricacao_selecionado %}
+            <a
+                href="{% url 'veiculos' %}"
+                class="btn-limpar-busca"
+            >
+                Limpar
+            </a>
+        {% endif %}
+    </form>
 
     <div class="table-container">
 

@@ -360,8 +360,8 @@
 
 .btn-voltar svg {
     margin-right: 6px;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
 }
 
 .btn-voltar:hover {
@@ -388,9 +388,41 @@
     opacity: 0.9;
 }
 
+.topo-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.topo-acoes .btn-voltar {
+    margin-top: 0;
+}
+
+.topo-acoes .btn-preco {
+    margin: 0;
+}
+
 /* =========================================================
    SITUAÇÃO DO VEÍCULO
    ========================================================= */
+
+.prazo-reserva {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid #f3d39a;
+    border-radius: 8px;
+    background: #fff8e8;
+    color: #8a5a00;
+}
+
+.prazo-reserva p {
+    margin: 4px 0 0;
+    font-size: 13px;
+}
 
 .situacao-card {
     padding: 0;
@@ -639,7 +671,7 @@
 @media (max-width: 700px) {
 
     .topo-acoes {
-        align-items: flex-start;
+        align-items: flex-start;    
     }
 
     .titulo-veiculo {

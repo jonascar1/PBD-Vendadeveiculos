@@ -192,6 +192,19 @@
                                 Este veículo está reservado para um cliente.
                             </p>
                         </div>
+                        {% if reserva %}
+                            <div class="prazo-reserva">
+                                <i data-lucide="clock"></i>
+
+                                <div>
+                                    <strong>Prazo da reserva</strong>
+                                    <p>
+                                        Expira em:
+                                        {{ reserva.expira_em|date:"d/m/Y H:i" }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="acoes-situacao">

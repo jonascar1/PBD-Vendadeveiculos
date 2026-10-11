@@ -15,6 +15,7 @@ from .models import HistoricoPrecoVeiculo, HistoricoSituacaoVeiculo, LancamentoF
 from .models import (HistoricoSituacaoVeiculo,Usuario,PerfilVendedor,Veiculo,FotoVeiculo,ReservaVeiculo,)
 
 from django.db import transaction
+from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
@@ -77,7 +78,34 @@ def painel_view(request):
 @perfil_requerido("GERENTE")
 def painel_gerente_view(request):
     vendedores = PerfilVendedor.objects.select_related("usuario").all()
-    return render(request, "core/gerente_painel_inicio.html", {"vendedores": vendedores})
+
+    # Total de veículos disponíveis para venda.
+    veiculos_disponiveis = Veiculo.objects.filter(
+        status=Veiculo.Status.DISPONIVEL
+    ).count()
+
+    # Total de veículos vendidos.
+    vendas_concluidas = Veiculo.objects.filter(
+        situacao__in=[
+            Veiculo.Situacao.VENDIDO,
+            Veiculo.Situacao.ENTREGUE,]
+    ).count()
+
+    # Total de vendedores ativos.
+    vendedores_ativos = PerfilVendedor.objects.filter(
+        usuario__ativo=True
+    ).count()
+
+    return render(
+        request,
+        "core/gerente_painel_inicio.html",
+        {
+            "vendedores": vendedores,
+            "veiculos_disponiveis": veiculos_disponiveis,
+            "vendas_concluidas": vendas_concluidas,
+            "vendedores_ativos": vendedores_ativos,
+        },
+    )
 
 
 @perfil_requerido("VENDEDOR")
@@ -366,12 +394,34 @@ def editar_vendedor_view(request, vendedor_id):
 
 @perfil_requerido("GERENTE")
 def vendedores_view(request):
+    busca = request.GET.get("busca", "").strip()
+    status = request.GET.get("status", "")
+    
     vendedores = PerfilVendedor.objects.select_related("usuario").all()
+
+    if busca:
+        vendedores = vendedores.filter(
+            Q(usuario__first_name__icontains=busca)
+            | Q(usuario__last_name__icontains=busca)
+            | Q(usuario__username__icontains=busca)
+            | Q(usuario__email__icontains=busca)
+        )
+
+    # Filtro por status da conta
+    if status == "ativo":
+        vendedores = vendedores.filter(usuario__ativo=True)
+    elif status == "inativo":
+        vendedores = vendedores.filter(usuario__ativo=False)
+    else:
+        status = ""
 
     return render(
         request,
         "core/gerente_painel_vendedores.html",
-        {"vendedores": vendedores}
+        {"vendedores": vendedores,
+         "busca": busca,
+         "status_selecionado": status,
+        }
     )
 
 @perfil_requerido("GERENTE")
@@ -593,12 +643,66 @@ def cadastrar_veiculo_view(request):
 def veiculos_view(request):
     for reserva in ReservaVeiculo.objects.filter(cancelada=False,expira_em__lte=timezone.now(),):
         reserva.expirar()
-    veiculos = Veiculo.objects.prefetch_related("fotos").all().order_by("-criado_em")
+
+    busca = request.GET.get("busca", "").strip()
+    situacao = request.GET.get("situacao", "")
+    origem = request.GET.get("origem", "")
+    ano_fabricacao = request.GET.get("ano_fabricacao", "")
+
+    veiculos = Veiculo.objects.prefetch_related("fotos").all()
+
+    if busca:
+        veiculos = veiculos.filter(
+            Q(marca__icontains=busca) |
+            Q(modelo__icontains=busca) |
+            Q(placa__icontains=busca)
+        )
+    
+
+    situacoes_validas = dict(Veiculo.Situacao.choices)
+
+    if situacao in situacoes_validas:
+        veiculos = veiculos.filter(situacao=situacao)
+    else:
+        situacao = ""
+
+    origens_validas = dict(Veiculo.Origem.choices)
+
+    if origem in origens_validas:
+        veiculos = veiculos.filter(origem=origem)
+    else:
+        origem = ""
+
+    if ano_fabricacao:
+        try:
+            ano = int(ano_fabricacao)
+            if 1900 <= ano <= 2100:
+                veiculos = veiculos.filter(ano_fabricacao=ano)
+            else:
+                ano_fabricacao = ""
+        except ValueError:
+            ano_fabricacao = ""
+
+    veiculos = veiculos.order_by("-criado_em")
+
+    anos = (Veiculo.objects.order_by("-ano_fabricacao")
+            .values_list("ano_fabricacao", flat=True)
+            .distinct()
+        )
 
     return render(
         request,
         "core/gerente_painel_veiculos.html",
-        {"veiculos": veiculos}
+        {"veiculos": veiculos,
+         "busca": busca,
+         "situacoes" : Veiculo.Situacao.choices,
+         "origens" : Veiculo.Origem.choices,
+         "situacao_selecionada": situacao,
+         "origem_selecionada": origem,
+         "ano_fabricacao_selecionado": ano_fabricacao,
+         "anos" : anos,
+
+        }
     )
 
 @perfil_requerido("GERENTE")
@@ -609,6 +713,23 @@ def detalhes_veiculo_view(request, veiculo_id):
     )
 
     fotos = veiculo.fotos.all()
+
+    reserva = None
+
+    if veiculo.situacao == Veiculo.Situacao.RESERVADO:
+        reserva = ReservaVeiculo.objects.filter(
+            veiculo=veiculo,
+            cancelada=False,
+        ).first()
+
+        if reserva:
+            reserva.expirar()
+
+            reserva.refresh_from_db()
+
+            if reserva.cancelada:
+                veiculo.refresh_from_db()
+                reserva = None
 
     despesas = veiculo.lancamentos.filter(
         tipo=LancamentoFinanceiro.Tipo.DESPESA,
@@ -640,6 +761,7 @@ def detalhes_veiculo_view(request, veiculo_id):
             "custo_total": custo_total,
             "ultimo_lancamento": ultimo_lancamento,
             "ultimo_historico_preco": ultimo_historico_preco,
+            "reserva": reserva,
         }
     )
 
@@ -830,10 +952,31 @@ def alterar_situacao_veiculo_view(request, veiculo_id):
             veiculo_id=veiculo.id,
         )
 
+    
     situacao_anterior = veiculo.situacao
-
     veiculo.situacao = nova_situacao
-    veiculo.save(update_fields=["situacao"])
+
+    if nova_situacao == Veiculo.Situacao.PREPARACAO:
+        veiculo.status = Veiculo.Status.DISPONIVEL
+
+    elif nova_situacao == Veiculo.Situacao.DISPONIVEL:
+        veiculo.status = Veiculo.Status.DISPONIVEL
+
+    elif nova_situacao == Veiculo.Situacao.RESERVADO:
+        veiculo.status = Veiculo.Status.RESERVADO
+
+    elif nova_situacao in [
+        Veiculo.Situacao.VENDIDO,
+        Veiculo.Situacao.ENTREGUE,
+    ]:
+        veiculo.status = Veiculo.Status.VENDIDO
+        veiculo.venda_fechada = True
+
+    veiculo.save(update_fields=[
+        "situacao",
+        "status",
+        "venda_fechada",
+    ])
 
     HistoricoSituacaoVeiculo.objects.create(
         veiculo=veiculo,

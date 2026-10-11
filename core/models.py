@@ -289,10 +289,19 @@ class ReservaVeiculo(models.Model):
             self.cancelada = True
             self.save(update_fields=["cancelada"])
 
-            veiculo = Veiculo.objects.filter(pk=self.veiculo_id, situacao=Veiculo.Situacao.RESERVADO,).first()
+            veiculo = Veiculo.objects.filter(
+                pk=self.veiculo_id,
+                situacao=Veiculo.Situacao.RESERVADO,
+            ).first()
 
             if veiculo:
-                veiculo.situacao = Veiculo.Situacao.DISPONIVELveiculo.save(update_fields=["situacao"])
+                veiculo.situacao = Veiculo.Situacao.DISPONIVEL
+                veiculo.status = Veiculo.Status.DISPONIVEL
+
+                veiculo.save(update_fields=[
+                    "situacao",
+                    "status",
+                ])
 
                 HistoricoSituacaoVeiculo.objects.create(
                     veiculo=veiculo,
