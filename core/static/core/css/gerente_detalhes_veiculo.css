@@ -497,7 +497,16 @@
 .form-situacao {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.form-situacao > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .form-situacao input {
@@ -544,6 +553,8 @@
     transition: 0.2s;
     display: flex;
     align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .btn-disponivel {

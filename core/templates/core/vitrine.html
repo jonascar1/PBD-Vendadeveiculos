@@ -1,0 +1,327 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VendaCerta | Encontre seu próximo carro</title>
+
+    <link rel="stylesheet" href="{% static 'core/css/vitrine.css' %}">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="cabecalho">
+        <div class="container cabecalho-conteudo">
+
+            <a href="{% url 'vitrine' %}" class="logo">
+                <span class="logo-icone"><img src="{% static 'core/img/favicon.png' %}" alt="Logo VendaCerta"></span>
+                <span>Venda<span class="logo-destaque">Certa</span></span>
+            </a>
+
+            <nav class="menu">
+                <a href="#estoque">Estoque</a>
+                <a href="#como-comprar">Como comprar</a>
+                <a href="#contato">Contato</a>
+            </nav>
+
+            <a href="#contato" class="botao-whatsapp">
+                <img src="{% static 'core/img/whatsapp-icon.png' %}" alt="Fale conosco"> Fale conosco
+            </a>
+
+        </div>
+    </header>
+
+    <main>
+
+        <!-- BANNER PRINCIPAL -->
+        <section class="banner">
+
+            <div class="banner-fundo"></div>
+
+            <div class="container banner-conteudo">
+
+                <span class="banner-etiqueta">
+                    Seu próximo carro está aqui
+                </span>
+
+                <h1>
+                    Encontre o carro certo,
+                    <span>sem sair de casa.</span>
+                </h1>
+
+                <p>
+                    Confira nosso estoque, compare opções e encontre
+                    o veículo ideal para você.
+                </p>
+
+                <a href="#estoque" class="botao-principal">
+                    Explorar veículos
+                    <span aria-hidden="true">→</span>
+                </a>
+
+            </div>
+
+            <div class="banner-indicador">
+                <span></span>
+                Qualidade e confiança em cada escolha
+            </div>
+
+        </section>
+
+        <!-- ESTOQUE -->
+        <section class="estoque secao" id="estoque">
+
+            <div class="container">
+
+                <div class="estoque-cabecalho">
+                    <div>
+                        <span class="subtitulo">ENCONTRE O SEU</span>
+                        <h2>Nosso estoque</h2>
+                        <p>Conheça os veículos disponíveis para você.</p>
+                    </div>
+
+                    <span class="total-veiculos">
+                        {{ veiculos|length }} veículos
+                    </span>
+                </div>
+
+                <!-- FILTROS -->
+                
+                <form class="filtros" method="get" action="#estoque">
+                    <h3 class="filtros-titulo">Pesquisar</h3>
+
+                    <div class="filtros-campos">
+                        
+                                            
+                    
+                    <div class="filtro-campo">
+                        <label for="marca">Marca</label>
+
+                        <select id="marca" name="marca">
+                            <option value="">Todas as marcas</option>
+
+                            {% for marca_opcao in marcas %}
+                                <option value="{{ marca_opcao }}"
+                                    {% if filtros.marca == marca_opcao %}selected{% endif %}>
+                                    {{ marca_opcao }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+
+
+
+                        <div class="filtro-campo">
+                            <label for="preco">Preço máximo</label>
+                            <input
+                                type="number"
+                                id="preco"
+                                name="preco"
+                                min="0"
+                                step="1000"
+                                placeholder="Até R$"
+                                value="{{ filtros.preco }}"
+                            >
+                        </div>
+
+                        <div class="filtro-campo">
+                            <label for="ano">Ano</label>
+                            <input
+                                type="number"
+                                id="ano"
+                                name="ano"
+                                list="lista-anos"
+                                min="1900"
+                                max="2100"
+                                step="1"
+                                placeholder="Ex.: 2020"
+                                value="{{ filtros.ano }}"
+                            >
+                            <datalist id="lista-anos">
+                                {% for ano_opcao in anos %}
+                                    {% if ano_opcao >= 1900 %}
+                                        <option value="{{ ano_opcao }}">
+                                    {% endif %}
+                                {% endfor %}
+                            </datalist>
+                        </div>
+
+                        <div class="filtro-campo">
+                            <label for="combustivel">Combustível</label>
+                            <select id="combustivel" name="combustivel">
+                                <option value="">Todos</option>
+                                {% for combustivel_opcao in combustiveis %}
+                                    <option
+                                        value="{{ combustivel_opcao }}"
+                                        {% if filtros.combustivel == combustivel_opcao %}selected{% endif %}
+                                    >
+                                        {{ combustivel_opcao }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="filtros-acoes">
+                            <button type="submit" class="botao-filtrar">Filtrar</button>
+                            <a href="{% url 'vitrine' %}" class="botao-limpar">Limpar</a>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- CARDS DOS VEÍCULOS -->
+                <div class="grade-veiculos">
+
+                    {% for veiculo in veiculos %}
+
+                        <article class="card-veiculo">
+
+                            <a href="#" class="card-foto">
+                                {% with foto=veiculo.fotos.all|first %}
+                                    {% if foto %}
+                                        <img src="{{ foto.imagem.url }}"
+                                             alt="{{ veiculo.marca }} {{ veiculo.modelo }}"
+                                             loading="lazy">
+                                    {% else %}
+                                        <div class="sem-foto">
+                                            <span><i data-lucide="image-off"></i></span>
+                                            <p>Foto indisponível</p>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+
+                                <span class="etiqueta-combustivel">
+                                    {{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"Veículo" }}
+                                </span>
+                            </a>
+
+                            <div class="card-conteudo">
+
+                                <span class="card-marca">
+                                    {{ veiculo.marca }}
+                                </span>
+
+                                <h3>{{ veiculo.modelo }}</h3>
+
+                                <p class="card-versao">
+                                    {{ veiculo.versao|default:"Confira os detalhes do veículo" }}
+                                </p>
+
+                                <strong class="card-preco">
+                                    R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                </strong>
+
+                                <div class="card-detalhes">
+                                    <span>{{ veiculo.ano_fabricacao }}</span>
+                                    <span>{{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"—" }}</span>
+                                </div>
+
+                                <a href="#contato" class="botao-card">
+                                    Tenho interesse
+                                    <span aria-hidden="true">→</span>
+                                </a>
+
+                            </div>
+
+                        </article>
+
+                    {% empty %}
+
+                        <div class="estoque-vazio">
+                            <span><i data-lucide="car"></i></span>
+                            <h3>Nenhum veículo encontrado</h3>
+                            <p>
+                                Não encontramos veículos com esses filtros.
+                                Experimente alterar sua busca.
+                            </p>
+                            <a href="{% url 'vitrine' %}">Ver todos os veículos</a>
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- COMO COMPRAR -->
+        <section class="como-comprar secao" id="como-comprar">
+
+            <div class="container">
+
+                <div class="titulo-centralizado">
+                    <span class="subtitulo">SIMPLES E TRANSPARENTE</span>
+                    <h2>Comprar seu carro ficou mais fácil.</h2>
+                    <p>Você escolhe o veículo e nossa equipe ajuda no restante.</p>
+                </div>
+
+                <div class="etapas">
+
+                    <article class="etapa">
+                        <span class="etapa-numero">01</span>
+                        <h3>Escolha seu veículo</h3>
+                        <p>Explore nosso estoque e encontre o carro ideal para você.</p>
+                    </article>
+
+                    <article class="etapa">
+                        <span class="etapa-numero">02</span>
+                        <h3>Entre em contato</h3>
+                        <p>Tire suas dúvidas e conheça todos os detalhes do veículo.</p>
+                    </article>
+
+                    <article class="etapa">
+                        <span class="etapa-numero">03</span>
+                        <h3>Negocie com confiança</h3>
+                        <p>Nossa equipe orienta você durante o processo de compra.</p>
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- CONTATO -->
+        <section class="contato" id="contato">
+
+            <div class="container contato-conteudo">
+                <div>
+                    <span class="subtitulo">VAMOS CONVERSAR?</span>
+                    <h2>Seu próximo carro pode estar aqui.</h2>
+                    <p>Entre em contato com nossa equipe para saber mais.</p>
+                </div>
+
+                <!-- Substituiremos pelo link real do WhatsApp da loja -->
+                <a href="#" class="botao-contato">
+                    Fale com a equipe →
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer class="rodape">
+        <div class="container rodape-conteudo">
+            <a href="{% url 'vitrine' %}" class="logo logo-rodape">
+                <span class="logo-icone"><img src="/static/core/img/favicon.png" alt="VendaCerta"></span>
+                <span>Venda<span class="logo-destaque">Certa</span></span>
+            </a>
+
+            <p>© {% now "Y" %} VendaCerta. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+     <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

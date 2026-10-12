@@ -17,7 +17,7 @@ urlpatterns = [
     path("painel/administrativo/despesas/<int:despesa_id>/excluir/", views.excluir_despesa_view, name="excluir_despesa"),
     path("painel/administrativo/despesas/veiculo/<int:veiculo_id>/excluidas/", views.despesas_excluidas_veiculo_view, name="despesas_excluidas_veiculo"),
 
-    
+
     path("painel/gerente/inicio/", views.painel_gerente_view, name="painel_gerente"),
     path("painel/gerente/vendedores/", views.vendedores_view, name="vendedores"),
     path("painel/gerente/vendedores/cadastrar/", views.cadastrar_vendedor_view, name="cadastrar_vendedor"),
@@ -28,5 +28,7 @@ urlpatterns = [
     path("veiculos/<int:veiculo_id>/situacao/",views.alterar_situacao_veiculo_view,name="alterar_situacao_veiculo",),
     path("veiculos/<int:veiculo_id>/reservar/",views.reservar_veiculo_view, name="reservar_veiculo",),
     path("painel/gerente/veiculos/<int:veiculo_id>/preco/", views.alterar_preco_veiculo_view, name="alterar_preco_veiculo"),
+
+    path("", views.vitrine_view, name="vitrine"),
 
 ]

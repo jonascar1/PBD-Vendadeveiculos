@@ -4,6 +4,14 @@
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 
+from decimal import Decimal, InvalidOperation
+
+from django.db.models import Q
+from django.shortcuts import render
+
+from .models import Veiculo
+
+
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -994,3 +1002,107 @@ def alterar_situacao_veiculo_view(request, veiculo_id):
         "detalhes_veiculo",
         veiculo_id=veiculo.id,
     )
+
+
+
+def vitrine_view(request):
+    # Base: somente veículos disponíveis para venda.
+    estoque = Veiculo.objects.filter(
+        situacao=Veiculo.Situacao.DISPONIVEL,
+        status=Veiculo.Status.DISPONIVEL,
+    )
+
+    # Captura os filtros enviados pela página.
+    marca = request.GET.get("marca", "").strip()
+    preco = request.GET.get("preco", "").strip()
+    ano = request.GET.get("ano", "").strip()
+    combustivel = request.GET.get("combustivel", "").strip()
+
+    # Consulta dos veículos, preservando as fotos.
+    veiculos = (
+    estoque
+    .only(
+        "id",
+        "marca",
+        "modelo",
+        "ano_fabricacao",
+        "ano_modelo",
+        "cor",
+        "combustivel",
+        "quilometragem",
+        "preco_venda",
+        "criado_em",
+    )
+    .prefetch_related("fotos")
+    .order_by("-criado_em")
+)
+
+    # Filtro por marca: aceita pesquisa parcial.
+    if marca:
+        veiculos = veiculos.filter(marca__icontains=marca)
+
+    # Filtro por preço máximo.
+    if preco:
+        try:
+            preco_maximo = Decimal(preco.replace(",", "."))
+            if preco_maximo >= 0:
+                veiculos = veiculos.filter(
+                    preco_venda__lte=preco_maximo
+                )
+        except (InvalidOperation, ValueError):
+            preco = ""
+
+    # Filtro por ano de fabricação ou ano do modelo.
+    if ano:
+        try:
+            ano_filtro = int(ano)
+            if 1900 <= ano_filtro <= 2100:
+                veiculos = veiculos.filter(
+                    Q(ano_fabricacao=ano_filtro)
+                    | Q(ano_modelo=ano_filtro)
+                )
+        except (ValueError, TypeError):
+            ano = ""
+
+    # Filtro por combustível: aceita pesquisa parcial.
+    if combustivel:
+        veiculos = veiculos.filter(
+            combustivel__icontains=combustivel
+        )
+
+    # Sugestões baseadas no estoque disponível.
+    marcas = (
+        estoque.order_by()
+        .values_list("marca", flat=True)
+        .distinct()
+        .order_by("marca")
+    )
+
+    combustiveis = (
+        estoque.order_by()
+        .values_list("combustivel", flat=True)
+        .distinct()
+        .order_by("combustivel")
+    )
+
+    # Anos de fabricação e modelo, sem duplicatas.
+    anos = sorted(
+        set(estoque.values_list("ano_fabricacao", flat=True))
+        | set(estoque.values_list("ano_modelo", flat=True)),
+        reverse=True,
+    )
+
+    contexto = {
+        "veiculos": veiculos,
+        "marcas": marcas,
+        "anos": anos,
+        "combustiveis": combustiveis,
+        "filtros": {
+            "marca": marca,
+            "preco": preco,
+            "ano": ano,
+            "combustivel": combustivel,
+        },
+    }
+
+    return render(request, "core/vitrine.html", contexto)
