@@ -1,6 +1,5 @@
 /* ==================================================
    VENDACERTA — VITRINE DE VEÍCULOS
-   CSS organizado e responsivo
 ================================================== */
 
 /* ---------- Variáveis e reset ---------- */
@@ -39,14 +38,8 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-a {
-    color: inherit;
-}
-
-img {
-    display: block;
-    max-width: 100%;
-}
+a { color: inherit; }
+img { display: block; max-width: 100%; }
 
 button,
 input,
@@ -60,9 +53,8 @@ select {
     margin-inline: auto;
 }
 
-.secao {
-    padding: 82px 0;
-}
+.secao { padding: 82px 0; }
+
 
 /* ==================================================
    CABEÇALHO
@@ -77,6 +69,8 @@ select {
     border-bottom: 1px solid var(--borda);
     box-shadow: 0 3px 14px rgba(15, 35, 70, 0.04);
     backdrop-filter: blur(12px);
+    opacity: 0.95;
+    transition: opacity 0.2s ease;
 }
 
 .cabecalho-conteudo {
@@ -84,7 +78,7 @@ select {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 28px;
+    gap: 24px;
 }
 
 .logo {
@@ -112,9 +106,9 @@ select {
     border-radius: 8px;
 }
 
-.logo-destaque {
-    color: var(--azul);
-}
+.logo-destaque { color: var(--azul); }
+
+/* Menu desktop */
 
 .menu {
     display: flex;
@@ -134,25 +128,20 @@ select {
 }
 
 .menu a::after {
+    content: "";
     position: absolute;
     right: 0;
     bottom: 2px;
     left: 0;
     height: 2px;
     background: var(--azul);
-    content: "";
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.2s ease;
 }
 
-.menu a:hover {
-    color: var(--azul);
-}
-
-.menu a:hover::after {
-    transform: scaleX(1);
-}
+.menu a:hover { color: var(--azul); }
+.menu a:hover::after { transform: scaleX(1); }
 
 .botao-whatsapp {
     display: inline-flex;
@@ -181,6 +170,125 @@ select {
     color: var(--azul);
 }
 
+/* Botão do menu mobile (escondido no desktop) */
+
+.botao-menu-mobile {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: var(--branco);
+    cursor: pointer;
+}
+
+.botao-menu-mobile span {
+    display: block;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: #10213d;
+}
+
+/* Drawer (menu lateral mobile) */
+
+.drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgb(0 0 0 / 45%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.drawer-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 201;
+    width: min(320px, 85vw);
+    height: 100vh;
+    height: 100dvh;
+    padding: 24px;
+    overflow-y: auto;
+    background: var(--branco);
+    box-shadow: -8px 0 30px rgb(0 0 0 / 12%);
+    transform: translateX(100%);
+    visibility: hidden;
+    transition: transform 0.25s ease, visibility 0.25s ease;
+}
+
+.drawer-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--borda);
+}
+
+.drawer-titulo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #10213d;
+}
+
+.fechar-menu {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #10213d;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.drawer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 16px;
+}
+
+.drawer-links a {
+    display: block;
+    padding: 15px 10px;
+    border-radius: 8px;
+    color: #10213d;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.drawer-links a:hover { background: #f1f5f9; }
+
+.drawer-links .drawer-whatsapp {
+    margin-top: 12px;
+    background: var(--azul);
+    color: var(--branco);
+    text-align: center;
+}
+
+/* Estado aberto (JS adiciona .menu-aberto no body) */
+
+body.menu-aberto { overflow: hidden; }
+
+body.menu-aberto .drawer-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+body.menu-aberto .drawer-menu {
+    transform: translateX(0);
+    visibility: visible;
+}
+
+
 /* ==================================================
    BANNER PRINCIPAL
 ================================================== */
@@ -201,12 +309,10 @@ select {
     inset: 0;
     z-index: -1;
     background-image:
-        linear-gradient(
-            90deg,
+        linear-gradient(90deg,
             rgba(4, 19, 45, 0.96) 0%,
             rgba(4, 19, 45, 0.82) 42%,
-            rgba(4, 19, 45, 0.35) 100%
-        ),
+            rgba(4, 19, 45, 0.35) 100%),
         url("/static/core/img/pneu-azul.png");
     background-size: cover;
     background-position: center;
@@ -232,10 +338,10 @@ select {
 }
 
 .banner-etiqueta::before {
+    content: "";
     width: 25px;
     height: 2px;
     background: var(--azul-claro);
-    content: "";
 }
 
 .banner h1 {
@@ -310,13 +416,12 @@ select {
     box-shadow: 0 0 12px rgba(96, 165, 250, 0.8);
 }
 
+
 /* ==================================================
-   ESTOQUE — CABEÇALHO
+   ESTOQUE — TÍTULO
 ================================================== */
 
-.estoque {
-    background: var(--fundo);
-}
+.estoque { background: var(--fundo); }
 
 .estoque-cabecalho {
     display: flex;
@@ -330,7 +435,7 @@ select {
     display: inline-block;
     margin-bottom: 9px;
     color: var(--azul);
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 900;
     letter-spacing: 1.7px;
 }
@@ -348,7 +453,7 @@ select {
 .titulo-centralizado p {
     margin-top: 11px;
     color: var(--texto-suave);
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.8;
 }
 
@@ -361,13 +466,14 @@ select {
     border-radius: 8px;
     background: #eff6ff;
     color: #1d4ed8;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     white-space: nowrap;
 }
 
+
 /* ==================================================
-   FILTROS — CARD DE PESQUISA
+   FILTROS
 ================================================== */
 
 form.filtros {
@@ -385,7 +491,7 @@ form.filtros {
     display: block;
     margin: 0 0 20px;
     color: var(--azul-escuro);
-    font-size: 21px;
+    font-size: 24px;
     font-weight: 800;
     text-align: left;
 }
@@ -407,7 +513,7 @@ form.filtros {
 
 .filtros .filtro-campo label {
     color: #334155;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 800;
 }
 
@@ -424,13 +530,11 @@ form.filtros {
     background-color: #fff;
     color: var(--texto);
     color-scheme: light;
-    font-size: 13px;
+    font-size: 15px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.filtros .filtro-campo input::placeholder {
-    color: #94a3b8;
-}
+.filtros .filtro-campo input::placeholder { color: #94a3b8; }
 
 .filtros .filtro-campo input:focus,
 .filtros .filtro-campo select:focus {
@@ -455,296 +559,219 @@ form.filtros {
     background: var(--azul);
     color: var(--branco);
     cursor: pointer;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
     transition: background 0.2s ease;
 }
 
-.filtros .botao-filtrar:hover {
-    background: var(--azul-hover);
-}
+.filtros .botao-filtrar:hover { background: var(--azul-hover); }
 
 .filtros .botao-limpar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 46px;
-    padding: 0 6px;
-    color: var(--azul);
-    font-size: 12px;
+    padding: 0 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    color: var(--texto-suave);
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .filtros .botao-limpar:hover {
     color: var(--azul-hover);
-    text-decoration: underline;
+    border-color: var(--azul-hover);
 }
+
 
 /* ==================================================
-   GRADE E CARDS DE VEÍCULOS
+   CARROSSEL DE VEÍCULOS
+   Desktop: 5 cards | Tablet: 4 cards | Celular: 2 cards
+   (o JS precisa usar esses mesmos números ao deslizar)
 ================================================== */
 
-.grade-veiculos {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: stretch;
-    gap: 25px;
+.carrossel-veiculos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     width: 100%;
+    min-width: 0;
 }
+
+.janela-veiculos {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    touch-action: pan-y;
+}
+
+.trilho-veiculos {
+    display: flex;
+    align-items: stretch;
+    gap: 16px;
+    transition: transform 0.35s ease;
+    will-change: transform;
+}
+
+.trilho-veiculos .card-veiculo {
+    flex: 0 0 calc((100% - 64px) / 5);   /* 5 cards, 4 espaços de 16px */
+    min-width: 0;
+}
+
+/* Setas */
+
+.seta-carrossel {
+    display: flex;
+    flex: 0 0 36px;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid #dbe3ef;
+    border-radius: 50%;
+    background: var(--branco);
+    color: var(--azul-escuro);
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.seta-carrossel:hover:not(:disabled) {
+    background: var(--azul);
+    color: var(--branco);
+}
+
+.seta-carrossel:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+
+/* ==================================================
+   CARD DE VEÍCULO (base)
+   Se você já tem esses estilos em outro lugar, apague esta seção.
+================================================== */
 
 .card-veiculo {
     display: flex;
     flex-direction: column;
-    min-width: 0;
     overflow: hidden;
-    border: 1px solid #e3eaf3;
-    border-radius: 13px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
     background: var(--branco);
-    box-shadow: 0 4px 16px rgba(15, 35, 70, 0.045);
-    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
-}
-
-.card-veiculo:hover {
-    transform: translateY(-5px);
-    border-color: #cbdcf5;
-    box-shadow: 0 14px 30px rgba(15, 35, 70, 0.11);
+    box-shadow: var(--sombra);
 }
 
 .card-foto {
     position: relative;
-    display: block;
     width: 100%;
-    height: 225px;
-    flex-shrink: 0;
+    aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: #e9eef5;
-    text-decoration: none;
 }
 
 .card-foto img {
-    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
-    transition: transform 0.4s ease;
-}
-
-.card-veiculo:hover .card-foto img {
-    transform: scale(1.045);
-}
-
-.sem-foto {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 8px;
-    background: linear-gradient(135deg, #edf2f8, #dce5f0);
-    color: #64748b;
-}
-
-.sem-foto span {
-    font-size: 43px;
-}
-
-.sem-foto p {
-    font-size: 12px;
-    font-weight: 600;
 }
 
 .etiqueta-combustivel {
     position: absolute;
-    top: 13px;
-    left: 13px;
-    z-index: 1;
-    max-width: calc(100% - 26px);
-    overflow: hidden;
-    padding: 6px 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 5px;
-    background: rgba(7, 27, 59, 0.9);
-    color: #fff;
+    top: 10px;
+    left: 10px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: var(--azul-escuro);
+    color: var(--branco);
     font-size: 10px;
     font-weight: 800;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    backdrop-filter: blur(5px);
 }
 
 .card-conteudo {
     display: flex;
     flex: 1;
     flex-direction: column;
-    align-items: flex-start;
-    padding: 19px;
+    min-width: 0;
+    padding: 12px;
 }
 
 .card-marca {
-    display: inline-block;
-    margin-bottom: 5px;
     color: var(--azul);
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: 1.2px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
 .card-conteudo h3 {
-    width: 100%;
-    margin-bottom: 7px;
     color: var(--azul-escuro);
-    font-size: 20px;
-    font-weight: 800;
-    line-height: 1.35;
+    font-size: 16px;
     overflow-wrap: anywhere;
 }
 
 .card-versao {
-    min-height: 24px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: var(--texto-suave);
     font-size: 12px;
-    line-height: 1.7;
+    overflow-wrap: anywhere;
 }
 
 .card-preco {
-    display: block;
-    width: 100%;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     color: var(--azul-escuro);
-    font-size: 25px;
-    font-weight: 900;
-    line-height: 1.3;
-    letter-spacing: -0.5px;
+    font-size: 19px;
+    font-weight: 800;
     overflow-wrap: anywhere;
 }
 
 .card-detalhes {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    margin-bottom: 18px;
-    padding-top: 13px;
+    gap: 5px;
+    margin-bottom: 12px;
+    padding-top: 10px;
     border-top: 1px solid var(--borda);
 }
 
 .card-detalhes span {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 8px;
-    border-radius: 5px;
+    padding: 4px 7px;
+    border-radius: 6px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 10px;
-    font-weight: 700;
+    font-size: 11px;
 }
 
 .botao-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    width: 100%;
-    min-height: 44px;
-    margin-top: auto;
-    padding: 0 15px;
-    border: 1px solid var(--azul);
-    border-radius: 7px;
-    background: var(--azul);
-    color: var(--branco);
-    font-size: 12px;
-    font-weight: 800;
-    text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.botao-card span {
-    font-size: 17px;
-    transition: transform 0.2s ease;
-}
-
-.botao-card:hover {
-    border-color: var(--azul-hover);
-    background: var(--azul-hover);
-}
-
-.botao-card:hover span {
-    transform: translateX(3px);
-}
-
-/* ---------- Estoque vazio ---------- */
-
-.estoque-vazio {
-    grid-column: 1 / -1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 65px 24px;
-    border: 1px dashed #cbd5e1;
-    border-radius: var(--raio);
-    background: var(--branco);
-    text-align: center;
-}
-
-.estoque-vazio svg {
-    width: 60px;
-    height: 60px;
-    color: #cbd5e1;
-}
-
-.estoque-vazio > span {
-    margin-bottom: 15px;
-    font-size: 45px;
-}
-
-.estoque-vazio h3 {
-    margin-bottom: 8px;
-    color: var(--azul-escuro);
-    font-size: 21px;
-}
-
-.estoque-vazio p {
-    max-width: 420px;
-    margin-bottom: 20px;
-    color: var(--texto-suave);
-    font-size: 13px;
-    line-height: 1.8;
-}
-
-.estoque-vazio a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
-    padding: 0 17px;
-    border-radius: 7px;
+    gap: 6px;
+    min-height: 40px;
+    margin-top: auto;
+    padding: 0 10px;
+    border-radius: 8px;
     background: var(--azul);
     color: var(--branco);
     font-size: 12px;
     font-weight: 800;
     text-decoration: none;
+    transition: background 0.2s ease;
 }
 
-.estoque-vazio a:hover {
-    background: var(--azul-hover);
-}
+.botao-card:hover { background: var(--azul-hover); }
+
 
 /* ==================================================
    COMO COMPRAR
 ================================================== */
 
-.como-comprar {
-    background: var(--branco);
-}
+.como-comprar { background: var(--branco); }
 
 .titulo-centralizado {
     max-width: 720px;
@@ -752,13 +779,9 @@ form.filtros {
     text-align: center;
 }
 
-.titulo-centralizado .subtitulo {
-    margin-bottom: 12px;
-}
+.titulo-centralizado .subtitulo { margin-bottom: 12px; }
 
-.titulo-centralizado h2 {
-    font-size: clamp(28px, 3.5vw, 39px);
-}
+.titulo-centralizado h2 { font-size: clamp(28px, 3.5vw, 39px); }
 
 .titulo-centralizado p {
     max-width: 570px;
@@ -789,9 +812,9 @@ form.filtros {
 
 .etapa-numero {
     display: grid;
+    place-items: center;
     width: 48px;
     height: 48px;
-    place-items: center;
     margin-bottom: 21px;
     border-radius: 11px;
     background: #eaf2ff;
@@ -812,6 +835,7 @@ form.filtros {
     font-size: 13px;
     line-height: 1.9;
 }
+
 
 /* ==================================================
    CONTATO
@@ -834,9 +858,7 @@ form.filtros {
     gap: 35px;
 }
 
-.contato .subtitulo {
-    color: #93c5fd;
-}
+.contato .subtitulo { color: #93c5fd; }
 
 .contato h2 {
     max-width: 650px;
@@ -860,9 +882,9 @@ form.filtros {
     align-items: center;
     justify-content: center;
     gap: 12px;
+    flex-shrink: 0;
     min-height: 49px;
     padding: 0 21px;
-    flex-shrink: 0;
     border: 1px solid var(--branco);
     border-radius: 8px;
     background: var(--branco);
@@ -878,6 +900,7 @@ form.filtros {
     background: #dbeafe;
 }
 
+
 /* ==================================================
    RODAPÉ
 ================================================== */
@@ -886,26 +909,15 @@ form.filtros {
     padding: 25px 0;
     background: var(--azul-profundo);
     color: #cbd5e1;
+    
 }
 
 .rodape-conteudo {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 20px;
+    
 }
 
-.logo-rodape {
-    color: var(--branco);
-}
-
-.logo-rodape > span:last-child {
-    color: var(--branco);
-}
-
-.logo-rodape .logo-destaque {
-    color: #93c5fd;
-}
 
 .rodape p {
     color: #94a3b8;
@@ -913,91 +925,66 @@ form.filtros {
     text-align: right;
 }
 
+
 /* ==================================================
-   RESPONSIVIDADE
+   RESPONSIVO — TABLET (até 1100px)
 ================================================== */
 
 @media (max-width: 1100px) {
-    .container {
-        width: calc(100% - 40px);
-    }
+    .container { width: calc(100% - 40px); }
 
-    .cabecalho-conteudo {
-        gap: 18px;
-    }
-
-    .menu {
-        gap: 20px;
-    }
+    .cabecalho-conteudo { gap: 18px; }
+    .menu { gap: 20px; }
 
     .filtros .filtros-campos {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .filtros .filtros-acoes {
-        grid-column: 1 / -1;
-    }
+    .filtros .filtros-acoes { grid-column: 1 / -1; }
 
-    .grade-veiculos {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 22px;
-    }
+    /* Carrossel: 4 cards, 3 espaços de 12px */
+    .trilho-veiculos { gap: 12px; }
 
-    .card-foto {
-        height: 235px;
+    .trilho-veiculos .card-veiculo {
+        flex-basis: calc((100% - 36px) / 4);
     }
 }
 
-@media (max-width: 680px) {
-    .container {
-        width: calc(100% - 32px);
-    }
 
-    .secao {
-        padding: 55px 0;
-    }
+/* ==================================================
+   RESPONSIVO — MENU MOBILE (até 768px)
+================================================== */
 
+@media (max-width: 768px) {
     .cabecalho-conteudo {
-        min-height: auto;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 13px;
-        padding-top: 13px;
-        padding-bottom: 13px;
-    }
-
-    .logo {
-        gap: 8px;
-        font-size: 16px;
-    }
-
-    .logo-icone {
-        width: 38px;
-        height: 38px;
-    }
-
-    .botao-whatsapp {
-        padding: 9px 11px;
-        font-size: 11px;
-    }
-
-    .menu {
-        order: 3;
-        display: flex;
-        justify-content: space-between;
+        min-height: 68px;
         gap: 12px;
-        width: 100%;
-        padding-top: 8px;
-        border-top: 1px solid #f1f5f9;
     }
 
-    .menu a {
-        font-size: 11px;
-    }
+    .menu,
+    .botao-whatsapp { display: none; }
 
-    .banner {
-        min-height: 430px;
+    .botao-menu-mobile {
+        display: flex;
+        flex-shrink: 0;
     }
+}
+
+
+/* ==================================================
+   RESPONSIVO — CELULAR (até 680px)
+================================================== */
+
+@media (max-width: 680px) {
+    .container { width: calc(100% - 32px); }
+
+    .secao { padding: 55px 0; }
+
+    .logo { font-size: 16px; gap: 8px; }
+    .logo-icone { width: 38px; height: 38px; }
+
+    /* Banner */
+    .banner { min-height: 430px; }
 
     .banner-fundo {
         background-image:
@@ -1043,6 +1030,7 @@ form.filtros {
         font-size: 10px;
     }
 
+    /* Estoque */
     .estoque-cabecalho {
         align-items: flex-start;
         flex-direction: column;
@@ -1051,22 +1039,15 @@ form.filtros {
     }
 
     .estoque-cabecalho h2,
-    .titulo-centralizado h2 {
-        font-size: 29px;
-    }
+    .titulo-centralizado h2 { font-size: 29px; }
 
     .estoque-cabecalho p,
-    .titulo-centralizado p {
-        font-size: 13px;
-    }
+    .titulo-centralizado p { font-size: 13px; }
 
-    .total-veiculos {
-        padding: 7px 10px;
-    }
+    .total-veiculos { padding: 7px 10px; }
 
-    .filtros {
-        padding: 16px;
-    }
+    /* Filtros */
+    .filtros { padding: 16px; }
 
     .filtros .filtros-campos {
         grid-template-columns: minmax(0, 1fr);
@@ -1078,53 +1059,82 @@ form.filtros {
         width: 100%;
     }
 
-    .filtros .botao-filtrar {
-        flex: 1;
+    .filtros .botao-filtrar { flex: 1; }
+
+    /* Carrossel: 2 cards, 1 espaço de 10px */
+    .carrossel-veiculos { gap: 6px; }
+
+    .seta-carrossel {
+        flex-basis: 28px;
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
     }
 
-    .grade-veiculos {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 20px;
+    .trilho-veiculos { gap: 10px; }
+
+    .trilho-veiculos .card-veiculo {
+        flex-basis: calc((100% - 10px) / 2);
     }
 
-    .card-veiculo {
-        width: 100%;
-        max-width: 480px;
-        margin-inline: auto;
-    }
+    .card-conteudo { padding: 9px; }
 
-    .card-foto {
-        height: 245px;
-    }
-
-    .card-conteudo {
-        padding: 18px;
+    .card-marca {
+        font-size: 9px;
+        letter-spacing: 0.6px;
     }
 
     .card-conteudo h3 {
-        font-size: 19px;
-    }
-
-    .card-preco {
-        font-size: 24px;
+        font-size: 14px;
+        line-height: 1.35;
     }
 
     .card-versao {
-        margin-bottom: 12px;
+        margin-bottom: 9px;
+        font-size: 10px;
+        line-height: 1.45;
     }
 
-    .titulo-centralizado {
-        margin-bottom: 28px;
+    .card-preco {
+        margin-bottom: 9px;
+        font-size: 15px;
+        letter-spacing: -0.3px;
     }
+
+    .card-detalhes {
+        margin-bottom: 10px;
+        padding-top: 8px;
+    }
+
+    .card-detalhes span {
+        padding: 4px 5px;
+        font-size: 9px;
+    }
+
+    .botao-card {
+        min-height: 36px;
+        gap: 4px;
+        padding: 0 6px;
+        font-size: 9px;
+    }
+
+    .etiqueta-combustivel {
+        top: 5px;
+        left: 5px;
+        max-width: calc(100% - 10px);
+        padding: 4px 5px;
+        font-size: 8px;
+    }
+
+    /* Como comprar */
+    .titulo-centralizado { margin-bottom: 28px; }
 
     .etapas {
         grid-template-columns: minmax(0, 1fr);
         gap: 15px;
     }
 
-    .etapa {
-        padding: 23px;
-    }
+    .etapa { padding: 23px; }
 
     .etapa-numero {
         width: 43px;
@@ -1132,9 +1142,8 @@ form.filtros {
         margin-bottom: 16px;
     }
 
-    .contato {
-        padding: 48px 0;
-    }
+    /* Contato */
+    .contato { padding: 48px 0; }
 
     .contato-conteudo {
         align-items: flex-start;
@@ -1142,14 +1151,10 @@ form.filtros {
         gap: 23px;
     }
 
-    .contato h2 {
-        font-size: 29px;
-    }
+    .contato h2 { font-size: 29px; }
+    .contato p { font-size: 13px; }
 
-    .contato p {
-        font-size: 13px;
-    }
-
+    /* Rodapé */
     .rodape-conteudo {
         align-items: flex-start;
         flex-direction: column;
@@ -1162,50 +1167,40 @@ form.filtros {
     }
 }
 
+
+/* ==================================================
+   RESPONSIVO — CELULAR PEQUENO (até 380px)
+================================================== */
+
 @media (max-width: 380px) {
-    .container {
-        width: calc(100% - 24px);
+    .container { width: calc(100% - 24px); }
+
+    .cabecalho-conteudo { gap: 10px; }
+
+    .logo { font-size: 14px; }
+    .logo-icone { width: 34px; height: 34px; }
+
+    .banner h1 { font-size: 33px; }
+
+    .carrossel-veiculos { gap: 4px; }
+
+    .seta-carrossel {
+        flex-basis: 24px;
+        width: 24px;
+        height: 24px;
     }
 
-    .cabecalho-conteudo {
-        gap: 10px;
-    }
+    .card-conteudo { padding: 7px; }
+    .card-preco { font-size: 14px; }
+}
 
-    .logo {
-        font-size: 14px;
-    }
 
-    .logo-icone {
-        width: 34px;
-        height: 34px;
-    }
+/* ==================================================
+   ACESSIBILIDADE — MENOS ANIMAÇÃO
+================================================== */
 
-    .botao-whatsapp {
-        padding: 8px;
-        font-size: 10px;
-    }
-
-    .menu {
-        gap: 8px;
-    }
-
-    .menu a {
-        font-size: 10px;
-    }
-
-    .banner h1 {
-        font-size: 33px;
-    }
-
-    .card-foto {
-        height: 205px;
-    }
-
-    .card-conteudo {
-        padding: 15px;
-    }
-
-    .card-preco {
-        font-size: 22px;
-    }
+@media (prefers-reduced-motion: reduce) {
+    .trilho-veiculos,
+    .drawer-menu,
+    .drawer-overlay { transition: none; }
 }

@@ -1106,3 +1106,18 @@ def vitrine_view(request):
     }
 
     return render(request, "core/vitrine.html", contexto)
+
+def vitrine_veiculo_detalhe_view(request, pk):
+    veiculo = get_object_or_404(
+        Veiculo.objects.filter(
+            situacao=Veiculo.Situacao.DISPONIVEL,
+            status=Veiculo.Status.DISPONIVEL,
+        ).prefetch_related("fotos"),
+        pk=pk,
+    )
+
+    return render(
+        request,
+        "core/vitrine_veiculo_detalhe.html",
+        {"veiculo": veiculo},
+    )

@@ -1,6 +1,4 @@
-
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -10,102 +8,147 @@
     <title>VendaCerta | Encontre seu próximo carro</title>
 
     <link rel="stylesheet" href="{% static 'core/css/vitrine.css' %}">
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
+    <script src="https://unpkg.com/lucide@0.469.0"></script>
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
-    <header class="cabecalho">
-        <div class="container cabecalho-conteudo">
+<!-- CABEÇALHO -->
+<header class="cabecalho">
+    <div class="container cabecalho-conteudo">
 
-            <a href="{% url 'vitrine' %}" class="logo">
-                <span class="logo-icone"><img src="{% static 'core/img/favicon.png' %}" alt="Logo VendaCerta"></span>
-                <span>Venda<span class="logo-destaque">Certa</span></span>
-            </a>
+        <a href="{% url 'vitrine' %}" class="logo">
+            <span class="logo-icone">
+                <img src="{% static 'core/img/favicon.png' %}" alt="Logo VendaCerta">
+            </span>
+            <span>Venda<span class="logo-destaque">Certa</span></span>
+        </a>
 
-            <nav class="menu">
-                <a href="#estoque">Estoque</a>
-                <a href="#como-comprar">Como comprar</a>
-                <a href="#contato">Contato</a>
-            </nav>
+        <!-- Navegação desktop -->
+        <nav class="menu" id="menu-desktop">
+            <a href="#estoque">Estoque</a>
+            <a href="#como-comprar">Como comprar</a>
+            <a href="#contato">Contato</a>
+        </nav>
 
-            <a href="#contato" class="botao-whatsapp">
-                <img src="{% static 'core/img/whatsapp-icon.png' %}" alt="Fale conosco"> Fale conosco
+        <a href="#contato" class="botao-whatsapp">
+            <img src="{% static 'core/img/whatsapp-icon.png' %}" alt="">
+            <span>Fale conosco</span>
+        </a>
+
+        <!-- Botão do menu mobile -->
+        <button
+            class="botao-menu-mobile"
+            id="abrir-menu"
+            type="button"
+            aria-label="Abrir menu"
+            aria-controls="drawer-menu"
+            aria-expanded="false">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+    </div>
+</header>
+
+<!-- Fundo escuro do drawer -->
+<div class="drawer-overlay" id="drawer-overlay"></div>
+
+<!-- Menu lateral mobile -->
+<aside
+    class="drawer-menu"
+    id="drawer-menu"
+    aria-label="Menu de navegação"
+    aria-hidden="true"
+    inert>
+
+    <div class="drawer-cabecalho">
+        <span class="drawer-titulo">Menu</span>
+
+        <button
+            class="fechar-menu"
+            id="fechar-menu"
+            type="button"
+            aria-label="Fechar menu">
+            &times;
+        </button>
+    </div>
+
+    <nav class="drawer-links">
+        <a href="#estoque">Estoque</a>
+        <a href="#como-comprar">Como comprar</a>
+        <a href="#contato">Contato</a>
+        <a href="#contato" class="drawer-whatsapp">
+            Fale conosco pelo WhatsApp
+        </a>
+    </nav>
+</aside>
+
+<main>
+
+    <!-- BANNER PRINCIPAL -->
+    <section class="banner">
+
+        <div class="banner-fundo"></div>
+
+        <div class="container banner-conteudo">
+
+            <span class="banner-etiqueta">
+                Seu próximo carro está aqui
+            </span>
+
+            <h1>
+                Encontre o carro certo,
+                <span>sem sair de casa.</span>
+            </h1>
+
+            <p>
+                Confira nosso estoque, compare opções e encontre
+                o veículo ideal para você.
+            </p>
+
+            <a href="#estoque" class="botao-principal">
+                Explorar veículos
+                <span aria-hidden="true">→</span>
             </a>
 
         </div>
-    </header>
 
-    <main>
+        <div class="banner-indicador">
+            <span></span>
+            Qualidade e confiança em cada escolha
+        </div>
 
-        <!-- BANNER PRINCIPAL -->
-        <section class="banner">
+    </section>
 
-            <div class="banner-fundo"></div>
+    <!-- ESTOQUE -->
+    <section class="estoque secao" id="estoque">
 
-            <div class="container banner-conteudo">
+        <div class="container">
 
-                <span class="banner-etiqueta">
-                    Seu próximo carro está aqui
-                </span>
-
-                <h1>
-                    Encontre o carro certo,
-                    <span>sem sair de casa.</span>
-                </h1>
-
-                <p>
-                    Confira nosso estoque, compare opções e encontre
-                    o veículo ideal para você.
-                </p>
-
-                <a href="#estoque" class="botao-principal">
-                    Explorar veículos
-                    <span aria-hidden="true">→</span>
-                </a>
-
-            </div>
-
-            <div class="banner-indicador">
-                <span></span>
-                Qualidade e confiança em cada escolha
-            </div>
-
-        </section>
-
-        <!-- ESTOQUE -->
-        <section class="estoque secao" id="estoque">
-
-            <div class="container">
-
-                <div class="estoque-cabecalho">
-                    <div>
-                        <span class="subtitulo">ENCONTRE O SEU</span>
-                        <h2>Nosso estoque</h2>
-                        <p>Conheça os veículos disponíveis para você.</p>
-                    </div>
-
-                    <span class="total-veiculos">
-                        {{ veiculos|length }} veículos
-                    </span>
+            <div class="estoque-cabecalho">
+                <div>
+                    <span class="subtitulo">ENCONTRE O SEU</span>
+                    <h2>Nosso estoque</h2>
+                    <p>Conheça os veículos disponíveis para você.</p>
                 </div>
 
-                <!-- FILTROS -->
-                
-                <form class="filtros" method="get" action="#estoque">
-                    <h3 class="filtros-titulo">Pesquisar</h3>
+                <span class="total-veiculos">
+                    {{ veiculos|length }}
+                    {% if veiculos|length == 1 %}veículo{% else %}veículos{% endif %}
+                </span>
+            </div>
 
-                    <div class="filtros-campos">
-                        
-                                            
-                    
+            <!-- FILTROS -->
+            <form class="filtros" method="get" action="#estoque">
+                <h3 class="filtros-titulo">Pesquisar</h3>
+
+                <div class="filtros-campos">
+
                     <div class="filtro-campo">
                         <label for="marca">Marca</label>
-
                         <select id="marca" name="marca">
                             <option value="">Todas as marcas</option>
-
                             {% for marca_opcao in marcas %}
                                 <option value="{{ marca_opcao }}"
                                     {% if filtros.marca == marca_opcao %}selected{% endif %}>
@@ -115,213 +158,351 @@
                         </select>
                     </div>
 
-
-
-
-                        <div class="filtro-campo">
-                            <label for="preco">Preço máximo</label>
-                            <input
-                                type="number"
-                                id="preco"
-                                name="preco"
-                                min="0"
-                                step="1000"
-                                placeholder="Até R$"
-                                value="{{ filtros.preco }}"
-                            >
-                        </div>
-
-                        <div class="filtro-campo">
-                            <label for="ano">Ano</label>
-                            <input
-                                type="number"
-                                id="ano"
-                                name="ano"
-                                list="lista-anos"
-                                min="1900"
-                                max="2100"
-                                step="1"
-                                placeholder="Ex.: 2020"
-                                value="{{ filtros.ano }}"
-                            >
-                            <datalist id="lista-anos">
-                                {% for ano_opcao in anos %}
-                                    {% if ano_opcao >= 1900 %}
-                                        <option value="{{ ano_opcao }}">
-                                    {% endif %}
-                                {% endfor %}
-                            </datalist>
-                        </div>
-
-                        <div class="filtro-campo">
-                            <label for="combustivel">Combustível</label>
-                            <select id="combustivel" name="combustivel">
-                                <option value="">Todos</option>
-                                {% for combustivel_opcao in combustiveis %}
-                                    <option
-                                        value="{{ combustivel_opcao }}"
-                                        {% if filtros.combustivel == combustivel_opcao %}selected{% endif %}
-                                    >
-                                        {{ combustivel_opcao }}
-                                    </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <div class="filtros-acoes">
-                            <button type="submit" class="botao-filtrar">Filtrar</button>
-                            <a href="{% url 'vitrine' %}" class="botao-limpar">Limpar</a>
-                        </div>
+                    <div class="filtro-campo">
+                        <label for="preco">Preço máximo</label>
+                        <input
+                            type="number"
+                            id="preco"
+                            name="preco"
+                            min="0"
+                            step="1000"
+                            placeholder="Até R$"
+                            value="{{ filtros.preco }}">
                     </div>
-                </form>
 
-                <!-- CARDS DOS VEÍCULOS -->
-                <div class="grade-veiculos">
+                    <div class="filtro-campo">
+                        <label for="ano">Ano</label>
+                        <input
+                            type="number"
+                            id="ano"
+                            name="ano"
+                            list="lista-anos"
+                            min="1900"
+                            max="2100"
+                            step="1"
+                            placeholder="Ex.: 2020"
+                            value="{{ filtros.ano }}">
+                        <datalist id="lista-anos">
+                            {% for ano_opcao in anos %}
+                                {% if ano_opcao >= 1900 %}
+                                    <option value="{{ ano_opcao }}">
+                                {% endif %}
+                            {% endfor %}
+                        </datalist>
+                    </div>
 
-                    {% for veiculo in veiculos %}
+                    <div class="filtro-campo">
+                        <label for="combustivel">Combustível</label>
+                        <select id="combustivel" name="combustivel">
+                            <option value="">Todos</option>
+                            {% for combustivel_opcao in combustiveis %}
+                                <option value="{{ combustivel_opcao }}"
+                                    {% if filtros.combustivel == combustivel_opcao %}selected{% endif %}>
+                                    {{ combustivel_opcao }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                        <article class="card-veiculo">
+                    <div class="filtros-acoes">
+                        <button type="submit" class="botao-filtrar">Filtrar</button>
+                        <a href="{% url 'vitrine' %}" class="botao-limpar">Limpar</a>
+                    </div>
 
-                            <a href="#" class="card-foto">
-                                {% with foto=veiculo.fotos.all|first %}
-                                    {% if foto %}
-                                        <img src="{{ foto.imagem.url }}"
-                                             alt="{{ veiculo.marca }} {{ veiculo.modelo }}"
-                                             loading="lazy">
-                                    {% else %}
-                                        <div class="sem-foto">
-                                            <span><i data-lucide="image-off"></i></span>
-                                            <p>Foto indisponível</p>
-                                        </div>
-                                    {% endif %}
-                                {% endwith %}
+                </div>
+            </form>
 
-                                <span class="etiqueta-combustivel">
-                                    {{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"Veículo" }}
-                                </span>
-                            </a>
+            <!-- CARROSSEL DE VEÍCULOS -->
+            <div class="carrossel-veiculos" id="carrossel-veiculos">
 
-                            <div class="card-conteudo">
+                <button class="seta-carrossel anterior"
+                        type="button"
+                        aria-label="Veículo anterior">
+                    &#10094;
+                </button>
 
-                                <span class="card-marca">
-                                    {{ veiculo.marca }}
-                                </span>
+                <div class="janela-veiculos">
+                    <div class="trilho-veiculos">
 
-                                <h3>{{ veiculo.modelo }}</h3>
+                        {% for veiculo in veiculos %}
 
-                                <p class="card-versao">
-                                    {{ veiculo.versao|default:"Confira os detalhes do veículo" }}
-                                </p>
+                            <article class="card-veiculo">
 
-                                <strong class="card-preco">
-                                    R$ {{ veiculo.preco_venda|floatformat:2 }}
-                                </strong>
+                                <a href="#" class="card-foto">
+                                    {% with foto=veiculo.fotos.all|first %}
+                                        {% if foto %}
+                                            <img src="{{ foto.imagem.url }}"
+                                                 alt="{{ veiculo.marca }} {{ veiculo.modelo }}"
+                                                 loading="lazy">
+                                        {% else %}
+                                            <div class="sem-foto">
+                                                <span><i data-lucide="image-off"></i></span>
+                                                <p>Foto indisponível</p>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
 
-                                <div class="card-detalhes">
-                                    <span>{{ veiculo.ano_fabricacao }}</span>
-                                    <span>{{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"—" }}</span>
-                                </div>
-
-                                <a href="#contato" class="botao-card">
-                                    Tenho interesse
-                                    <span aria-hidden="true">→</span>
+                                    <span class="etiqueta-combustivel">
+                                        {{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"Veículo" }}
+                                    </span>
                                 </a>
 
+                                <div class="card-conteudo">
+
+                                    <span class="card-marca">{{ veiculo.marca }}</span>
+
+                                    <h3>{{ veiculo.modelo }}</h3>
+
+                                    <p class="card-versao">
+                                        {{ veiculo.versao|default:"Confira os detalhes do veículo" }}
+                                    </p>
+
+                                    <strong class="card-preco">
+                                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                    </strong>
+
+                                    <div class="card-detalhes">
+                                        <span>{{ veiculo.ano_fabricacao }}</span>
+                                        <span>{{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"—" }}</span>
+                                    </div>
+
+                                    <a href="#contato" class="botao-card">
+                                        Tenho interesse
+                                        <span aria-hidden="true">→</span>
+                                    </a>
+
+                                </div>
+
+                            </article>
+
+                        {% empty %}
+
+                            <div class="estoque-vazio">
+                                <span><i data-lucide="car"></i></span>
+                                <h3>Nenhum veículo encontrado</h3>
+                                <p>
+                                    Não encontramos veículos com esses filtros.
+                                    Experimente alterar sua busca.
+                                </p>
+                                <a href="{% url 'vitrine' %}">Ver todos os veículos</a>
                             </div>
 
-                        </article>
+                        {% endfor %}
 
-                    {% empty %}
-
-                        <div class="estoque-vazio">
-                            <span><i data-lucide="car"></i></span>
-                            <h3>Nenhum veículo encontrado</h3>
-                            <p>
-                                Não encontramos veículos com esses filtros.
-                                Experimente alterar sua busca.
-                            </p>
-                            <a href="{% url 'vitrine' %}">Ver todos os veículos</a>
-                        </div>
-
-                    {% endfor %}
-
+                    </div>
                 </div>
+
+                <button class="seta-carrossel proximo"
+                        type="button"
+                        aria-label="Próximo veículo">
+                    &#10095;
+                </button>
+
+            </div><!-- fecha .carrossel-veiculos -->
+
+        </div><!-- fecha .container -->
+    </section><!-- fecha .estoque -->
+
+    <!-- COMO COMPRAR -->
+    <section class="como-comprar secao" id="como-comprar">
+
+        <div class="container">
+
+            <div class="titulo-centralizado">
+                <span class="subtitulo">SIMPLES E TRANSPARENTE</span>
+                <h2>Comprar seu carro ficou mais fácil.</h2>
+                <p>Você escolhe o veículo e nossa equipe ajuda no restante.</p>
+            </div>
+
+            <div class="etapas">
+
+                <article class="etapa">
+                    <span class="etapa-numero">01</span>
+                    <h3>Escolha seu veículo</h3>
+                    <p>Explore nosso estoque e encontre o carro ideal para você.</p>
+                </article>
+
+                <article class="etapa">
+                    <span class="etapa-numero">02</span>
+                    <h3>Entre em contato</h3>
+                    <p>Tire suas dúvidas e conheça todos os detalhes do veículo.</p>
+                </article>
+
+                <article class="etapa">
+                    <span class="etapa-numero">03</span>
+                    <h3>Negocie com confiança</h3>
+                    <p>Nossa equipe orienta você durante o processo de compra.</p>
+                </article>
 
             </div>
 
-        </section>
-
-        <!-- COMO COMPRAR -->
-        <section class="como-comprar secao" id="como-comprar">
-
-            <div class="container">
-
-                <div class="titulo-centralizado">
-                    <span class="subtitulo">SIMPLES E TRANSPARENTE</span>
-                    <h2>Comprar seu carro ficou mais fácil.</h2>
-                    <p>Você escolhe o veículo e nossa equipe ajuda no restante.</p>
-                </div>
-
-                <div class="etapas">
-
-                    <article class="etapa">
-                        <span class="etapa-numero">01</span>
-                        <h3>Escolha seu veículo</h3>
-                        <p>Explore nosso estoque e encontre o carro ideal para você.</p>
-                    </article>
-
-                    <article class="etapa">
-                        <span class="etapa-numero">02</span>
-                        <h3>Entre em contato</h3>
-                        <p>Tire suas dúvidas e conheça todos os detalhes do veículo.</p>
-                    </article>
-
-                    <article class="etapa">
-                        <span class="etapa-numero">03</span>
-                        <h3>Negocie com confiança</h3>
-                        <p>Nossa equipe orienta você durante o processo de compra.</p>
-                    </article>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <!-- CONTATO -->
-        <section class="contato" id="contato">
-
-            <div class="container contato-conteudo">
-                <div>
-                    <span class="subtitulo">VAMOS CONVERSAR?</span>
-                    <h2>Seu próximo carro pode estar aqui.</h2>
-                    <p>Entre em contato com nossa equipe para saber mais.</p>
-                </div>
-
-                <!-- Substituiremos pelo link real do WhatsApp da loja -->
-                <a href="#" class="botao-contato">
-                    Fale com a equipe →
-                </a>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- RODAPÉ -->
-    <footer class="rodape">
-        <div class="container rodape-conteudo">
-            <a href="{% url 'vitrine' %}" class="logo logo-rodape">
-                <span class="logo-icone"><img src="/static/core/img/favicon.png" alt="VendaCerta"></span>
-                <span>Venda<span class="logo-destaque">Certa</span></span>
-            </a>
-
-            <p>© {% now "Y" %} VendaCerta. Todos os direitos reservados.</p>
         </div>
-    </footer>
 
-     <script>
-        lucide.createIcons();
-    </script>
+    </section>
+
+    <!-- CONTATO -->
+    <section class="contato" id="contato">
+
+        <div class="container contato-conteudo">
+            <div>
+                <span class="subtitulo">VAMOS CONVERSAR?</span>
+                <h2>Seu próximo carro pode estar aqui.</h2>
+                <p>Entre em contato com nossa equipe para saber mais.</p>
+            </div>
+
+            <!-- Substituiremos pelo link real do WhatsApp da loja -->
+            <a href="#" class="botao-contato">
+                Fale com a equipe →
+            </a>
+        </div>
+
+    </section>
+
+</main>
+
+<!-- RODAPÉ -->
+<footer class="rodape">
+    <div class="container rodape-conteudo">
+        <p>© {% now "Y" %} VendaCerta. Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+<!-- SCRIPT 1: ícones e menu lateral -->
+<script>
+    lucide.createIcons();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const abrir = document.getElementById("abrir-menu");
+        const fechar = document.getElementById("fechar-menu");
+        const drawer = document.getElementById("drawer-menu");
+        const overlay = document.getElementById("drawer-overlay");
+
+        if (!abrir || !fechar || !drawer || !overlay) return;
+
+        function abrirDrawer() {
+            document.body.classList.add("menu-aberto");
+            drawer.inert = false;
+            drawer.setAttribute("aria-hidden", "false");
+            abrir.setAttribute("aria-expanded", "true");
+            fechar.focus();
+        }
+
+        function fecharDrawer() {
+            document.body.classList.remove("menu-aberto");
+            drawer.inert = true;
+            drawer.setAttribute("aria-hidden", "true");
+            abrir.setAttribute("aria-expanded", "false");
+            abrir.focus();
+        }
+
+        abrir.addEventListener("click", abrirDrawer);
+        fechar.addEventListener("click", fecharDrawer);
+        overlay.addEventListener("click", fecharDrawer);
+
+        drawer.querySelectorAll("a").forEach(function (link) {
+            link.addEventListener("click", function () {
+                document.body.classList.remove("menu-aberto");
+                drawer.inert = true;
+                drawer.setAttribute("aria-hidden", "true");
+                abrir.setAttribute("aria-expanded", "false");
+            });
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && document.body.classList.contains("menu-aberto")) {
+                fecharDrawer();
+            }
+        });
+    });
+</script>
+
+<!-- SCRIPT 2: carrossel de veículos -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const carrossel = document.getElementById("carrossel-veiculos");
+        if (!carrossel) return;
+
+        const janela = carrossel.querySelector(".janela-veiculos");
+        const trilho = carrossel.querySelector(".trilho-veiculos");
+        const anterior = carrossel.querySelector(".anterior");
+        const proximo = carrossel.querySelector(".proximo");
+
+        if (!janela || !trilho || !anterior || !proximo) return;
+
+        const cards = Array.from(trilho.querySelectorAll(".card-veiculo"));
+        let indice = 0;
+
+        // Precisa bater com os breakpoints do CSS: 5 / 4 / 2 cards
+        function quantidadeVisivel() {
+            if (window.matchMedia("(max-width: 680px)").matches) return 2;
+            if (window.matchMedia("(max-width: 1100px)").matches) return 4;
+            return 5;
+        }
+
+        function maxIndice() {
+            return Math.max(0, cards.length - quantidadeVisivel());
+        }
+
+        function atualizar() {
+            indice = Math.min(indice, maxIndice());
+
+            if (cards.length) {
+                const gap = parseFloat(getComputedStyle(trilho).gap) || 0;
+                const passo = cards[0].getBoundingClientRect().width + gap;
+                trilho.style.transform = "translateX(" + (-indice * passo) + "px)";
+            }
+
+            anterior.disabled = indice === 0;
+            proximo.disabled = indice >= maxIndice();
+        }
+
+        function ir(direcao) {
+            const novo = Math.min(Math.max(indice + direcao, 0), maxIndice());
+            if (novo !== indice) {
+                indice = novo;
+                atualizar();
+            }
+        }
+
+        anterior.addEventListener("click", function () { ir(-1); });
+        proximo.addEventListener("click", function () { ir(1); });
+
+        /* ---------- Deslizar com o dedo ---------- */
+
+        let inicioX = 0;
+        let inicioY = 0;
+        let deslizou = false;
+
+        janela.addEventListener("touchstart", function (e) {
+            inicioX = e.touches[0].clientX;
+            inicioY = e.touches[0].clientY;
+            deslizou = false;
+        }, { passive: true });
+
+        janela.addEventListener("touchend", function (e) {
+            const dx = e.changedTouches[0].clientX - inicioX;
+            const dy = e.changedTouches[0].clientY - inicioY;
+
+            // só conta se foi mais horizontal que vertical e passou de 40px
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                deslizou = true;
+                ir(dx < 0 ? 1 : -1);
+            }
+        }, { passive: true });
+
+        // evita abrir um link sem querer ao terminar de deslizar
+        janela.addEventListener("click", function (e) {
+            if (deslizou) {
+                e.preventDefault();
+                e.stopPropagation();
+                deslizou = false;
+            }
+        }, true);
+
+        window.addEventListener("resize", atualizar);
+        atualizar();
+    });
+</script>
+
 </body>
 </html>

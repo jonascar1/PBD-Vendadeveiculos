@@ -30,5 +30,6 @@ urlpatterns = [
     path("painel/gerente/veiculos/<int:veiculo_id>/preco/", views.alterar_preco_veiculo_view, name="alterar_preco_veiculo"),
 
     path("", views.vitrine_view, name="vitrine"),
+    path("vitrine/veiculo/<int:pk>/", views.vitrine_veiculo_detalhe_view, name="vitrine_veiculo_detalhe"),
 
 ]
