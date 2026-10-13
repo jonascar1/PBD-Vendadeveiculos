@@ -1,6 +1,7 @@
 {% extends 'core/gerente_base.html' %}
 
 {% load static %}
+{% load static l10n %}
 
 {% block title %}
 Veículos | VENDACERTA
@@ -122,9 +123,9 @@ Veículos | VENDACERTA
             <option value="">Todos os anos</option>
 
             {% for ano in anos %}
-                <option value="{{ ano }}"
+                <option value="{{ ano|unlocalize }}"
                     {% if ano_fabricacao_selecionado == ano|stringformat:"s" %}selected{% endif %}>
-                    {{ ano }}
+                    {{ ano|unlocalize }}
                 </option>
             {% endfor %}
         </select>
@@ -209,7 +210,7 @@ Veículos | VENDACERTA
 
                     <td>
 
-                        {{ v.ano_fabricacao }}/{{ v.ano_modelo }}
+                        {{ v.ano_fabricacao|unlocalize }}/{{ v.ano_modelo|unlocalize }}
 
                     </td>
 

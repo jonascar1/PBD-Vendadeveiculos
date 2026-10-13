@@ -610,7 +610,7 @@ def cadastrar_veiculo_view(request):
                 "Veículo cadastrado com sucesso."
             )
 
-            return redirect("painel_gerente")
+            return redirect("veiculos")
 
 
         except ValidationError as erro:
@@ -1108,16 +1108,34 @@ def vitrine_view(request):
     return render(request, "core/vitrine.html", contexto)
 
 def vitrine_veiculo_detalhe_view(request, pk):
+    campos_publicos = (
+        "id",
+        "marca",
+        "modelo",
+        "ano_fabricacao",
+        "ano_modelo",
+        "cor",
+        "combustivel",
+        "quilometragem",
+        "preco_venda",
+        "opcionais",
+    )
+
     veiculo = get_object_or_404(
         Veiculo.objects.filter(
             situacao=Veiculo.Situacao.DISPONIVEL,
             status=Veiculo.Status.DISPONIVEL,
-        ).prefetch_related("fotos"),
+        ).values(*campos_publicos),
         pk=pk,
     )
+
+    fotos = Veiculo.objects.get(pk=veiculo["id"]).fotos.all()
 
     return render(
         request,
         "core/vitrine_veiculo_detalhe.html",
-        {"veiculo": veiculo},
+        {
+            "veiculo": veiculo,
+            "fotos": fotos,
+        },
     )

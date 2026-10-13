@@ -1,6 +1,7 @@
 {% extends "core/gerente_base.html" %}
 
 {% load static %}
+{% load static l10n %}
 
 {% block title %}
     Detalhes do veículo | VENDACERTA
@@ -340,7 +341,7 @@
                 </h2>
 
                 <p>
-                    {{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}
+                    {{ veiculo.ano_fabricacao|unlocalize }}/{{ veiculo.ano_modelo|unlocalize }}
                 </p>
 
             </div>
@@ -384,12 +385,12 @@
 
                 <div class="info-item">
                     <span>Ano de fabricação</span>
-                    <strong>{{ veiculo.ano_fabricacao }}</strong>
+                    <strong>{{ veiculo.ano_fabricacao|unlocalize }}</strong>
                 </div>
 
                 <div class="info-item">
                     <span>Ano modelo</span>
-                    <strong>{{ veiculo.ano_modelo }}</strong>
+                    <strong>{{ veiculo.ano_modelo|unlocalize }}</strong>
                 </div>
 
                 <div class="info-item">

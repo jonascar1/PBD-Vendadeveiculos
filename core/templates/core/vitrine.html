@@ -1,13 +1,16 @@
 {% load static %}
+{% load static l10n %}
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>VendaCerta | Encontre seu próximo carro</title>
+    <title>Encontre seu próximo carro | VENDACERTA</title>
 
     <link rel="stylesheet" href="{% static 'core/css/vitrine.css' %}">
+    <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}" >
     <script src="https://unpkg.com/lucide@0.469.0"></script>
 </head>
 <body>
@@ -181,11 +184,11 @@
                             max="2100"
                             step="1"
                             placeholder="Ex.: 2020"
-                            value="{{ filtros.ano }}">
+                            value="{{ filtros.ano|unlocalize }}">
                         <datalist id="lista-anos">
                             {% for ano_opcao in anos %}
                                 {% if ano_opcao >= 1900 %}
-                                    <option value="{{ ano_opcao }}">
+                                    <option value="{{ ano_opcao|unlocalize }}">
                                 {% endif %}
                             {% endfor %}
                         </datalist>
@@ -228,7 +231,7 @@
 
                             <article class="card-veiculo">
 
-                                <a href="#" class="card-foto">
+                                <a href="{% url 'vitrine_veiculo_detalhe' veiculo.id %}" class="card-foto">
                                     {% with foto=veiculo.fotos.all|first %}
                                         {% if foto %}
                                             <img src="{{ foto.imagem.url }}"
@@ -262,7 +265,7 @@
                                     </strong>
 
                                     <div class="card-detalhes">
-                                        <span>{{ veiculo.ano_fabricacao }}</span>
+                                        <span>{{ veiculo.ano_fabricacao|unlocalize }}</span>
                                         <span>{{ veiculo.get_combustivel_display|default:veiculo.combustivel|default:"—" }}</span>
                                     </div>
 

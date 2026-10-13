@@ -1,0 +1,191 @@
+{% load static %}
+{% load static l10n %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ veiculo.marca }} {{ veiculo.modelo }} | VENDACERTA</title>
+
+    <link
+        rel="stylesheet"
+        href="{% static 'core/css/vitrine_veiculo_detalhe.css' %}"
+    >
+    <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}" >
+
+    <script src="https://unpkg.com/lucide@0.469.0"></script>
+</head>
+<body>
+
+    <header class="cabecalho">
+        <div class="container cabecalho-conteudo">
+            <a href="{% url 'vitrine' %}" class="logo">
+                <span class="logo-icone">
+                    <img src="{% static 'core/img/favicon.png' %}" alt="Logo VendaCerta">
+                </span>
+                <span>Venda<span class="logo-destaque">Certa</span></span>
+            </a>
+            <div>
+                <a href="{% url 'vitrine' %}" class="link-voltar">
+                     <i data-lucide="chevron-left"></i>Voltar
+                </a>
+
+                <a href="#contato" class="botao-whatsapp">
+                    <img src="{% static 'core/img/whatsapp-icon.png' %}" alt="">
+                    <span>Fale conosco</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container pagina-detalhe">
+
+
+    <!-- GALERIA DE FOTOS -->
+    <section class="galeria">
+
+        <div class="foto-principal-container">
+            {% if fotos %}
+                <img
+                    id="foto-principal"
+                    src="{{ fotos.0.imagem.url }}"
+                    alt="Foto do {{ veiculo.marca }} {{ veiculo.modelo }}"
+                >
+            {% else %}
+                <div class="sem-foto">
+                    <p>Nenhuma foto cadastrada</p>
+                </div>
+            {% endif %}
+        </div>
+
+        {% if fotos %}
+            <div class="miniaturas">
+                {% for foto in fotos %}
+                    <button
+                        type="button"
+                        class="miniatura {% if forloop.first %}ativa{% endif %}"
+                        onclick="trocarFoto('{{ foto.imagem.url|escapejs }}', this)"
+                        aria-label="Ver foto {{ forloop.counter }}"
+                        aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+                    >
+                        <img
+                            src="{{ foto.imagem.url }}"
+                            alt="Foto {{ forloop.counter }} do veículo"
+                        >
+                    </button>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </section>
+
+
+        <section class="informacoes-veiculo">
+
+            <p class="marca-veiculo">{{ veiculo.marca }}</p>
+
+            <h1 class="nome-veiculo">
+                {{ veiculo.modelo }}
+            </h1>
+
+            <p class="preco-veiculo">
+                {{ veiculo.preco_venda|floatformat:2 }}
+            </p>
+
+            <div class="detalhes-grid">
+
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Ano de fabricação</span>
+                    <span class="detalhe-valor">
+                        {{ veiculo.ano_fabricacao|unlocalize|default:"Não informado" }}
+                    </span>
+                </div>
+
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Ano do modelo</span>
+                    <span class="detalhe-valor">
+                        {{ veiculo.ano_modelo|unlocalize|default:"Não informado" }}
+                    </span>
+                </div>
+
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Cor</span>
+                    <span class="detalhe-valor">
+                        {{ veiculo.cor|default:"Não informada" }}
+                    </span>
+                </div>
+
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Combustível</span>
+                    <span class="detalhe-valor">
+                        {{ veiculo.combustivel|default:"Não informado" }}
+                    </span>
+                </div>
+
+                <div class="detalhe-item">
+                    <span class="detalhe-label">Quilometragem</span>
+                    <span class="detalhe-valor">
+                        {% if veiculo.quilometragem != None %}
+                            {{ veiculo.quilometragem }} km
+                        {% else %}
+                            Não informada
+                        {% endif %}
+                    </span>
+                </div>
+
+            </div>
+
+            {% if veiculo.opcionais %}
+                <div class="secao-opcionais">
+                    <h2>Opcionais e equipamentos</h2>
+                    <p>{{ veiculo.opcionais|linebreaksbr }}</p>
+                </div>
+            {% endif %}
+
+            <div class="acoes-veiculo">
+                <a href="{% url 'vitrine' %}" class="botao-voltar">
+                    Ver outros veículos
+                </a>
+                <a href="#contato" class="botao-card">
+                    Tenho interesse
+                    <span aria-hidden="true">→</span>
+                </a>
+            </div>
+
+        </section>
+
+    </main>
+
+    <footer class="rodape">
+        <div class="container">
+            <p>
+                &copy; {% now "Y" %} VendaCerta. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
+
+<script>
+
+function trocarFoto(url, elemento) {
+
+    const fotoPrincipal = document.getElementById("foto-principal");
+
+    if (fotoPrincipal) {
+        fotoPrincipal.src = url;
+    }
+
+    document.querySelectorAll(".miniatura").forEach(function(miniatura) {
+        miniatura.classList.remove("ativa");
+    });
+
+    elemento.classList.add("ativa");
+}
+
+lucide.createIcons();
+
+</script>

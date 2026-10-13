@@ -1,6 +1,7 @@
 {% extends "core/administrativo_base.html" %}
 
 {% load static %}
+{% load static l10n %}
 
 {% block title %}
 Despesas | VENDACERTA
@@ -135,7 +136,7 @@ Despesas | VENDACERTA
 
                     <p>
                         Placa: {{ veiculo.placa }}
-                        · {{ veiculo.ano_modelo }}
+                        · {{ veiculo.ano_modelo|unlocalize }}
                     </p>
 
                 </div>

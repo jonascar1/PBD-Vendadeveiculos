@@ -86,7 +86,7 @@ select {
     align-items: center;
     gap: 10px;
     flex-shrink: 0;
-    color: var(--azul-escuro);
+    color: var(--azul);
     font-size: 24px;
     font-weight: 800;
     text-decoration: none;
@@ -106,7 +106,7 @@ select {
     border-radius: 8px;
 }
 
-.logo-destaque { color: var(--azul); }
+.logo-destaque { color: var(--azul-escuro); }
 
 /* Menu desktop */
 
@@ -673,6 +673,12 @@ form.filtros {
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.card-foto :hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
 }
 
 .card-foto img {
@@ -724,7 +730,7 @@ form.filtros {
 
 .card-preco {
     margin-bottom: 10px;
-    color: var(--azul-escuro);
+    color: var(--azul);
     font-size: 19px;
     font-weight: 800;
     overflow-wrap: anywhere;
@@ -764,7 +770,11 @@ form.filtros {
     transition: background 0.2s ease;
 }
 
-.botao-card:hover { background: var(--azul-hover); }
+.botao-card:hover {
+    background: var(--azul-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.2);
+ }
 
 
 /* ==================================================

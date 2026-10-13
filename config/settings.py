@@ -113,7 +113,13 @@ LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
-USE_I18N = True
+USE_L10N = True
+
+USE_THOUSAND_SEPARATOR = True
+
+THOUSAND_SEPARATOR = '.'
+
+DECIMAL_SEPARATOR = ','
 
 USE_TZ = True
 
