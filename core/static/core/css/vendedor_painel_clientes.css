@@ -1,0 +1,418 @@
+/* ==============================
+   CLIENTES — VENDA CERTA
+============================== */
+
+.clientes-pagina {
+    width: 100%;
+    color: #111827;
+}
+
+/* ==============================
+   CABEÇALHO
+============================== */
+
+.clientes-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.clientes-cabecalho h1 {
+    font-size: 28px;
+    margin: 0 0 6px;
+    color: #111827;
+}
+
+.clientes-cabecalho p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ==============================
+   BOTÃO CADASTRAR
+============================== */
+
+.btn-cadastrar-cliente {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
+}
+
+.btn-cadastrar-cliente:hover {
+    background: #1d4ed8;
+}
+
+.btn-cadastrar-cliente svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* ==============================
+   MENSAGENS
+============================== */
+
+.clientes-mensagens {
+    margin-bottom: 18px;
+}
+
+.mensagem-cliente {
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.mensagem-cliente.success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #047857;
+}
+
+.mensagem-cliente.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+}
+
+.mensagem-cliente.warning {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+
+.mensagem-cliente.info {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    color: #2563eb;
+}
+
+/* ==============================
+   CARD PRINCIPAL
+============================== */
+
+.clientes-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ==============================
+   BARRA DE PESQUISA
+============================== */
+
+.clientes-busca {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.campo-busca-cliente {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 180px;
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo-busca-cliente:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+}
+
+.campo-busca-cliente svg {
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.campo-busca-cliente input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #374151;
+    font-size: 13px;
+}
+
+.campo-busca-cliente input::placeholder {
+    color: #9ca3af;
+}
+
+/* Botões da pesquisa */
+
+.btn-pesquisar-cliente,
+.btn-limpar-busca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-pesquisar-cliente {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn-pesquisar-cliente:hover {
+    background: #1d4ed8;
+}
+
+.btn-limpar-busca {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-limpar-busca:hover {
+    background: #e5e7eb;
+}
+
+/* ==============================
+   TABELA
+============================== */
+
+.clientes-tabela-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.clientes-tabela {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.clientes-tabela thead {
+    background: #f9fafb;
+}
+
+.clientes-tabela th {
+    padding: 13px 20px;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+}
+
+.clientes-tabela td {
+    padding: 15px 20px;
+    border-top: 1px solid #f0f1f3;
+    color: #374151;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.clientes-tabela tbody tr {
+    transition: background 0.15s;
+}
+
+.clientes-tabela tbody tr:hover {
+    background: #fafcff;
+}
+
+.clientes-tabela td strong {
+    display: block;
+    color: #111827;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.clientes-tabela td small {
+    display: block;
+    margin-top: 4px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+/* ==============================
+   TIPO DE CLIENTE
+============================== */
+
+.tipo-cliente {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ==============================
+   SITUAÇÃO
+============================== */
+
+.status-cliente {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-cliente.ativo {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.status-cliente.inativo {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* ==============================
+   AÇÕES
+============================== */
+
+.clientes-acoes {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.acao-cliente {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dbeafe;
+    border-radius: 7px;
+    background: #eff6ff;
+    color: #2563eb;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.acao-cliente:hover {
+    border-color: #2563eb;
+    background: #dbeafe;
+}
+
+.acao-cliente svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ==============================
+   ESTADO VAZIO
+============================== */
+
+.clientes-vazio {
+    padding: 45px 20px !important;
+    text-align: center;
+    color: #9ca3af !important;
+}
+
+.clientes-vazio > svg {
+    width: 35px;
+    height: 35px;
+    margin-bottom: 12px;
+    color: #9ca3af;
+}
+
+.clientes-vazio strong {
+    margin-bottom: 6px;
+    font-size: 14px !important;
+}
+
+.clientes-vazio p {
+    margin: 0;
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+/* ==============================
+   RODAPÉ
+============================== */
+
+.clientes-rodape {
+    padding: 14px 20px;
+    border-top: 1px solid #e5e7eb;
+    background: #fff;
+    color: #6b7280;
+    font-size: 12px;
+}
+
+/* ==============================
+   RESPONSIVIDADE
+============================== */
+
+@media (max-width: 900px) {
+    .clientes-cabecalho {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 700px) {
+    .clientes-cabecalho h1 {
+        font-size: 24px;
+    }
+
+    .clientes-busca {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .campo-busca-cliente {
+        flex-basis: 100%;
+    }
+
+    .btn-pesquisar-cliente,
+    .btn-limpar-busca {
+        flex: 1;
+    }
+
+    .clientes-tabela th,
+    .clientes-tabela td {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .clientes-cabecalho {
+        flex-direction: column;
+    }
+
+    .btn-cadastrar-cliente {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

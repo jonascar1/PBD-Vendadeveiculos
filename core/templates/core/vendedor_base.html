@@ -1,0 +1,102 @@
+{% load static %}
+{% load static l10n %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Painel do Vendedor | VENDACERTA {% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_base.css' %}">
+    {% block extra_css %} {% endblock %}
+    <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            <span>VENDA</span>CERTA
+        </div>
+
+        <div class="perfil">
+            <div class="avatar">
+                {{ request.user.first_name|first|upper }}
+            </div>
+
+            <div>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                <span>Vendedor</span>
+            </div>
+        </div>
+
+        <nav class="menu">
+
+            <a href="#" class="ativo">
+                <span><i data-lucide="house"></i></span>
+                Início
+            </a>
+
+            <a href="{% url 'clientes' %}">
+                <span><i data-lucide="user"></i></span>
+                Clientes
+            </a>
+
+            <a href="#">
+                <span><i data-lucide="car-front"></i></span>
+                Veículos
+            </a>
+
+            <a href="#">
+                <span><i data-lucide="circle-dollar-sign"></i></span>
+                Negociações
+            </a>
+
+            <a href="#">
+                <span><i data-lucide="arrow-left-right"></i></span>
+                Registrar troca
+            </a>
+
+        </nav>
+
+        <div class="menu-inferior">
+
+            <a href="#">
+                <span><i data-lucide="settings"></i></span>
+                Configurações
+            </a>
+
+            <a href="{% url 'logout' %}" class="sair">
+                <span><i data-lucide="log-out"></i></span>
+                Sair
+            </a>
+
+        </div>
+
+    </aside>
+
+<!-- CONTEÚDO DA PÁGINA -->
+    <main class="conteudo">
+
+        {% block conteudo %}
+        {% endblock %}
+
+    </main>
+</body>
+</html>
+
+<!-- JAVASCRIPT ESPECÍFICO DA PÁGINA -->
+
+
+<script>
+    lucide.createIcons();
+</script>
+
+{% block extra_js %}
+{% endblock %}

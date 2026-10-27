@@ -1,32 +1,21 @@
-
-
-
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
-
-from decimal import Decimal, InvalidOperation
-
 from django.db.models import Q
-from django.shortcuts import render
-
-from .models import Veiculo
-
-
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models.aggregates import Sum
 from django.shortcuts import render, redirect, get_object_or_404
-
 from .decorators import perfil_requerido
-from .models import HistoricoPrecoVeiculo, HistoricoSituacaoVeiculo, LancamentoFinanceiro, Usuario, PerfilVendedor, Veiculo, FotoVeiculo
-from .models import (HistoricoSituacaoVeiculo,Usuario,PerfilVendedor,Veiculo,FotoVeiculo,ReservaVeiculo,)
+from .models import (HistoricoSituacaoVeiculo,Usuario,PerfilVendedor,Veiculo,FotoVeiculo,ReservaVeiculo,HistoricoPrecoVeiculo,
+                    LancamentoFinanceiro, Cliente, TelefoneCliente)
 
 from django.db import transaction
-from django.db.models import Q
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.utils import timezone
+
+from .forms import ClienteForm, TelefoneClienteFormSet
 
 def login_view(request):
     if request.method == "POST":
@@ -122,7 +111,7 @@ def painel_vendedor_view(request):
 
     veiculos = Veiculo.objects.all().order_by("-criado_em")
 
-    return render(request,"core/painel_vendedor.html",{"dados": dados,"veiculos": veiculos,},)
+    return render(request,"core/vendedor_painel_inicio.html",{"dados": dados,"veiculos": veiculos,},)
 
 @perfil_requerido("ADMINISTRATIVO")
 def painel_administrativo_view(request):
@@ -1138,4 +1127,137 @@ def vitrine_veiculo_detalhe_view(request, pk):
             "veiculo": veiculo,
             "fotos": fotos,
         },
+    )
+
+@login_required
+def clientes_view(request):
+    busca = request.GET.get("busca", "").strip()
+
+    clientes = Cliente.objects.prefetch_related("telefones")
+
+    if busca:
+        clientes = clientes.filter(
+            Q(nome__icontains=busca)
+            | Q(razao_social__icontains=busca)
+            | Q(nome_fantasia__icontains=busca)
+            | Q(cpf__icontains=busca)
+            | Q(cnpj__icontains=busca)
+            | Q(telefones__numero__icontains=busca)
+        ).distinct()
+
+    clientes = clientes.order_by("nome", "razao_social")
+
+    return render(
+        request,
+        "core/vendedor_painel_clientes.html",
+        {
+            "clientes": clientes,
+            "busca": busca,
+        },
+    )
+
+
+@login_required
+def cadastrar_cliente_view(request):
+    cliente = Cliente()
+
+    if request.method == "POST":
+        form = ClienteForm(request.POST, instance=cliente)
+        formset = TelefoneClienteFormSet(request.POST, instance=cliente)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                with transaction.atomic():
+                    cliente = form.save()
+                    formset.instance = cliente
+                    formset.save()
+
+                messages.success(request, "Cliente cadastrado com sucesso.")
+                return redirect("detalhes_cliente", cliente_id=cliente.pk)
+
+            except IntegrityError:
+                form.add_error(
+                    None,
+                    "Não foi possível cadastrar: o CPF ou CNPJ informado já está registrado.",
+                )
+    else:
+        form = ClienteForm(instance=cliente)
+        formset = TelefoneClienteFormSet(instance=cliente)
+
+    return render(
+        request,
+        "core/vendedor_cliente_form.html",
+        {
+            "form": form,
+            "formset": formset,
+            "titulo": "Cadastrar cliente",
+        },
+    )
+
+
+@login_required
+def detalhes_cliente_view(request, cliente_id):
+    cliente = get_object_or_404(
+        Cliente.objects.prefetch_related("telefones"),
+        pk=cliente_id,
+    )
+
+    return render(
+        request,
+        "core/vendedor_cliente_detalhes.html",
+        {"cliente": cliente},
+    )
+
+
+@login_required
+def editar_cliente_view(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == "POST":
+        form = ClienteForm(request.POST, instance=cliente)
+        formset = TelefoneClienteFormSet(request.POST, instance=cliente)
+
+        if form.is_valid() and formset.is_valid():
+            try:
+                with transaction.atomic():
+                    cliente = form.save()
+                    formset.instance = cliente
+                    formset.save()
+
+                messages.success(request, "Cliente atualizado com sucesso.")
+                return redirect("detalhes_cliente", cliente_id=cliente.pk)
+
+            except IntegrityError:
+                form.add_error(
+                    None,
+                    "Não foi possível atualizar: o CPF ou CNPJ informado já está registrado.",
+                )
+    else:
+        form = ClienteForm(instance=cliente)
+        formset = TelefoneClienteFormSet(instance=cliente)
+
+    return render(
+        request,
+        "core/vendedor_cliente_form.html",
+        {
+            "form": form,
+            "formset": formset,
+            "titulo": "Editar cliente",
+        },
+    )
+
+
+@login_required
+def desativar_cliente_view(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == "POST":
+        cliente.desativar()
+        messages.success(request, "Cliente desativado com sucesso.")
+        return redirect("clientes")
+
+    return render(
+        request,
+        "core/vendedor_cliente_confirmar_desativacao.html",
+        {"cliente": cliente},
     )

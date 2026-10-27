@@ -90,9 +90,15 @@
                 {{ veiculo.modelo }}
             </h1>
 
-            <p class="preco-veiculo">
-                {{ veiculo.preco_venda|floatformat:2 }}
-            </p>
+            {% if veiculo.preco_venda %}
+                <p class="preco-veiculo">
+                    R$ {{ veiculo.preco_venda|floatformat:2 }}
+                </p>
+            {% else %}
+                <p class="preco-veiculo">
+                    Consulte o preço
+                </p>
+            {% endif %}
 
             <div class="detalhes-grid">
 

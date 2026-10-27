@@ -1,0 +1,190 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+
+{% block title %}Clientes | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_clientes.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+
+    <section class="clientes-pagina">
+
+        <header class="clientes-cabecalho">
+            <div>
+                <h1>Clientes</h1>
+                <p>Consulte e gerencie os clientes cadastrados no VendaCerta.</p>
+            </div>
+
+            <a href="{% url 'cadastrar_cliente' %}" class="btn-cadastrar-cliente">
+                <i data-lucide="user-plus"></i>
+                Cadastrar cliente
+            </a>
+        </header>
+
+        {% if messages %}
+            <div class="clientes-mensagens">
+                {% for message in messages %}
+                    <div class="mensagem-cliente {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="clientes-card">
+
+            <form method="get"
+                action="{% url 'clientes' %}"
+                class="clientes-busca">
+
+                <div class="campo-busca-cliente">
+                    <i data-lucide="search"></i>
+
+                    <input
+                        type="search"
+                        name="busca"
+                        value="{{ busca }}"
+                        placeholder="Buscar por nome, CPF, CNPJ ou telefone..."
+                        aria-label="Pesquisar clientes"
+                    >
+                </div>
+
+                <button type="submit" class="btn-pesquisar-cliente">
+                    Pesquisar
+                </button>
+
+                {% if busca %}
+                    <a href="{% url 'clientes' %}" class="btn-limpar-busca">
+                        Limpar
+                    </a>
+                {% endif %}
+
+            </form>
+
+            <div class="clientes-tabela-container">
+
+                <table class="clientes-tabela">
+
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Tipo</th>
+                            <th>Documento</th>
+                            <th>Telefone</th>
+                            <th>Situação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for cliente in clientes %}
+                            <tr>
+
+                                <td>
+                                    <strong>{{ cliente.nome_exibicao }}</strong>
+
+                                    {% if cliente.tipo == "PJ" %}
+                                        <small>{{ cliente.razao_social }}</small>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if cliente.tipo == "PJ" %}
+                                        <span class="tipo-cliente">Pessoa jurídica</span>
+                                    {% else %}
+                                        <span class="tipo-cliente">Pessoa física</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if cliente.tipo == "PJ" %}
+                                        {{ cliente.cnpj|default:"—" }}
+                                    {% else %}
+                                        {{ cliente.cpf|default:"—" }}
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% for telefone in cliente.telefones.all %}
+                                        <div>{{ telefone.numero }}</div>
+                                    {% empty %}
+                                        —
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    {% if cliente.ativo %}
+                                        <span class="status-cliente ativo">Ativo</span>
+                                    {% else %}
+                                        <span class="status-cliente inativo">Inativo</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <div class="clientes-acoes">
+
+                                        <a
+                                            href="{% url 'detalhes_cliente' cliente.pk %}"
+                                            class="acao-cliente"
+                                            title="Ver detalhes"
+                                            aria-label="Ver detalhes do cliente"
+                                        >
+                                            <i data-lucide="eye"></i>
+                                        </a>
+
+                                        <a
+                                            href="{% url 'editar_cliente' cliente.pk %}"
+                                            class="acao-cliente"
+                                            title="Editar cliente"
+                                            aria-label="Editar cliente"
+                                        >
+                                            <i data-lucide="pencil"></i>
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="clientes-vazio">
+
+                                    <i data-lucide="users"></i>
+
+                                    {% if busca %}
+                                        <strong>Nenhum cliente encontrado</strong>
+                                        <p>
+                                            Não encontramos clientes com os
+                                            dados informados.
+                                        </p>
+                                    {% else %}
+                                        <strong>Nenhum cliente cadastrado</strong>
+                                        <p>
+                                            Cadastre o primeiro cliente para
+                                            começar.
+                                        </p>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <footer class="clientes-rodape">
+                {{ clientes|length }}
+                cliente{{ clientes|length|pluralize }} encontrado{{ clientes|length|pluralize }}
+            </footer>
+
+        </div>
+
+    </section>
+{% endblock %}

@@ -7,7 +7,13 @@ urlpatterns = [
     path("accounts/logout/", views.logout_view, name="logout"),
     path("painel/", views.painel_view, name="painel"),
 
-    path("painel/vendedor/", views.painel_vendedor_view, name="painel_vendedor"),
+    path("painel/vendedor/inicio", views.painel_vendedor_view, name="painel_vendedor"),
+    path("painel/vendedor/clientes/", views.clientes_view, name="clientes"),
+    path("painel/vendedor/clientes/cadastrar/", views.cadastrar_cliente_view, name="cadastrar_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/", views.detalhes_cliente_view, name="detalhes_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/editar/", views.editar_cliente_view, name="editar_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
 
     path("painel/administrativo/inicio/", views.painel_administrativo_view, name="painel_administrativo"),
     path("painel/administrativo/despesas/", views.despesas_view, name="despesas"),

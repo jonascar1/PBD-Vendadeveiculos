@@ -399,3 +399,144 @@ class HistoricoPrecoVeiculo(models.Model):
 
     def __str__(self):
         return f"{self.veiculo} — R$ {self.valor_anterior} → R$ {self.valor_novo}"
+
+
+class Cliente(models.Model):
+    class Tipo(models.TextChoices):
+        PESSOA_FISICA = "PF", "Pessoa Física"
+        PESSOA_JURIDICA = "PJ", "Pessoa Jurídica"
+
+    tipo = models.CharField(
+        max_length=2,
+        choices=Tipo.choices,
+    )
+
+    # Pessoa física
+    nome = models.CharField(max_length=150, blank=True)
+    cpf = models.CharField(max_length=11, blank=True)
+    data_nascimento = models.DateField(null=True, blank=True)
+
+    # Pessoa jurídica
+    cnpj = models.CharField(max_length=14, blank=True)
+    razao_social = models.CharField(max_length=180, blank=True)
+    nome_fantasia = models.CharField(max_length=150, blank=True)
+    responsavel = models.CharField(max_length=150, blank=True)
+
+    # Endereço
+    cep = models.CharField(max_length=8, blank=True)
+    logradouro = models.CharField(max_length=180, blank=True)
+    numero = models.CharField(max_length=20, blank=True)
+    complemento = models.CharField(max_length=100, blank=True)
+    bairro = models.CharField(max_length=100, blank=True)
+    cidade = models.CharField(max_length=100, blank=True)
+    estado = models.CharField(max_length=2, blank=True)
+
+    ativo = models.BooleanField(default=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["nome", "razao_social"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cpf"],
+                condition=~models.Q(cpf=""),
+                name="cliente_cpf_unico",
+            ),
+            models.UniqueConstraint(
+                fields=["cnpj"],
+                condition=~models.Q(cnpj=""),
+                name="cliente_cnpj_unico",
+            ),
+        ]
+
+    def clean(self):
+        super().clean()
+        erros = {}
+
+        # Mantém somente os números dos documentos.
+        self.cpf = re.sub(r"\D", "", self.cpf or "")
+        self.cnpj = re.sub(r"\D", "", self.cnpj or "")
+        self.cep = re.sub(r"\D", "", self.cep or "")
+
+        if self.tipo == self.Tipo.PESSOA_FISICA:
+            if not self.nome.strip():
+                erros["nome"] = "Informe o nome do cliente."
+            if len(self.cpf) != 11:
+                erros["cpf"] = "O CPF deve conter 11 dígitos."
+            if not self.data_nascimento:
+                erros["data_nascimento"] = "Informe a data de nascimento."
+            self.cnpj = ""
+            self.razao_social = ""
+            self.nome_fantasia = ""
+            self.responsavel = ""
+
+        elif self.tipo == self.Tipo.PESSOA_JURIDICA:
+            if not self.razao_social.strip():
+                erros["razao_social"] = "Informe a razão social."
+            if len(self.cnpj) != 14:
+                erros["cnpj"] = "O CNPJ deve conter 14 dígitos."
+            if not self.responsavel.strip():
+                erros["responsavel"] = "Informe o responsável."
+            self.cpf = ""
+            self.nome = ""
+            self.data_nascimento = None
+
+        else:
+            erros["tipo"] = "Selecione pessoa física ou jurídica."
+
+        if erros:
+            raise ValidationError(erros)
+
+    @property
+    def nome_exibicao(self):
+        if self.tipo == self.Tipo.PESSOA_FISICA:
+            return self.nome
+        return self.nome_fantasia or self.razao_social
+
+    def desativar(self):
+        self.ativo = False
+        self.save(update_fields=["ativo", "atualizado_em"])
+
+    def __str__(self):
+        return self.nome_exibicao
+
+
+class TelefoneCliente(models.Model):
+    class Tipo(models.TextChoices):
+        CELULAR = "CELULAR", "Celular"
+        FIXO = "FIXO", "Fixo"
+        COMERCIAL = "COMERCIAL", "Comercial"
+        WHATSAPP = "WHATSAPP", "WhatsApp"
+
+    cliente = models.ForeignKey(
+        Cliente,
+        on_delete=models.PROTECT,
+        related_name="telefones",
+    )
+    numero = models.CharField(max_length=20)
+    tipo = models.CharField(
+        max_length=12,
+        choices=Tipo.choices,
+        default=Tipo.CELULAR,
+    )
+    principal = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["-principal", "numero"]
+
+    def clean(self):
+        super().clean()
+        self.numero = re.sub(r"\D", "", self.numero or "")
+
+        if len(self.numero) not in (10, 11):
+            raise ValidationError({
+                "numero": "Informe um telefone com DDD e 10 ou 11 dígitos."
+            })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.numero

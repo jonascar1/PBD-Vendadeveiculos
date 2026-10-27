@@ -261,7 +261,11 @@
                                     </p>
 
                                     <strong class="card-preco">
-                                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                        {% if veiculo.preco_venda %}
+                                            R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                        {% else %}
+                                            Consulte o preço
+                                        {% endif %}
                                     </strong>
 
                                     <div class="card-detalhes">
