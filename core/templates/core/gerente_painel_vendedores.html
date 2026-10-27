@@ -16,11 +16,13 @@
                     <p>Gerencie os vendedores da revenda.</p>
                 </div>
 
-                <div class="user-info">
-                    <span>Gerente</span>
-                </div>
+                <a href="{% url 'cadastrar_vendedor' %}" class="add-button">
+                    <i data-lucide="user-plus"></i>
+                    Cadastrar vendedor
+                </a>
+            </header>
 
-                {% if messages %}
+            {% if messages %}
                     <div class="messages">
                         {% for message in messages %}
                             <div class="message message-success">
@@ -29,13 +31,8 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-            </header>
 
-            <div class="acoes-vendedores-topo">
-                <a href="{% url 'cadastrar_vendedor' %}" class="add-button">
-                    + Cadastrar vendedor
-                </a>
-            </div>
+            
 
 
             <!-- SEÇÃO -->
@@ -44,24 +41,16 @@
                 <div class="card vendedores-card">
 
                     <div class="section-header vendedores-header">
-                        <div>
-                            <h2>Vendedores cadastrados</h2>
-                            <p>Consulte e gerencie os vendedores do sistema.</p>
-                        </div>
-
                         <span class="contador-vendedores">
                             {{ vendedores|length }}
                             {% if vendedores|length == 1 %}
-                                vendedor
+                                vendedor encontrado
                             {% else %}
-                                vendedores
+                                vendedores encontrados
                             {% endif %}
                         </span>
                     </div>
 
-                
-
-                
                 <form method="GET" class="barra-pesquisa-vendedores">
                     <div class="campo-pesquisa-vendedores">
                         <i data-lucide="search"></i>
@@ -97,7 +86,7 @@
                 <!-- TABELA -->
                 <div class="table-container">
 
-                    <table>
+                    <table class="vendedores-tabela">
 
                         <thead>
 

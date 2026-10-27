@@ -1,0 +1,195 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+{% load static l10n %}
+
+{% block title %}
+    Detalhes de {{ cliente.nome|default:cliente.razao_social }} | VENDACERTA
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/vendedor_cliente_detalhes.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+
+<header class="topo-detalhes">
+    <div>
+        <h1>Ficha do Cliente</h1>
+        <p>Visualize os dados do cliente, veículos comprados e histórico de reservas/propostas.</p>
+    </div>
+
+    <div class="topo-acoes">
+        <a href="{% url 'clientes' %}" class="btn-voltar">
+            <i data-lucide="chevron-left"></i> Voltar para clientes
+        </a>
+        <a href="{% url 'editar_cliente' cliente.id %}" class="btn-editar">
+            <i data-lucide="square-pen"></i> Editar cliente
+        </a>
+    </div>
+</header>
+
+<section class="cliente-container">
+
+    <!-- DADOS DO CLIENTE -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="user"></i> Informações do Cliente</h3>
+            <span class="badge {% if cliente.ativo %}status-ativo{% else %}status-inativo{% endif %}">
+                {% if cliente.ativo %}Ativo{% else %}Inativo{% endif %}
+            </span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span>Tipo de Pessoa</span>
+                <strong>
+                    {% if cliente.tipo == "PJ" %}
+                        Pessoa jurídica
+                    {% else %}
+                        Pessoa física
+                    {% endif %}
+                </strong>
+            </div>
+
+            {% if cliente.tipo == "PF" %}
+                <div class="info-item">
+                    <span>Nome Completo</span>
+                    <strong>{{ cliente.nome }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>CPF</span>
+                    <strong>{{ cliente.cpf }}</strong>
+                </div>
+            {% else %}
+                <div class="info-item">
+                    <span>Razão Social</span>
+                    <strong>{{ cliente.razao_social }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>Nome Fantasia</span>
+                    <strong>{{ cliente.nome_fantasia|default:"-" }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>CNPJ</span>
+                    <strong>{{ cliente.cnpj }}</strong>
+                </div>
+            {% endif %}
+
+            <div class="info-item">
+                <span>E-mail</span>
+                <strong>{{ cliente.email|default:"Não informado" }}</strong>
+            </div>
+
+            <div class="info-item">
+                <span>Telefones</span>
+                <strong>
+                    {% for tel in cliente.telefones.all %}
+                        {{ tel.numero }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Nenhum telefone cadastrado
+                    {% endfor %}
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEÍCULOS COMPRADOS -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="shopping-bag"></i> Veículos Comprados</h3>
+            <span class="contador-badge">{{ veiculos_comprados.count }}</span>
+        </div>
+
+        {% if veiculos_comprados %}
+            <div class="tabela-responsive">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Placa</th>
+                            <th>Preço de Venda</th>
+                            <th>Situação</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for veiculo in veiculos_comprados %}
+                            <tr>
+                                <td>
+                                    <strong>{{ veiculo.marca }} {{ veiculo.modelo }}</strong>
+                                    <span class="sub-info">{{ veiculo.ano_fabricacao|unlocalize }}/{{ veiculo.ano_modelo|unlocalize }}</span>
+                                </td>
+                                <td>{{ veiculo.placa }}</td>
+                                <td>
+                                    {% if veiculo.preco_venda %}
+                                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge status-{{ veiculo.situacao|lower }}">
+                                        {{ veiculo.get_situacao_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'detalhes_veiculo' veiculo.id %}" class="btn-link">
+                                        <i data-lucide="eye"></i> Ver veículo
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="sem-registros">Nenhum veículo comprado por este cliente até o momento.</p>
+        {% endif %}
+    </div>
+
+    <!-- RESERVAS E PROPOSTAS -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="bookmark"></i> Histórico de Reservas e Propostas</h3>
+            <span class="contador-badge">{{ propostas_reservas.count }}</span>
+        </div>
+
+        {% if propostas_reservas %}
+            <div class="tabela-responsive">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Vendedor Responsável</th>
+                            <th>Contato Registrado</th>
+                            <th>Prazo da Reserva</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reserva in propostas_reservas %}
+                            <tr>
+                                <td><strong>{{ reserva.veiculo.marca }} {{ reserva.veiculo.modelo }}</strong></td>
+                                <td>{{ reserva.vendedor.get_full_name|default:reserva.vendedor.username }}</td>
+                                <td>{{ reserva.cliente_contato }}</td>
+                                <td>Expira em: {{ reserva.expira_em|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if reserva.cancelada %}
+                                        <span class="badge status-inativo">Cancelada / Expirada</span>
+                                    {% else %}
+                                        <span class="badge status-ativo">Ativa</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="sem-registros">Nenhuma reserva ou proposta encontrada para este cliente.</p>
+        {% endif %}
+    </div>
+
+</section>
+
+{% endblock conteudo %}

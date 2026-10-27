@@ -7,40 +7,86 @@ from django.contrib import messages
 from django.db.models.aggregates import Sum
 from django.shortcuts import render, redirect, get_object_or_404
 from .decorators import perfil_requerido
-from .models import (HistoricoSituacaoVeiculo,Usuario,PerfilVendedor,Veiculo,FotoVeiculo,ReservaVeiculo,HistoricoPrecoVeiculo,
-                    LancamentoFinanceiro, Cliente, TelefoneCliente)
+from .models import (
+    HistoricoSituacaoVeiculo,
+    Usuario,
+    PerfilVendedor,
+    Veiculo,
+    FotoVeiculo,
+    ReservaVeiculo,
+    HistoricoPrecoVeiculo,
+    LancamentoFinanceiro,
+    Cliente,
+    TelefoneCliente,
+)
 
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import ProtectedError
 from django.utils import timezone
 
-from .forms import ClienteForm, TelefoneClienteFormSet
+from .forms import (
+    AlterarSituacaoForm,
+    ClienteForm,
+    DespesaEditarForm,
+    DespesaForm,
+    LoginForm,
+    PrecoVendaForm,
+    ReservaForm,
+    TelefoneClienteFormSet,
+    VeiculoForm,
+    VendedorCadastroForm,
+    VendedorEdicaoForm,
+)
+
+
+def adicionar_erros_de_validacao(form, erro, renomear=None):
+    """
+    Converte um ValidationError do model (full_clean) em erros do form.
+    `renomear` troca nomes de campo do model pelos do form, ex.: {"first_name": "nome"}.
+    """
+    renomear = renomear or {}
+    if hasattr(erro, "message_dict"):
+        for campo, mensagens in erro.message_dict.items():
+            campo = renomear.get(campo, campo)
+            alvo = campo if campo in form.fields else None
+            for mensagem in mensagens:
+                form.add_error(alvo, mensagem)
+    else:
+        for mensagem in erro.messages:
+            form.add_error(None, mensagem)
+
+
+def erros_do_form_como_mensagens(request, form):
+    """Para as views que só redirecionam (reservar, alterar situação)."""
+    for erros in form.errors.values():
+        for erro in erros:
+            messages.error(request, erro)
+
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST.get("username", "").strip()
-        password = request.POST.get("password", "")
+        form = LoginForm(request.POST)
 
-        usuario = authenticate(request, username=username, password=password)
+        if form.is_valid():
+            usuario = authenticate(
+                request,
+                username=form.cleaned_data["username"],
+                password=form.cleaned_data["password"],
+            )
 
-        # Erro genérico de propósito: não dizer se foi usuário ou senha
-        # errada, nem se a conta está desativada — isso é informação
-        # que ajuda quem está tentando invadir.
-        erro_generico = "Usuário ou senha inválidos."
-        erro_ativo = "Usuário inativo. Contate o gerente."
-
-        if usuario is None or not usuario.ativo:
-            if usuario and not usuario.ativo:
-                messages.error(request, erro_ativo)
+            if usuario is None:
+                messages.error(request, "Usuário ou senha inválidos.")
+            elif not usuario.ativo:
+                messages.error(request, "Usuário inativo. Contate o gerente.")
             else:
-                messages.error(request, erro_generico)
-            return render(request, "core/login.html")
+                login(request, usuario)
+                return redirect("painel")
+    else:
+        form = LoginForm()
 
-        login(request, usuario)
-        return redirect("painel")
-
-    return render(request, "core/login.html")
+    return render(request, "core/login.html", {"form": form})
 
 
 @login_required
@@ -51,12 +97,6 @@ def logout_view(request):
 
 @login_required
 def painel_view(request):
-    """
-    Um único ponto de entrada pós-login que redireciona (ou renderiza)
-    o painel certo pro perfil do usuário. O template escolhido já
-    mostra só as opções daquele perfil — não é a mesma tela com botões
-    escondidos via CSS/JS.
-    """
     usuario = request.user
 
     if usuario.is_gerente():
@@ -66,7 +106,6 @@ def painel_view(request):
     elif usuario.is_administrativo():
         return redirect("painel_administrativo")
 
-    # Perfil não reconhecido: nega por padrão, nunca libera por engano.
     logout(request)
     messages.error(request, "Perfil de usuário inválido. Contate o gerente.")
     return redirect("login")
@@ -76,19 +115,17 @@ def painel_view(request):
 def painel_gerente_view(request):
     vendedores = PerfilVendedor.objects.select_related("usuario").all()
 
-    # Total de veículos disponíveis para venda.
     veiculos_disponiveis = Veiculo.objects.filter(
         status=Veiculo.Status.DISPONIVEL
     ).count()
 
-    # Total de veículos vendidos.
     vendas_concluidas = Veiculo.objects.filter(
         situacao__in=[
             Veiculo.Situacao.VENDIDO,
-            Veiculo.Situacao.ENTREGUE,]
+            Veiculo.Situacao.ENTREGUE,
+        ]
     ).count()
 
-    # Total de vendedores ativos.
     vendedores_ativos = PerfilVendedor.objects.filter(
         usuario__ativo=True
     ).count()
@@ -108,25 +145,27 @@ def painel_gerente_view(request):
 @perfil_requerido("VENDEDOR")
 def painel_vendedor_view(request):
     dados = get_object_or_404(PerfilVendedor, usuario=request.user)
-
     veiculos = Veiculo.objects.all().order_by("-criado_em")
 
-    return render(request,"core/vendedor_painel_inicio.html",{"dados": dados,"veiculos": veiculos,},)
+    return render(
+        request,
+        "core/vendedor_painel_inicio.html",
+        {"dados": dados, "veiculos": veiculos},
+    )
+
 
 @perfil_requerido("ADMINISTRATIVO")
 def painel_administrativo_view(request):
     return render(request, "core/administrativo_painel_inicio.html")
 
+
 @perfil_requerido("ADMINISTRATIVO")
 def despesas_view(request):
     veiculos = (
-        Veiculo.objects
-        .prefetch_related("fotos")
+        Veiculo.objects.prefetch_related("fotos")
         .all()
         .order_by("marca", "modelo")
     )
-
-    
 
     total_despesas = LancamentoFinanceiro.objects.filter(
         tipo=LancamentoFinanceiro.Tipo.DESPESA,
@@ -134,18 +173,16 @@ def despesas_view(request):
     ).count()
 
     valor_total = (
-        LancamentoFinanceiro.objects
-        .filter(tipo=LancamentoFinanceiro.Tipo.DESPESA,
-                excluido=False)
-        .aggregate(total=Sum("valor"))["total"]
+        LancamentoFinanceiro.objects.filter(
+            tipo=LancamentoFinanceiro.Tipo.DESPESA, excluido=False
+        ).aggregate(total=Sum("valor"))["total"]
         or 0
     )
 
     veiculos_com_despesas = (
-        Veiculo.objects
-        .filter(
+        Veiculo.objects.filter(
             lancamentos__tipo=LancamentoFinanceiro.Tipo.DESPESA,
-            lancamentos__excluido=False
+            lancamentos__excluido=False,
         )
         .distinct()
         .count()
@@ -159,8 +196,9 @@ def despesas_view(request):
             "total_despesas": total_despesas,
             "valor_total": valor_total,
             "veiculos_com_despesas": veiculos_com_despesas,
-        }
+        },
     )
+
 
 @perfil_requerido("ADMINISTRATIVO")
 def despesas_veiculo_view(request, veiculo_id):
@@ -171,12 +209,8 @@ def despesas_veiculo_view(request, veiculo_id):
         excluido=False,
     ).order_by("-data_lancamento", "-criado_em")
 
-    total_despesas = sum(
-        despesa.valor for despesa in despesas
-    )
-
+    total_despesas = sum(despesa.valor for despesa in despesas)
     custo_aquisicao = veiculo.custo_aquisicao or 0
-
     custo_total = custo_aquisicao + total_despesas
 
     return render(
@@ -191,33 +225,29 @@ def despesas_veiculo_view(request, veiculo_id):
         },
     )
 
+
 @perfil_requerido("ADMINISTRATIVO")
 def adicionar_despesa_view(request, veiculo_id):
     veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
 
     if request.method == "POST":
-        valor = request.POST.get("valor")
-        data_lancamento = request.POST.get("data_lancamento")
-        descricao = request.POST.get("descricao")
-
-        LancamentoFinanceiro.objects.create(
-            veiculo=veiculo,
-            tipo=LancamentoFinanceiro.Tipo.DESPESA,
-            valor=valor,
-            data_lancamento=data_lancamento,
-            descricao=descricao,
-            registrado_por=request.user,
-        )
-
-        return redirect("despesas_veiculo", veiculo_id=veiculo.id)
+        form = DespesaForm(request.POST)
+        if form.is_valid():
+            despesa = form.save(commit=False)
+            despesa.veiculo = veiculo
+            despesa.tipo = LancamentoFinanceiro.Tipo.DESPESA
+            despesa.registrado_por = request.user
+            despesa.save()
+            return redirect("despesas_veiculo", veiculo_id=veiculo.id)
+    else:
+        form = DespesaForm()
 
     return render(
         request,
         "core/administrativo_adicionar_despesa.html",
-        {
-            "veiculo": veiculo,
-        },
+        {"form": form, "veiculo": veiculo},
     )
+
 
 @perfil_requerido("ADMINISTRATIVO")
 def editar_despesa_view(request, despesa_id):
@@ -228,28 +258,22 @@ def editar_despesa_view(request, despesa_id):
     )
 
     if request.method == "POST":
-        despesa.valor = request.POST.get("valor")
-        despesa.data_lancamento = request.POST.get("data_lancamento")
-        despesa.descricao = request.POST.get("descricao")
-
-        despesa.editado_por = request.user
-        despesa.editado_em = timezone.now()
-
-        despesa.save()
-
-        return redirect(
-            "despesas_veiculo",
-            veiculo_id=despesa.veiculo.id
-        )
+        form = DespesaEditarForm(request.POST, instance=despesa)
+        if form.is_valid():
+            despesa = form.save(commit=False)
+            despesa.editado_por = request.user
+            despesa.editado_em = timezone.now()
+            despesa.save()
+            return redirect("despesas_veiculo", veiculo_id=despesa.veiculo.id)
+    else:
+        form = DespesaEditarForm(instance=despesa)
 
     return render(
         request,
         "core/administrativo_editar_despesa.html",
-        {
-            "despesa": despesa,
-            "veiculo": despesa.veiculo,
-        },
+        {"form": form, "despesa": despesa, "veiculo": despesa.veiculo},
     )
+
 
 @perfil_requerido("ADMINISTRATIVO")
 def excluir_despesa_view(request, despesa_id):
@@ -272,10 +296,7 @@ def excluir_despesa_view(request, despesa_id):
             ]
         )
 
-        return redirect(
-            "despesas_veiculo",
-            veiculo_id=despesa.veiculo.id
-        )
+        return redirect("despesas_veiculo", veiculo_id=despesa.veiculo.id)
 
     return render(
         request,
@@ -285,6 +306,7 @@ def excluir_despesa_view(request, despesa_id):
             "veiculo": despesa.veiculo,
         },
     )
+
 
 @perfil_requerido("ADMINISTRATIVO")
 def despesas_excluidas_veiculo_view(request, veiculo_id):
@@ -309,91 +331,60 @@ def despesas_excluidas_veiculo_view(request, veiculo_id):
 def editar_vendedor_view(request, vendedor_id):
     dados = get_object_or_404(
         PerfilVendedor.objects.select_related("usuario"),
-        pk=vendedor_id
+        pk=vendedor_id,
     )
-
-
     usuario = dados.usuario
 
     if request.method == "POST":
-        nome = request.POST.get("nome", "").strip()
-        email = request.POST.get("email", "").strip()
-        ativo = request.POST.get("ativo") == "true"
+        form = VendedorEdicaoForm(request.POST)
 
-        tipo_alcada = request.POST.get(
-            "tipo_alcada",
-            dados.tipo_alcada
+        if form.is_valid():
+            cd = form.cleaned_data
+            try:
+                with transaction.atomic():
+                    usuario.first_name = cd["nome"]
+                    usuario.email = cd["email"]
+                    usuario.ativo = cd["ativo"]
+                    usuario.save()
+
+                    dados.tipo_alcada = cd["tipo_alcada"]
+                    dados.valor_alcada = cd["valor_alcada"]
+                    dados.percentual_comissao = cd["percentual_comissao"]
+                    dados.editado_por = request.user
+
+                    dados.full_clean()
+                    dados.save()
+
+                messages.success(request, "Dados do vendedor atualizados com sucesso.")
+                return redirect("vendedores")
+
+            except ValidationError as erro:
+                usuario.refresh_from_db()
+                adicionar_erros_de_validacao(form, erro)
+    else:
+        form = VendedorEdicaoForm(
+            initial={
+                "nome": usuario.first_name,
+                "email": usuario.email,
+                "ativo": "true" if usuario.ativo else "false",
+                "tipo_alcada": dados.tipo_alcada,
+                "valor_alcada": dados.valor_alcada,
+                "percentual_comissao": dados.percentual_comissao,
+            }
         )
-
-        valor_alcada = request.POST.get(
-            "valor_alcada",
-            dados.valor_alcada
-        )
-
-        percentual_comissao = request.POST.get(
-            "percentual_comissao",
-            dados.percentual_comissao
-        )
-
-        if not nome:
-            messages.error(
-                request,
-                "O nome do vendedor é obrigatório."
-            )
-
-            return render(
-                request,
-                "core/gerente_editar_vendedor.html",
-                {"dados": dados}
-            )
-
-        try:
-            # ==========================
-            # DADOS DA CONTA
-            # ==========================
-
-            usuario.first_name = nome
-            usuario.email = email
-            usuario.ativo = ativo
-            usuario.save()
-
-            # ==========================
-            # DADOS COMERCIAIS
-            # ==========================
-
-            dados.tipo_alcada = tipo_alcada
-            dados.valor_alcada = valor_alcada
-            dados.percentual_comissao = percentual_comissao
-            dados.editado_por = request.user
-
-            dados.full_clean()
-            dados.save()
-
-            messages.success(
-                request,
-                "Dados do vendedor atualizados com sucesso."
-            )
-
-            return redirect("vendedores")
-
-        except ValidationError:
-            messages.error(
-                request,
-                "Verifique os valores informados."
-            )
-    
 
     return render(
-    request,
-    "core/gerente_editar_vendedor.html",
-    {"dados": dados}
-)
+        request,
+        "core/gerente_editar_vendedor.html",
+        {"dados": dados, "form": form},
+    )
+
 
 @perfil_requerido("GERENTE")
 def vendedores_view(request):
     busca = request.GET.get("busca", "").strip()
     status = request.GET.get("status", "")
-    
+
     vendedores = PerfilVendedor.objects.select_related("usuario").all()
 
     if busca:
@@ -404,7 +395,6 @@ def vendedores_view(request):
             | Q(usuario__email__icontains=busca)
         )
 
-    # Filtro por status da conta
     if status == "ativo":
         vendedores = vendedores.filter(usuario__ativo=True)
     elif status == "inativo":
@@ -415,230 +405,95 @@ def vendedores_view(request):
     return render(
         request,
         "core/gerente_painel_vendedores.html",
-        {"vendedores": vendedores,
-         "busca": busca,
-         "status_selecionado": status,
-        }
+        {
+            "vendedores": vendedores,
+            "busca": busca,
+            "status_selecionado": status,
+        },
     )
+
 
 @perfil_requerido("GERENTE")
 def cadastrar_vendedor_view(request):
-
     if request.method == "POST":
-        nome = request.POST.get("nome", "").strip()
-        username = request.POST.get("username", "").strip()
-        email = request.POST.get("email", "").strip()
-        senha = request.POST.get("senha", "")
+        form = VendedorCadastroForm(request.POST)
 
-        tipo_alcada = request.POST.get(
-            "tipo_alcada",
-            PerfilVendedor.TipoAlcada.PERCENTUAL
-        )
+        if form.is_valid():
+            cd = form.cleaned_data
+            try:
+                with transaction.atomic():
+                    usuario = Usuario(
+                        username=cd["username"],
+                        email=cd["email"],
+                        perfil=Usuario.Perfil.VENDEDOR,
+                        ativo=True,
+                    )
+                    usuario.set_password(cd["senha"])
+                    usuario.first_name = cd["nome"]
 
-        valor_alcada = request.POST.get(
-            "valor_alcada",
-            "0"
-        )
+                    usuario.full_clean()
+                    usuario.save()
 
-        percentual_comissao = request.POST.get(
-            "percentual_comissao",
-            "0"
-        )
+                    PerfilVendedor.objects.create(
+                        usuario=usuario,
+                        tipo_alcada=cd["tipo_alcada"],
+                        valor_alcada=cd["valor_alcada"],
+                        percentual_comissao=cd["percentual_comissao"],
+                        editado_por=request.user,
+                    )
 
-        if not nome or not username or not senha:
-            messages.error(request, "Preencha os campos obrigatórios.")
-            return render(
-                request,
-                "core/gerente_cadastrar_vendedor.html"
-            )
+                messages.success(request, "Vendedor cadastrado com sucesso.")
+                return redirect("vendedores")
 
-        if Usuario.objects.filter(username=username).exists():
-            messages.error(request, "Esse usuário já está cadastrado.")
-            return render(
-                request,
-                "core/gerente_cadastrar_vendedor.html"
-            )
+            except ValidationError as erro:
+                adicionar_erros_de_validacao(form, erro, renomear={"first_name": "nome"})
+            except IntegrityError:
+                form.add_error("username", "Esse usuário já está cadastrado.")
+    else:
+        form = VendedorCadastroForm()
 
-        try:
-            with transaction.atomic():
+    return render(request, "core/gerente_cadastrar_vendedor.html", {"form": form})
 
-                usuario = Usuario(
-                    username=username,
-                    email=email,
-                    perfil=Usuario.Perfil.VENDEDOR,
-                    ativo=True
-                )
 
-                usuario.set_password(senha)
-                usuario.first_name = nome
-
-                usuario.full_clean()
-                usuario.save()
-
-                PerfilVendedor.objects.create(
-                    usuario=usuario,
-                    tipo_alcada=tipo_alcada,
-                    valor_alcada=valor_alcada,
-                    percentual_comissao=percentual_comissao,
-                    editado_por=request.user
-                )
-
-            messages.success(
-                request,
-                "Vendedor cadastrado com sucesso."
-            )
-
-            return redirect("vendedores")
-
-        except Exception:
-            messages.error(
-                request,
-                "Não foi possível cadastrar o vendedor. Verifique os dados."
-            )
-
-    return render(
-        request,
-        "core/gerente_cadastrar_vendedor.html"
-    )
 @perfil_requerido("GERENTE")
 def cadastrar_veiculo_view(request):
-
     if request.method == "POST":
+        form = VeiculoForm(request.POST, request.FILES)
 
-        placa = request.POST.get("placa", "").strip()
-        chassi = request.POST.get("chassi", "").strip()
-        renavam = request.POST.get("renavam", "").strip()
+        if form.is_valid():
+            try:
+                with transaction.atomic():
+                    veiculo = form.save(commit=False)
+                    veiculo.criado_por = request.user
+                    veiculo.save()
 
-        marca = request.POST.get("marca", "").strip()
-        modelo = request.POST.get("modelo", "").strip()
-
-        ano_fabricacao = request.POST.get("ano_fabricacao", "").strip()
-        ano_modelo = request.POST.get("ano_modelo", "").strip()
-
-        cor = request.POST.get("cor", "").strip()
-        combustivel = request.POST.get("combustivel", "").strip()
-        quilometragem = request.POST.get("quilometragem", "").strip()
-
-        opcionais = request.POST.get("opcionais", "").strip()
-
-        origem = request.POST.get("origem", "").strip()
-
-        custo_aquisicao = request.POST.get("custo_aquisicao","").strip()
-
-        valor_repasse = request.POST.get("valor_repasse","").strip()
-        
-        preco_venda = request.POST.get("preco_venda","").strip()
-        
-        
-
-
-        # CAMPOS OBRIGATÓRIOS
-
-        if not all([
-            placa,
-            chassi,
-            renavam,
-            marca,
-            modelo,
-            ano_fabricacao,
-            ano_modelo,
-            cor,
-            combustivel,
-            quilometragem,
-            origem
-        ]):
-
-            messages.error(
-                request,
-                "Preencha todos os campos obrigatórios."
-            )
-
-            return render(
-                request,
-                "core/gerente_cadastrar_veiculo.html"
-            )
-
-
-        try:
-
-            veiculo = Veiculo(
-                placa=placa,
-                chassi=chassi,
-                renavam=renavam,
-                marca=marca,
-                modelo=modelo,
-                ano_fabricacao=ano_fabricacao,
-                ano_modelo=ano_modelo,
-                cor=cor,
-                combustivel=combustivel,
-                quilometragem=quilometragem,
-                opcionais=opcionais,
-                origem=origem,
-                custo_aquisicao=custo_aquisicao or None,
-                valor_repasse=valor_repasse or None,
-                preco_venda=preco_venda or None,
-                criado_por=request.user
-            )
-
-            veiculo.full_clean()
-            veiculo.save()
-
-            fotos = request.FILES.getlist("fotos")
-
-            for ordem, imagem in enumerate(fotos):
-                FotoVeiculo.objects.create(
-                    veiculo=veiculo,
-                    imagem=imagem,
-                    ordem=ordem,
-                    principal=(ordem == 0)
-                )
-
-
-            messages.success(
-                request,
-                "Veículo cadastrado com sucesso."
-            )
-
-            return redirect("veiculos")
-
-
-        except ValidationError as erro:
-
-            if hasattr(erro, "message_dict"):
-
-                for campo, erros in erro.message_dict.items():
-
-                    for mensagem in erros:
-
-                        messages.error(
-                            request,
-                            mensagem
+                    for ordem, imagem in enumerate(form.cleaned_data["fotos"]):
+                        FotoVeiculo.objects.create(
+                            veiculo=veiculo,
+                            imagem=imagem,
+                            ordem=ordem,
+                            principal=(ordem == 0),
                         )
 
-            else:
+                messages.success(request, "Veículo cadastrado com sucesso.")
+                return redirect("veiculos")
 
-                messages.error(
-                    request,
-                    "Verifique os dados informados."
+            except IntegrityError:
+                form.add_error(
+                    None,
+                    "Já existe um veículo com essa placa ou chassi no estoque.",
                 )
+    else:
+        form = VeiculoForm()
+
+    return render(request, "core/gerente_cadastrar_veiculo.html", {"form": form})
 
 
-        except IntegrityError:
-
-            messages.error(
-                request,
-                "Já existe um veículo com essa placa ou chassi no estoque."
-            )
-
-
-    return render(
-        request,
-        "core/gerente_cadastrar_veiculo.html"
-    )
-    
 @perfil_requerido("GERENTE")
 def veiculos_view(request):
-    for reserva in ReservaVeiculo.objects.filter(cancelada=False,expira_em__lte=timezone.now(),):
+    for reserva in ReservaVeiculo.objects.filter(
+        cancelada=False, expira_em__lte=timezone.now()
+    ):
         reserva.expirar()
 
     busca = request.GET.get("busca", "").strip()
@@ -650,21 +505,18 @@ def veiculos_view(request):
 
     if busca:
         veiculos = veiculos.filter(
-            Q(marca__icontains=busca) |
-            Q(modelo__icontains=busca) |
-            Q(placa__icontains=busca)
+            Q(marca__icontains=busca)
+            | Q(modelo__icontains=busca)
+            | Q(placa__icontains=busca)
         )
-    
 
     situacoes_validas = dict(Veiculo.Situacao.choices)
-
     if situacao in situacoes_validas:
         veiculos = veiculos.filter(situacao=situacao)
     else:
         situacao = ""
 
     origens_validas = dict(Veiculo.Origem.choices)
-
     if origem in origens_validas:
         veiculos = veiculos.filter(origem=origem)
     else:
@@ -682,35 +534,35 @@ def veiculos_view(request):
 
     veiculos = veiculos.order_by("-criado_em")
 
-    anos = (Veiculo.objects.order_by("-ano_fabricacao")
-            .values_list("ano_fabricacao", flat=True)
-            .distinct()
-        )
+    anos = (
+        Veiculo.objects.order_by("-ano_fabricacao")
+        .values_list("ano_fabricacao", flat=True)
+        .distinct()
+    )
 
     return render(
         request,
         "core/gerente_painel_veiculos.html",
-        {"veiculos": veiculos,
-         "busca": busca,
-         "situacoes" : Veiculo.Situacao.choices,
-         "origens" : Veiculo.Origem.choices,
-         "situacao_selecionada": situacao,
-         "origem_selecionada": origem,
-         "ano_fabricacao_selecionado": ano_fabricacao,
-         "anos" : anos,
-
-        }
+        {
+            "veiculos": veiculos,
+            "busca": busca,
+            "situacoes": Veiculo.Situacao.choices,
+            "origens": Veiculo.Origem.choices,
+            "situacao_selecionada": situacao,
+            "origem_selecionada": origem,
+            "ano_fabricacao_selecionado": ano_fabricacao,
+            "anos": anos,
+        },
     )
+
 
 @perfil_requerido("GERENTE")
 def detalhes_veiculo_view(request, veiculo_id):
     veiculo = get_object_or_404(
-        Veiculo.objects.prefetch_related("fotos"),
-        pk=veiculo_id
+        Veiculo.objects.prefetch_related("fotos"), pk=veiculo_id
     )
 
     fotos = veiculo.fotos.all()
-
     reserva = None
 
     if veiculo.situacao == Veiculo.Situacao.RESERVADO:
@@ -721,31 +573,23 @@ def detalhes_veiculo_view(request, veiculo_id):
 
         if reserva:
             reserva.expirar()
-
             reserva.refresh_from_db()
-
             if reserva.cancelada:
                 veiculo.refresh_from_db()
                 reserva = None
 
     despesas = veiculo.lancamentos.filter(
-        tipo=LancamentoFinanceiro.Tipo.DESPESA,
-        excluido=False
-        ).order_by("-data_lancamento", "-criado_em")
+        tipo=LancamentoFinanceiro.Tipo.DESPESA, excluido=False
+    ).order_by("-data_lancamento", "-criado_em")
 
     total_despesas = despesas.aggregate(total=Sum("valor"))["total"] or 0
-
     custo_aquisicao = veiculo.custo_aquisicao or 0
-
     custo_total = custo_aquisicao + total_despesas
-
     ultimo_lancamento = despesas.first()
 
     ultimo_historico_preco = (
-    veiculo.historico_precos
-    .order_by("-alterado_em")
-    .first()
-)
+        veiculo.historico_precos.order_by("-alterado_em").first()
+    )
 
     return render(
         request,
@@ -759,49 +603,36 @@ def detalhes_veiculo_view(request, veiculo_id):
             "ultimo_lancamento": ultimo_lancamento,
             "ultimo_historico_preco": ultimo_historico_preco,
             "reserva": reserva,
-        }
+        },
     )
+
 
 @perfil_requerido("GERENTE")
 def alterar_preco_veiculo_view(request, veiculo_id):
     veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
 
     if veiculo.venda_fechada:
-        return redirect("detalhes_veiculo",veiculo_id=veiculo.id,)
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-    despesas = veiculo.lancamentos.filter(tipo=LancamentoFinanceiro.Tipo.DESPESA,excluido=False,)
-
-    total_despesas = (
-        despesas.aggregate(total=Sum("valor"))["total"]or 0)
-
-    custo_total = ((veiculo.custo_aquisicao or 0)+ total_despesas)
+    despesas = veiculo.lancamentos.filter(
+        tipo=LancamentoFinanceiro.Tipo.DESPESA,
+        excluido=False,
+    )
+    total_despesas = despesas.aggregate(total=Sum("valor"))["total"] or 0
+    custo_total = (veiculo.custo_aquisicao or 0) + total_despesas
 
     if request.method == "POST":
+        if veiculo.situacao in [Veiculo.Situacao.VENDIDO, Veiculo.Situacao.ENTREGUE]:
+            messages.error(
+                request, "O preço não pode ser alterado após a venda do veículo."
+            )
+            return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-        if veiculo.situacao in [
-        Veiculo.Situacao.VENDIDO,
-        Veiculo.Situacao.ENTREGUE,]:
-            messages.error(request,"O preço não pode ser alterado após a venda do veículo.")
-            
-            return redirect("detalhes_veiculo",veiculo_id=veiculo.id,)
+        form = PrecoVendaForm(request.POST)
 
-    novo_preco = request.POST.get("preco_venda")
-    
-    if novo_preco:
-            try:
-                novo_preco = Decimal(novo_preco)
-            except (InvalidOperation, TypeError):
-                return render(
-                    request,
-                    "core/gerente_alterar_preco.html",
-                    {
-                        "veiculo": veiculo,
-                        "erro_preco": "Informe um preço válido.",
-                    },
-                )
-
+        if form.is_valid():
+            novo_preco = form.cleaned_data["preco_venda"]
             valor_anterior = veiculo.preco_venda or 0
-
             abaixo_do_custo = novo_preco < custo_total
 
             veiculo.preco_venda = novo_preco
@@ -819,64 +650,49 @@ def alterar_preco_veiculo_view(request, veiculo_id):
             if abaixo_do_custo:
                 messages.warning(
                     request,
-                    "Atenção: o preço de venda está abaixo do custo total acumulado."
+                    "Atenção: o preço de venda está abaixo do custo total acumulado.",
                 )
 
-            return redirect(
-                "detalhes_veiculo",
-                veiculo_id=veiculo.id,
-            )
+            return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+    else:
+        form = PrecoVendaForm(initial={"preco_venda": veiculo.preco_venda})
 
     return render(
         request,
         "core/gerente_alterar_preco.html",
-        {
-            "veiculo": veiculo,
-            "custo_total": custo_total,
-        },
+        {"veiculo": veiculo, "custo_total": custo_total, "form": form},
     )
+
+
 @perfil_requerido("GERENTE")
 def reservar_veiculo_view(request, veiculo_id):
     veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
 
     if request.method != "POST":
-        return redirect(
-            "detalhes_veiculo",
-            veiculo_id=veiculo.id,
-        )
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-    cliente_nome = request.POST.get("cliente_nome", "").strip()
-    cliente_contato = request.POST.get("cliente_contato", "").strip()
+    form = ReservaForm(request.POST)
 
-    if not cliente_nome or not cliente_contato:
-        messages.error(
-            request,
-            "Informe o nome e o contato do cliente."
-        )
-        return redirect(
-            "detalhes_veiculo",
-            veiculo_id=veiculo.id,
-        )
+    if not form.is_valid():
+        erros_do_form_como_mensagens(request, form)
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+
+    cliente_nome = form.cleaned_data["cliente_nome"]
+    cliente_contato = form.cleaned_data["cliente_contato"]
 
     if veiculo.situacao != Veiculo.Situacao.DISPONIVEL:
-        messages.error(
-            request,
-            "Apenas veículos disponíveis podem ser reservados."
-        )
-        return redirect(
-            "detalhes_veiculo",
-            veiculo_id=veiculo.id,
-        )
+        messages.error(request, "Apenas veículos disponíveis podem ser reservados.")
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
     reserva, criada = ReservaVeiculo.objects.get_or_create(
-    veiculo=veiculo,
-    defaults={
-        "cliente_nome": cliente_nome,
-        "cliente_contato": cliente_contato,
-        "vendedor": request.user,
-        "expira_em": timezone.now() + timedelta(hours=24),
-    },
-)
+        veiculo=veiculo,
+        defaults={
+            "cliente_nome": cliente_nome,
+            "cliente_contato": cliente_contato,
+            "vendedor": request.user,
+            "expira_em": timezone.now() + timedelta(hours=24),
+        },
+    )
 
     if not criada:
         reserva.cliente_nome = cliente_nome
@@ -886,8 +702,8 @@ def reservar_veiculo_view(request, veiculo_id):
         reserva.cancelada = False
         reserva.save()
 
-        veiculo.situacao = Veiculo.Situacao.RESERVADO
-        veiculo.save(update_fields=["situacao"])
+    veiculo.situacao = Veiculo.Situacao.RESERVADO
+    veiculo.save(update_fields=["situacao"])
 
     HistoricoSituacaoVeiculo.objects.create(
         veiculo=veiculo,
@@ -897,16 +713,10 @@ def reservar_veiculo_view(request, veiculo_id):
         motivo="Reserva do veículo",
     )
 
-    messages.success(
-        request,
-        "Veículo reservado com sucesso."
-    )
+    messages.success(request, "Veículo reservado com sucesso.")
+    return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-    return redirect(
-        "detalhes_veiculo",
-        veiculo_id=veiculo.id,
-    )
-    
+
 @perfil_requerido("GERENTE", "ADMINISTRATIVO")
 def alterar_situacao_veiculo_view(request, veiculo_id):
     veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
@@ -914,152 +724,114 @@ def alterar_situacao_veiculo_view(request, veiculo_id):
     if request.method != "POST":
         return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-    nova_situacao = request.POST.get("situacao")
-    motivo = request.POST.get("motivo", "").strip()
+    form = AlterarSituacaoForm(request.POST)
+
+    if not form.is_valid():
+        erros_do_form_como_mensagens(request, form)
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+
+    nova_situacao = form.cleaned_data["situacao"]
+    motivo = form.cleaned_data["motivo"]
+    cliente = form.cleaned_data.get("cliente")
 
     transicoes_permitidas = {
-        Veiculo.Situacao.PREPARACAO: [
-            Veiculo.Situacao.DISPONIVEL,
-        ],
-        Veiculo.Situacao.DISPONIVEL: [
-            Veiculo.Situacao.RESERVADO,
-        ],
+        Veiculo.Situacao.PREPARACAO: [Veiculo.Situacao.DISPONIVEL],
+        Veiculo.Situacao.DISPONIVEL: [Veiculo.Situacao.RESERVADO],
         Veiculo.Situacao.RESERVADO: [
             Veiculo.Situacao.DISPONIVEL,
             Veiculo.Situacao.VENDIDO,
         ],
-        Veiculo.Situacao.VENDIDO: [
-            Veiculo.Situacao.ENTREGUE,
-        ],
+        Veiculo.Situacao.VENDIDO: [Veiculo.Situacao.ENTREGUE],
         Veiculo.Situacao.ENTREGUE: [],
     }
 
-    situacoes_permitidas = transicoes_permitidas.get(
-        veiculo.situacao,
-        []
-    )
+    if nova_situacao not in transicoes_permitidas.get(veiculo.situacao, []):
+        messages.error(request, "Essa transição de situação não é permitida.")
+        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
-    if nova_situacao not in situacoes_permitidas:
-        messages.error(
-            request,
-            "Essa transição de situação não é permitida."
-        )
-        return redirect(
-            "detalhes_veiculo",
-            veiculo_id=veiculo.id,
-        )
-
-    
     situacao_anterior = veiculo.situacao
     veiculo.situacao = nova_situacao
 
-    if nova_situacao == Veiculo.Situacao.PREPARACAO:
-        veiculo.status = Veiculo.Status.DISPONIVEL
+    update_fields = ["situacao", "status", "venda_fechada"]
 
-    elif nova_situacao == Veiculo.Situacao.DISPONIVEL:
+    if nova_situacao in [Veiculo.Situacao.PREPARACAO, Veiculo.Situacao.DISPONIVEL]:
         veiculo.status = Veiculo.Status.DISPONIVEL
-
     elif nova_situacao == Veiculo.Situacao.RESERVADO:
         veiculo.status = Veiculo.Status.RESERVADO
-
-    elif nova_situacao in [
-        Veiculo.Situacao.VENDIDO,
-        Veiculo.Situacao.ENTREGUE,
-    ]:
+    elif nova_situacao in [Veiculo.Situacao.VENDIDO, Veiculo.Situacao.ENTREGUE]:
         veiculo.status = Veiculo.Status.VENDIDO
         veiculo.venda_fechada = True
 
-    veiculo.save(update_fields=[
-        "situacao",
-        "status",
-        "venda_fechada",
-    ])
+    if nova_situacao == Veiculo.Situacao.VENDIDO:
+        veiculo.cliente_comprador = cliente
+        update_fields.append("cliente_comprador")
+
+    veiculo.save(update_fields=update_fields)
 
     HistoricoSituacaoVeiculo.objects.create(
         veiculo=veiculo,
         situacao_anterior=situacao_anterior,
         situacao_nova=nova_situacao,
         alterado_por=request.user,
-        motivo=motivo or None,)
-
-    messages.success(
-        request,
-        "Situação do veículo alterada com sucesso."
+        motivo=motivo or None,
     )
 
-    return redirect(
-        "detalhes_veiculo",
-        veiculo_id=veiculo.id,
-    )
-
+    messages.success(request, "Situação do veículo alterada com sucesso.")
+    return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
 
 
 def vitrine_view(request):
-    # Base: somente veículos disponíveis para venda.
     estoque = Veiculo.objects.filter(
         situacao=Veiculo.Situacao.DISPONIVEL,
         status=Veiculo.Status.DISPONIVEL,
     )
 
-    # Captura os filtros enviados pela página.
     marca = request.GET.get("marca", "").strip()
     preco = request.GET.get("preco", "").strip()
     ano = request.GET.get("ano", "").strip()
     combustivel = request.GET.get("combustivel", "").strip()
 
-    # Consulta dos veículos, preservando as fotos.
     veiculos = (
-    estoque
-    .only(
-        "id",
-        "marca",
-        "modelo",
-        "ano_fabricacao",
-        "ano_modelo",
-        "cor",
-        "combustivel",
-        "quilometragem",
-        "preco_venda",
-        "criado_em",
+        estoque.only(
+            "id",
+            "marca",
+            "modelo",
+            "ano_fabricacao",
+            "ano_modelo",
+            "cor",
+            "combustivel",
+            "quilometragem",
+            "preco_venda",
+            "criado_em",
+        )
+        .prefetch_related("fotos")
+        .order_by("-criado_em")
     )
-    .prefetch_related("fotos")
-    .order_by("-criado_em")
-)
 
-    # Filtro por marca: aceita pesquisa parcial.
     if marca:
         veiculos = veiculos.filter(marca__icontains=marca)
 
-    # Filtro por preço máximo.
     if preco:
         try:
             preco_maximo = Decimal(preco.replace(",", "."))
             if preco_maximo >= 0:
-                veiculos = veiculos.filter(
-                    preco_venda__lte=preco_maximo
-                )
+                veiculos = veiculos.filter(preco_venda__lte=preco_maximo)
         except (InvalidOperation, ValueError):
             preco = ""
 
-    # Filtro por ano de fabricação ou ano do modelo.
     if ano:
         try:
             ano_filtro = int(ano)
             if 1900 <= ano_filtro <= 2100:
                 veiculos = veiculos.filter(
-                    Q(ano_fabricacao=ano_filtro)
-                    | Q(ano_modelo=ano_filtro)
+                    Q(ano_fabricacao=ano_filtro) | Q(ano_modelo=ano_filtro)
                 )
         except (ValueError, TypeError):
             ano = ""
 
-    # Filtro por combustível: aceita pesquisa parcial.
     if combustivel:
-        veiculos = veiculos.filter(
-            combustivel__icontains=combustivel
-        )
+        veiculos = veiculos.filter(combustivel__icontains=combustivel)
 
-    # Sugestões baseadas no estoque disponível.
     marcas = (
         estoque.order_by()
         .values_list("marca", flat=True)
@@ -1074,7 +846,6 @@ def vitrine_view(request):
         .order_by("combustivel")
     )
 
-    # Anos de fabricação e modelo, sem duplicatas.
     anos = sorted(
         set(estoque.values_list("ano_fabricacao", flat=True))
         | set(estoque.values_list("ano_modelo", flat=True)),
@@ -1095,6 +866,7 @@ def vitrine_view(request):
     }
 
     return render(request, "core/vitrine.html", contexto)
+
 
 def vitrine_veiculo_detalhe_view(request, pk):
     campos_publicos = (
@@ -1129,6 +901,7 @@ def vitrine_veiculo_detalhe_view(request, pk):
         },
     )
 
+
 @login_required
 def clientes_view(request):
     busca = request.GET.get("busca", "").strip()
@@ -1156,7 +929,6 @@ def clientes_view(request):
         },
     )
 
-
 @login_required
 def cadastrar_cliente_view(request):
     cliente = Cliente()
@@ -1173,7 +945,8 @@ def cadastrar_cliente_view(request):
                     formset.save()
 
                 messages.success(request, "Cliente cadastrado com sucesso.")
-                return redirect("detalhes_cliente", cliente_id=cliente.pk)
+                # ALTERE AQUI: redireciona para a lista de clientes em vez dos detalhes
+                return redirect("clientes")
 
             except IntegrityError:
                 form.add_error(
@@ -1194,7 +967,6 @@ def cadastrar_cliente_view(request):
         },
     )
 
-
 @login_required
 def detalhes_cliente_view(request, cliente_id):
     cliente = get_object_or_404(
@@ -1202,12 +974,26 @@ def detalhes_cliente_view(request, cliente_id):
         pk=cliente_id,
     )
 
+    # 1. Veículos que este cliente comprou
+    veiculos_comprados = Veiculo.objects.filter(
+        cliente_comprador=cliente
+    ).prefetch_related("fotos").order_by("-criado_em")
+
+    # 2. Reservas/Propostas associadas ao nome do cliente (usando criada_em no feminino)
+    propostas_reservas = ReservaVeiculo.objects.filter(
+        Q(cliente_nome__icontains=cliente.nome) |
+        (Q(cliente_nome__icontains=cliente.razao_social) if cliente.razao_social else Q())
+    ).select_related("veiculo", "vendedor").order_by("-criada_em")
+
     return render(
         request,
         "core/vendedor_cliente_detalhes.html",
-        {"cliente": cliente},
+        {
+            "cliente": cliente,
+            "veiculos_comprados": veiculos_comprados,
+            "propostas_reservas": propostas_reservas,
+        },
     )
-
 
 @login_required
 def editar_cliente_view(request, cliente_id):
@@ -1259,5 +1045,29 @@ def desativar_cliente_view(request, cliente_id):
     return render(
         request,
         "core/vendedor_cliente_confirmar_desativacao.html",
+        {"cliente": cliente},
+    )
+
+
+@login_required
+def deletar_cliente_view(request, cliente_id):
+    cliente = get_object_or_404(Cliente, pk=cliente_id)
+
+    if request.method == "POST":
+        try:
+            cliente.delete()
+            messages.success(request, "Cliente excluído com sucesso.")
+            return redirect("clientes")
+        except ProtectedError:
+            messages.error(
+                request,
+                "Não é possível excluir este cliente pois ele possui veículos com vendas registradas. "
+                "Para inativá-lo, utilize a opção de desativação.",
+            )
+            return redirect("detalhes_cliente", cliente_id=cliente.id)
+
+    return render(
+        request,
+        "core/vendedor_cliente_confirmar_exclusao.html",
         {"cliente": cliente},
     )

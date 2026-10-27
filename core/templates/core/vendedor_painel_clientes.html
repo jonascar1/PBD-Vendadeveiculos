@@ -5,11 +5,12 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_clientes.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/erros_formulario.css' %}">
 {% endblock %}
 
 {% block conteudo %}
 
-    <section class="clientes-pagina">
+    
 
         <header class="clientes-cabecalho">
             <div>
@@ -33,7 +34,20 @@
             </div>
         {% endif %}
 
+<section class="clientes-pagina">
+    
         <div class="clientes-card">
+
+            <div class="section-header clientes-header">
+                        <span class="contador-clientes">
+                            {{ clientes|length }}
+                            {% if clientes|length == 1 %}
+                                cliente encontrado
+                            {% else %}
+                                clientes encontrados
+                            {% endif %}
+                        </span>
+                    </div>
 
             <form method="get"
                 action="{% url 'clientes' %}"
@@ -178,11 +192,6 @@
                 </table>
 
             </div>
-
-            <footer class="clientes-rodape">
-                {{ clientes|length }}
-                cliente{{ clientes|length|pluralize }} encontrado{{ clientes|length|pluralize }}
-            </footer>
 
         </div>
 

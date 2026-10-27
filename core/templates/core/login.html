@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{% static 'core/css/login.css' %}">
 
     <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'core/css/erros_formulario.css' %}">
 </head>
 <body>
     <main class="login-container">
@@ -32,21 +33,17 @@
                 
             {% endif %}
 
-            <form method="post" id="loginForm">
+            <form method="post" id="loginForm" novalidate>
 
                 {% csrf_token %}
+
+                {{ form.non_field_errors }}
 
                 <div class="input-group">
                     <label for="username">Usuário</label>
 
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        placeholder="Digite seu usuário"
-                        autocomplete="username"
-                        required
-                    >
+                    {{ form.username }}
+{{ form.username.errors }}
                 </div>
 
                 <div class="input-group">
@@ -54,14 +51,8 @@
 
                     <div class="password-container">
 
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            placeholder="Digite sua senha"
-                            autocomplete="current-password"
-                            required
-                        >
+                        {{ form.password }}
+{{ form.password.errors }}
 
                         <button
                             type="button"

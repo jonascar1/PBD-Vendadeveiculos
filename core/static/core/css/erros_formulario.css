@@ -1,0 +1,35 @@
+/* Erros de validação gerados pelo Django */
+ul.errorlist {
+    list-style: none !important;
+    margin: 6px 0 0 !important;
+    padding: 0 !important;
+}
+
+ul.errorlist li {
+    color: #dc2626 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    list-style: none !important;
+}
+
+/* Asterisco vermelho antes de cada erro */
+ul.errorlist li::before {
+    content: "* " !important;
+    color: #dc2626 !important;
+    font-weight: 700 !important;
+}
+
+/* Campos com erros */
+.input-erro {
+    border: 1px solid #dc2626 !important;
+}
+
+/* Erros gerais do formulário */
+ul.errorlist.nonfield {
+    margin: 0 0 16px !important;
+    padding: 10px 12px !important;
+    background: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+    border-radius: 8px !important;
+}

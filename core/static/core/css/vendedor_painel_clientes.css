@@ -19,6 +19,16 @@
     margin-bottom: 30px;
 }
 
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
 .clientes-cabecalho h1 {
     font-size: 28px;
     margin: 0 0 6px;
@@ -29,6 +39,17 @@
     margin: 0;
     color: #6b7280;
     font-size: 14px;
+}
+
+.contador,
+.contador-clientes {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
 }
 
 /* ==============================
@@ -113,7 +134,12 @@
 /* ==============================
    BARRA DE PESQUISA
 ============================== */
-
+.clientes-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;  
+}
 .clientes-busca {
     display: flex;
     align-items: center;

@@ -6,15 +6,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 30px;
 }
 
 .topo h1 {
     font-size: 28px;
-    margin-bottom: 6px;
+    margin: 0 0 6px;
+    color: #111827;
 }
 
 .topo p {
+    margin: 0;
     color: #6b7280;
     font-size: 14px;
 }
@@ -28,14 +31,39 @@
     gap: 45px;
 }
 
-.badge {
-    background: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-weight: bold;
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e5e7eb;
 }
+
+.section-header h2 {
+    font-size: 16px;
+    margin: 0 0 4px;
+    color: #111827;
+}
+
+.section-header p {
+    color: #64748b;
+    font-size: 12px;
+    margin: 0;
+}
+
+.contador,
+.contador-veiculos {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 
 
 /* ==============================
@@ -43,15 +71,19 @@
 ============================== */
 
 .btn-cadastrar {
-    display: inline-block;
+     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 16px;
-    background: #2563eb;
-    color: white;
     border-radius: 7px;
+    background: #2563eb;
+    color: #fff;
     text-decoration: none;
     font-size: 13px;
-    font-weight: bold;
-    transition: 0.2s;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
 }
 
 .btn-cadastrar:hover {
@@ -88,16 +120,6 @@
     font-size: 12px;
 }
 
-.contador {
-    background: #eff6ff;
-    color: #2563eb;
-    padding: 7px 11px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-
 /* ==============================
    TABELA
 ============================== */
@@ -110,6 +132,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
+    text-align: left;
 }
 
 thead {
@@ -117,19 +140,21 @@ thead {
 }
 
 th {
-    text-align: left;
     padding: 13px 20px;
     color: #6b7280;
     font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    white-space: nowrap;
 }
 
 td {
     padding: 15px 20px;
     border-top: 1px solid #f0f1f3;
-    font-size: 13px;
     color: #374151;
+    font-size: 13px;
+    vertical-align: middle;
 }
 
 

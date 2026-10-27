@@ -16,11 +16,6 @@
                     <h1>Cadastrar vendedor</h1>
                     <p>Cadastre um novo vendedor na revenda.</p>
                 </div>
-
-                <div class="user-info">
-                    Gerente
-                </div>
-
             </header>
 
 
@@ -49,9 +44,11 @@
                     </div>
 
 
-                    <form method="post">
+                    <form method="post" novalidate>
 
                         {% csrf_token %}
+
+                        {{ form.non_field_errors }}
 
 
                         <div class="form-grid">
@@ -63,13 +60,8 @@
                                     Nome completo
                                 </label>
 
-                                <input
-                                    type="text"
-                                    id="nome"
-                                    name="nome"
-                                    placeholder="Digite o nome completo"
-                                    required
-                                >
+                                {{ form.nome }}
+{{ form.nome.errors }}
 
                             </div>
 
@@ -81,13 +73,8 @@
                                     Usuário
                                 </label>
 
-                                <input
-                                    type="text"
-                                    id="username"
-                                    name="username"
-                                    placeholder="Digite o usuário para login"
-                                    required
-                                >
+                                {{ form.username }}
+{{ form.username.errors }}
 
                                 <small>
                                     Usado pelo vendedor para entrar no sistema.
@@ -103,12 +90,8 @@
                                     E-mail
                                 </label>
 
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    placeholder="Digite o e-mail"
-                                >
+                                {{ form.email }}
+{{ form.email.errors }}
 
                             </div>
 
@@ -118,13 +101,7 @@
                                 <label for="senha">Senha</label>
 
                                 <div class="senha-container">
-                                    <input
-                                        type="password"
-                                        id="senha"
-                                        name="senha"
-                                        placeholder="Digite a senha"
-                                        required
-                                    >
+                                    {{ form.senha }}
 
                                     <button
                                         type="button"
@@ -134,6 +111,7 @@
                                         Mostrar
                                     </button>
                                 </div>
+                                {{ form.senha.errors }}
                             </div>
 
                             <!-- ALÇADA -->
@@ -150,7 +128,7 @@
                                             type="radio"
                                             name="tipo_alcada"
                                             value="PERCENTUAL"
-                                            checked
+                                            {% if form.tipo_alcada.value != "VALOR" %}checked{% endif %}
                                         >
                                         <span>Percentual (%)</span>
                                     </label>
@@ -160,6 +138,7 @@
                                             type="radio"
                                             name="tipo_alcada"
                                             value="VALOR"
+                                            {% if form.tipo_alcada.value == "VALOR" %}checked{% endif %}
                                         >
                                         <span>Valor (R$)</span>
                                     </label>
@@ -176,15 +155,7 @@
 
                                 <div class="alcada-valor">
 
-                                    <input
-                                        type="number"
-                                        id="valor_alcada"
-                                        name="valor_alcada"
-                                        step="0.01"
-                                        min="0"
-                                        value="0"
-                                        required
-                                    >
+                                    {{ form.valor_alcada }}
 
                                     <span
                                         class="alcada-sufixo"
@@ -194,10 +165,12 @@
                                     </span>
 
                                 </div>
+{{ form.valor_alcada.errors }}
 
                                 <small id="ajuda-alcada">
                                     Percentual máximo de desconto sem aprovação.
                                 </small>
+                                {{ form.tipo_alcada.errors }}
 
                             </div>
 
@@ -209,17 +182,8 @@
                                     Percentual de comissão (%)
                                 </label>
 
-                                <input
-                                    type="number"
-                                    id="percentual_comissao"
-                                    name="percentual_comissao"
-                                    step="0.01"
-                                    min="0"
-                                    value="0"
-                                    max="100"
-                                    required
-
-                                >
+                                {{ form.percentual_comissao }}
+                                {{ form.percentual_comissao.errors }}
 
                             </div>
 
@@ -281,11 +245,9 @@ const ajudaAlcada = document.getElementById(
     "ajuda-alcada"
 );
 
-radiosAlcada.forEach(function(radio) {
+function atualizarAlcada(valor) {
 
-    radio.addEventListener("change", function() {
-
-        if (this.value === "VALOR") {
+        if (valor === "VALOR") {
 
             labelAlcada.textContent =
                 "Limite de desconto (R$)";
@@ -306,8 +268,17 @@ radiosAlcada.forEach(function(radio) {
                 "Percentual máximo de desconto sem aprovação.";
         }
 
-    });
+    }
 
+radiosAlcada.forEach(function(radio) {
+    radio.addEventListener("change", function() {
+        atualizarAlcada(this.value);
+    });
 });
+
+const marcado = document.querySelector('input[name="tipo_alcada"]:checked');
+if (marcado) {
+    atualizarAlcada(marcado.value);
+}
 </script>
 {% endblock extra_js %}

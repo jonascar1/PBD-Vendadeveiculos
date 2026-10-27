@@ -38,27 +38,29 @@
 
         <nav class="menu">
 
-            <a href="#" class="ativo">
+            <a href="{% url 'painel_vendedor' %}" class="menu-item 
+                {% if request.resolver_match.url_name == 'painel_vendedor' %}active{% endif %}">
                 <span><i data-lucide="house"></i></span>
                 Início
             </a>
 
-            <a href="{% url 'clientes' %}">
+            <a href="{% url 'clientes' %}" class="menu-item 
+                {% if request.resolver_match.url_name == 'clientes' or request.resolver_match.url_name == 'cadastrar_cliente' or request.resolver_match.url_name == 'editar_cliente' or request.resolver_match.url_name == 'detalhes_cliente'  %}active{% endif %}">
                 <span><i data-lucide="user"></i></span>
                 Clientes
             </a>
 
-            <a href="#">
+            <a href="#" class="menu-item">
                 <span><i data-lucide="car-front"></i></span>
                 Veículos
             </a>
 
-            <a href="#">
+            <a href="#" class="menu-item">
                 <span><i data-lucide="circle-dollar-sign"></i></span>
                 Negociações
             </a>
 
-            <a href="#">
+            <a href="#" class="menu-item">
                 <span><i data-lucide="arrow-left-right"></i></span>
                 Registrar troca
             </a>
@@ -67,12 +69,12 @@
 
         <div class="menu-inferior">
 
-            <a href="#">
+            <a href="#" class="menu-item">
                 <span><i data-lucide="settings"></i></span>
                 Configurações
             </a>
 
-            <a href="{% url 'logout' %}" class="sair">
+            <a href="{% url 'logout' %}" class="menu-item logout">
                 <span><i data-lucide="log-out"></i></span>
                 Sair
             </a>

@@ -30,20 +30,12 @@ Veículos | VENDACERTA
         </p>
     </div>
 
-    <div class="topo-acoes">
-
-        <div class="badge">
-            Gerente
-        </div>
-
-        <a
-            href="{% url 'cadastrar_veiculo' %}"
-            class="btn-cadastrar"
-        >
-            + Cadastrar veículo
-        </a>
-
-    </div>
+    <a
+        href="{% url 'cadastrar_veiculo' %}"
+        class="btn-cadastrar"
+    >
+        + Cadastrar veículo
+    </a>
 
 </header>
 
@@ -65,24 +57,18 @@ Veículos | VENDACERTA
 {% endif %}
 
 
+
 <section class="card">
 
-    <div class="card-header">
-
-        <div>
-
-            <h2>Estoque de veículos</h2>
-
-            <p>
-                Consulte os veículos cadastrados no sistema.
-            </p>
-
-        </div>
-
-        <span class="contador">
-            {{ veiculos|length }} veículo{{ veiculos|length|pluralize }}
+    <div class="section-header veiculos-header">
+        <span class="contador-veiculos">
+            {{ veiculos|length }}
+            {% if vendedores|length == 1 %}
+                veiculo encontrado
+            {% else %}
+                veiculos encontrados
+            {% endif %}
         </span>
-
     </div>
 
     <form method="GET" class="barra-pesquisa-veiculos">

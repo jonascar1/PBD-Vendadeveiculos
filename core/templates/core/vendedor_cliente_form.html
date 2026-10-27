@@ -1,0 +1,377 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+
+{% block title %}{{ titulo }} | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_cliente_form.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/erros_formulario.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+<header class="cliente-form-cabecalho">
+    <div>
+        <h1>{{ titulo }}</h1>
+        <p>Preencha os dados do cliente. Os campos mudam conforme o tipo de pessoa.</p>
+    </div>
+</header>
+
+<section class="cliente-form-pagina">
+
+    <form method="post" novalidate class="cliente-form">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <!-- TIPO DE PESSOA -->
+        <div class="cliente-form-card">
+
+            <h2>Tipo de cliente</h2>
+
+            <div class="cliente-form-tipos">
+
+                <label class="cliente-form-tipo">
+                    <input
+                        type="radio"
+                        name="tipo"
+                        value="PF"
+                        {% if form.tipo.value != "PJ" %}checked{% endif %}
+                    >
+                    <span>
+                        <strong>Pessoa física</strong>
+                        <small>Cliente identificado por CPF.</small>
+                    </span>
+                </label>
+
+                <label class="cliente-form-tipo">
+                    <input
+                        type="radio"
+                        name="tipo"
+                        value="PJ"
+                        {% if form.tipo.value == "PJ" %}checked{% endif %}
+                    >
+                    <span>
+                        <strong>Pessoa jurídica</strong>
+                        <small>Empresa identificada por CNPJ.</small>
+                    </span>
+                </label>
+
+            </div>
+
+            {{ form.tipo.errors }}
+
+        </div>
+
+
+        <!-- PESSOA FÍSICA -->
+        <div class="cliente-form-card" data-tipo="PF">
+
+            <h2>Dados da pessoa física</h2>
+
+            <div class="cliente-form-grade">
+
+                <div class="cliente-form-campo largo">
+                    <label for="id_nome">Nome completo</label>
+                    {{ form.nome }}
+                    {{ form.nome.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_cpf">CPF</label>
+                    {{ form.cpf }}
+                    {{ form.cpf.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_data_nascimento">Data de nascimento</label>
+                    {{ form.data_nascimento }}
+                    {{ form.data_nascimento.errors }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PESSOA JURÍDICA -->
+        <div class="cliente-form-card" data-tipo="PJ">
+
+            <h2>Dados da pessoa jurídica</h2>
+
+            <div class="cliente-form-grade">
+
+                <div class="cliente-form-campo largo">
+                    <label for="id_razao_social">Razão social</label>
+                    {{ form.razao_social }}
+                    {{ form.razao_social.errors }}
+                </div>
+
+                <div class="cliente-form-campo largo">
+                    <label for="id_nome_fantasia">Nome fantasia</label>
+                    {{ form.nome_fantasia }}
+                    {{ form.nome_fantasia.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_cnpj">CNPJ</label>
+                    {{ form.cnpj }}
+                    {{ form.cnpj.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_responsavel">Responsável</label>
+                    {{ form.responsavel }}
+                    {{ form.responsavel.errors }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CONTATOS -->
+        <div class="cliente-form-card">
+
+            <div class="cliente-form-titulo-linha">
+                <h2>Contatos</h2>
+
+                <button type="button" class="cliente-form-btn-secundario" id="adicionar-telefone">
+                    + Adicionar telefone
+                </button>
+            </div>
+
+            {{ formset.management_form }}
+            {{ formset.non_form_errors }}
+
+            <div id="lista-telefones">
+
+                {% for f in formset %}
+                    <div class="cliente-form-telefone">
+
+                        {% for oculto in f.hidden_fields %}{{ oculto }}{% endfor %}
+
+                        <div class="cliente-form-campo">
+                            <label for="{{ f.numero.id_for_label }}">Telefone</label>
+                            {{ f.numero }}
+                            {{ f.numero.errors }}
+                        </div>
+
+                        <div class="cliente-form-campo">
+                            <label for="{{ f.tipo.id_for_label }}">Tipo</label>
+                            {{ f.tipo }}
+                            {{ f.tipo.errors }}
+                        </div>
+
+                        <label class="cliente-form-check">
+                            {{ f.principal }} Principal
+                        </label>
+
+                        <span hidden>{{ f.DELETE }}</span>
+
+                        <button type="button" class="cliente-form-remover" data-remover>
+                            Remover
+                        </button>
+
+                        {{ f.non_field_errors }}
+
+                    </div>
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- ENDEREÇO -->
+        <div class="cliente-form-card">
+
+            <h2>Endereço</h2>
+
+            <p class="cliente-form-ajuda" data-tipo="PJ">
+                Para pessoa jurídica o endereço é opcional.
+            </p>
+
+            <div class="cliente-form-grade">
+
+                <div class="cliente-form-campo">
+                    <label for="id_cep">CEP</label>
+                    {{ form.cep }}
+                    {{ form.cep.errors }}
+                </div>
+
+                <div class="cliente-form-campo largo">
+                    <label for="id_logradouro">Logradouro</label>
+                    {{ form.logradouro }}
+                    {{ form.logradouro.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_numero">Número</label>
+                    {{ form.numero }}
+                    {{ form.numero.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_complemento">Complemento</label>
+                    {{ form.complemento }}
+                    {{ form.complemento.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_bairro">Bairro</label>
+                    {{ form.bairro }}
+                    {{ form.bairro.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_cidade">Cidade</label>
+                    {{ form.cidade }}
+                    {{ form.cidade.errors }}
+                </div>
+
+                <div class="cliente-form-campo">
+                    <label for="id_estado">Estado</label>
+                    {{ form.estado }}
+                    {{ form.estado.errors }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="cliente-form-acoes">
+            <a href="{% url 'clientes' %}" class="cliente-form-btn-secundario">Cancelar</a>
+            <button type="submit" class="cliente-form-btn-principal">Salvar cliente</button>
+        </div>
+
+    </form>
+
+    <!-- Modelo de uma nova linha de telefone (copiado pelo script) -->
+    <template id="modelo-telefone">
+        <div class="cliente-form-telefone">
+
+            {% for oculto in formset.empty_form.hidden_fields %}{{ oculto }}{% endfor %}
+
+            <div class="cliente-form-campo">
+                <label>Telefone</label>
+                {{ formset.empty_form.numero }}
+            </div>
+
+            <div class="cliente-form-campo">
+                <label>Tipo</label>
+                {{ formset.empty_form.tipo }}
+            </div>
+
+            <label class="cliente-form-check">
+                {{ formset.empty_form.principal }} Principal
+            </label>
+
+            <span hidden>{{ formset.empty_form.DELETE }}</span>
+
+            <button type="button" class="cliente-form-remover" data-remover>
+                Remover
+            </button>
+
+        </div>
+    </template>
+
+</section>
+
+<script>
+(function () {
+
+    /* ---------- Pessoa física / jurídica ---------- */
+    const radiosTipo = document.querySelectorAll('input[name="tipo"]');
+    const blocosTipo = document.querySelectorAll('[data-tipo]');
+
+    function atualizarTipo() {
+        const marcado = document.querySelector('input[name="tipo"]:checked');
+        const tipo = marcado ? marcado.value : "PF";
+
+        blocosTipo.forEach(function (bloco) {
+            bloco.hidden = bloco.dataset.tipo !== tipo;
+        });
+    }
+
+    radiosTipo.forEach(function (radio) {
+        radio.addEventListener("change", atualizarTipo);
+    });
+    atualizarTipo();
+
+
+    /* ---------- Máscaras (o servidor guarda só os números) ---------- */
+    function mascara(campo, formatar) {
+        if (!campo) { return; }
+        const aplicar = function () { campo.value = formatar(campo.value.replace(/\D/g, "")); };
+        campo.addEventListener("input", aplicar);
+        if (campo.value) { aplicar(); }
+    }
+
+    function cpf(v) {
+        return v.slice(0, 11)
+            .replace(/^(\d{3})(\d)/, "$1.$2")
+            .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+            .replace(/\.(\d{3})(\d)/, ".$1-$2");
+    }
+
+    function cnpj(v) {
+        return v.slice(0, 14)
+            .replace(/^(\d{2})(\d)/, "$1.$2")
+            .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+            .replace(/\.(\d{3})(\d)/, ".$1/$2")
+            .replace(/(\d{4})(\d)/, "$1-$2");
+    }
+
+    function cep(v) {
+        return v.slice(0, 8).replace(/^(\d{5})(\d)/, "$1-$2");
+    }
+
+    function telefone(v) {
+        v = v.slice(0, 11);
+        if (v.length > 10) { return v.replace(/^(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3"); }
+        if (v.length > 6)  { return v.replace(/^(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3"); }
+        if (v.length > 2)  { return v.replace(/^(\d{2})(\d*)/, "($1) $2"); }
+        return v;
+    }
+
+    mascara(document.getElementById("id_cpf"), cpf);
+    mascara(document.getElementById("id_cnpj"), cnpj);
+    mascara(document.getElementById("id_cep"), cep);
+
+
+    /* ---------- Telefones ---------- */
+    const lista = document.getElementById("lista-telefones");
+    const modelo = document.getElementById("modelo-telefone");
+    const total = document.getElementById("id_telefones-TOTAL_FORMS");
+
+    function prepararLinha(linha) {
+        mascara(linha.querySelector('input[name$="-numero"]'), telefone);
+
+        linha.querySelector("[data-remover]").addEventListener("click", function () {
+            const apagar = linha.querySelector('input[name$="-DELETE"]');
+            if (apagar) { apagar.checked = true; }
+            linha.hidden = true;
+        });
+    }
+
+    lista.querySelectorAll(".cliente-form-telefone").forEach(prepararLinha);
+
+    document.getElementById("adicionar-telefone").addEventListener("click", function () {
+        const indice = parseInt(total.value, 10);
+        const html = modelo.innerHTML.replace(/__prefix__/g, indice);
+
+        const caixa = document.createElement("div");
+        caixa.innerHTML = html.trim();
+        const linha = caixa.firstElementChild;
+
+        lista.appendChild(linha);
+        total.value = indice + 1;
+        prepararLinha(linha);
+    });
+
+})();
+</script>
+
+{% endblock %}

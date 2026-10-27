@@ -31,9 +31,6 @@ Cadastrar veículo | VENDACERTA
 
     </div>
 
-    <div class="badge">
-        Gerente
-    </div>
 
 </header>
 
@@ -55,9 +52,11 @@ Cadastrar veículo | VENDACERTA
 {% endif %}
 
 
-<form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data" novalidate>
 
     {% csrf_token %}
+
+    {{ form.non_field_errors }}
 
 
     <!-- DADOS DO VEÍCULO -->
@@ -84,14 +83,8 @@ Cadastrar veículo | VENDACERTA
                     Placa
                 </label>
 
-                <input
-                    type="text"
-                    id="placa"
-                    name="placa"
-                    maxlength="8"
-                    placeholder="ABC1D23 ou ABC1234"
-                    required
-                >
+                {{ form.placa }}
+{{ form.placa.errors }}
 
             </div>
 
@@ -102,14 +95,8 @@ Cadastrar veículo | VENDACERTA
                     Chassi
                 </label>
 
-                <input
-                    type="text"
-                    id="chassi"
-                    name="chassi"
-                    maxlength="17"
-                    placeholder="17 caracteres"
-                    required
-                >
+                {{ form.chassi }}
+{{ form.chassi.errors }}
 
             </div>
 
@@ -118,15 +105,8 @@ Cadastrar veículo | VENDACERTA
                     Renavam
                 </label>
 
-                <input
-                    type="text"
-                    id="renavam"
-                    name="renavam"
-                    maxlength="11"
-                    inputmode="numeric"
-                    placeholder="Digite o renavam"
-                    required
-                >
+                {{ form.renavam }}
+{{ form.renavam.errors }}
             </div>
 
             <div class="campo">
@@ -135,13 +115,8 @@ Cadastrar veículo | VENDACERTA
                     Marca
                 </label>
 
-                <input
-                    type="text"
-                    id="marca"
-                    name="marca"
-                    placeholder="Ex.: Toyota"
-                    required
-                >
+                {{ form.marca }}
+{{ form.marca.errors }}
 
             </div>
 
@@ -152,13 +127,8 @@ Cadastrar veículo | VENDACERTA
                     Modelo
                 </label>
 
-                <input
-                    type="text"
-                    id="modelo"
-                    name="modelo"
-                    placeholder="Ex.: Corolla"
-                    required
-                >
+                {{ form.modelo }}
+{{ form.modelo.errors }}
 
             </div>
 
@@ -169,14 +139,8 @@ Cadastrar veículo | VENDACERTA
                     Ano de fabricação
                 </label>
 
-                <input
-                    type="number"
-                    id="ano_fabricacao"
-                    name="ano_fabricacao"
-                    oninput="this.value = this.value.slice(0, 4)"
-                    min="0"
-                    required
-                >
+                {{ form.ano_fabricacao }}
+{{ form.ano_fabricacao.errors }}
 
             </div>
 
@@ -187,14 +151,8 @@ Cadastrar veículo | VENDACERTA
                     Ano do modelo
                 </label>
 
-                <input
-                    type="number"
-                    id="ano_modelo"
-                    name="ano_modelo"
-                    oninput="this.value = this.value.slice(0, 4)"
-                    min="0"
-                    required
-                >
+                {{ form.ano_modelo }}
+{{ form.ano_modelo.errors }}
 
             </div>
 
@@ -205,13 +163,8 @@ Cadastrar veículo | VENDACERTA
                     Cor
                 </label>
 
-                <input
-                    type="text"
-                    id="cor"
-                    name="cor"
-                    placeholder="Ex.: Branco"
-                    required
-                >
+                {{ form.cor }}
+{{ form.cor.errors }}
 
             </div>
 
@@ -222,41 +175,8 @@ Cadastrar veículo | VENDACERTA
                     Combustível
                 </label>
 
-                <select
-                    id="combustivel"
-                    name="combustivel"
-                    required
-                >
-
-                    <option value="">
-                        Selecione
-                    </option>
-
-                    <option value="Gasolina">
-                        Gasolina
-                    </option>
-
-                    <option value="Etanol">
-                        Etanol
-                    </option>
-
-                    <option value="Flex">
-                        Flex
-                    </option>
-
-                    <option value="Diesel">
-                        Diesel
-                    </option>
-
-                    <option value="Elétrico">
-                        Elétrico
-                    </option>
-
-                    <option value="Híbrido">
-                        Híbrido
-                    </option>
-
-                </select>
+                {{ form.combustivel }}
+                {{ form.combustivel.errors }}
 
             </div>
 
@@ -269,17 +189,12 @@ Cadastrar veículo | VENDACERTA
 
                 <div class="input-unidade">
 
-                    <input
-                        type="number"
-                        id="quilometragem"
-                        name="quilometragem"
-                        min="0"
-                        required
-                    >
+                    {{ form.quilometragem }}
 
                     <span>km</span>
 
                 </div>
+{{ form.quilometragem.errors }}
 
             </div>
 
@@ -297,12 +212,8 @@ Cadastrar veículo | VENDACERTA
                 Informe os principais opcionais do veículo.
             </span>
 
-            <textarea
-                id="opcionais"
-                name="opcionais"
-                rows="4"
-                placeholder="Ex.: ar-condicionado, câmera de ré, bancos de couro..."
-            ></textarea>
+            {{ form.opcionais }}
+            {{ form.opcionais.errors }}
 
         </div>
 
@@ -339,8 +250,7 @@ Cadastrar veículo | VENDACERTA
                         type="radio"
                         name="origem"
                         value="COMPRADO"
-                        checked
-                        required
+                        {% if form.origem.value != "TROCA" and form.origem.value != "CONSIGNADO" %}checked{% endif %}
                     >
 
                     <div>
@@ -364,6 +274,7 @@ Cadastrar veículo | VENDACERTA
                         type="radio"
                         name="origem"
                         value="TROCA"
+                        {% if form.origem.value == "TROCA" %}checked{% endif %}
                     >
 
                     <div>
@@ -387,6 +298,7 @@ Cadastrar veículo | VENDACERTA
                         type="radio"
                         name="origem"
                         value="CONSIGNADO"
+                        {% if form.origem.value == "CONSIGNADO" %}checked{% endif %}
                     >
 
                     <div>
@@ -408,6 +320,8 @@ Cadastrar veículo | VENDACERTA
         </div>
 
 
+        {{ form.origem.errors }}
+
         <div class="form-grid valores">
 
             <div class="campo" id="campo-custo">
@@ -418,15 +332,9 @@ Cadastrar veículo | VENDACERTA
                 <div class="input-moeda">
                     <span>R$</span>
 
-                    <input
-                        type="number"
-                        id="custo_aquisicao"
-                        name="custo_aquisicao"
-                        min="0"
-                        step="0.01"
-                        placeholder="0,00"
-                    >
+                    {{ form.custo_aquisicao }}
                 </div>
+{{ form.custo_aquisicao.errors }}
 
                 <div class="campo">
                     <label for="preco_venda">
@@ -436,15 +344,9 @@ Cadastrar veículo | VENDACERTA
                     <div class="input-moeda">
                         <span>R$</span>
 
-                        <input
-                            type="number"
-                            id="preco_venda"
-                            name="preco_venda"
-                            min="0"
-                            step="0.01"
-                            placeholder="0,00"
-                        >
+                        {{ form.preco_venda }}
                     </div>
+{{ form.preco_venda.errors }}
 
     <small class="descricao">
         Preço pelo qual o veículo será anunciado para venda.
@@ -465,15 +367,9 @@ Cadastrar veículo | VENDACERTA
                 <div class="input-moeda">
                     <span>R$</span>
 
-                    <input
-                        type="number"
-                        id="valor_repasse"
-                        name="valor_repasse"
-                        min="0"
-                        step="0.01"
-                        placeholder="0,00"
-                    >
+                    {{ form.valor_repasse }}
                 </div>
+{{ form.valor_repasse.errors }}
 
                 <small class="descricao" id="descricao-repasse">
                     Utilizado quando o veículo for consignado.
@@ -537,6 +433,8 @@ Cadastrar veículo | VENDACERTA
                 class="preview-fotos"
             ></div>
 
+            {{ form.fotos.errors }}
+
             <div class="aviso-fotos">
                 <i data-lucide="info"></i><span>A primeira foto será utilizada como foto principal.</span>
             </div>
@@ -598,13 +496,11 @@ function atualizarOrigem() {
         // Consignado não possui custo de aquisição
         custoAquisicao.value = "0,00";
         custoAquisicao.disabled = true;
-        custoAquisicao.required = false;
 
         campoCusto.classList.add("campo-desabilitado");
 
         // No consignado, o repasse é obrigatório
         valorRepasse.disabled = false;
-        valorRepasse.required = true;
 
         campoRepasse.classList.remove("campo-desabilitado");
 
@@ -612,14 +508,12 @@ function atualizarOrigem() {
 
         // Comprado ou troca precisam de custo
         custoAquisicao.disabled = false;
-        custoAquisicao.required = true;
 
         campoCusto.classList.remove("campo-desabilitado");
 
         // Repasse não é necessário nesses casos
         valorRepasse.value = "";
         valorRepasse.disabled = true;
-        valorRepasse.required = false;
 
         campoRepasse.classList.add("campo-desabilitado");
     }
@@ -827,4 +721,3 @@ function atualizarInput() {
 </script>
 
 {% endblock extra_js %}
-

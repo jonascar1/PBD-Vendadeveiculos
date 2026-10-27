@@ -1,0 +1,196 @@
+.topo-detalhes {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.topo-detalhes h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.topo-detalhes p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.topo-acoes {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-voltar, .btn-editar {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-voltar {
+    background-color: #f1f5f9;
+    color: #334155;
+    border: 1px solid #e2e8f0;
+}
+
+.btn-voltar:hover {
+    background-color: #e2e8f0;
+}
+
+.btn-editar {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-editar:hover {
+    background-color: #1d4ed8;
+}
+
+/* CARDS DE INFORMAÇÕES */
+.cliente-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card-info {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-cabecalho h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.card-cabecalho h3 svg {
+    width: 20px;
+    height: 20px;
+    color: #2563eb;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.info-item span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 4px;
+}
+
+.info-item strong {
+    font-size: 14px;
+    color: #1e293b;
+}
+
+/* TABELAS */
+.tabela-responsive {
+    overflow-x: auto;
+}
+
+.tabela {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tabela th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tabela td {
+    padding: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.sub-info {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* BADGES E STATUS */
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-ativo {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.status-inativo {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.status-vendido, .status-entregue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.contador-badge {
+    background-color: #f1f5f9;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.btn-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-link:hover {
+    text-decoration: underline;
+}
+
+.sem-registros {
+    font-size: 14px;
+    color: #64748b;
+    font-style: italic;
+    margin: 8px 0;
+}

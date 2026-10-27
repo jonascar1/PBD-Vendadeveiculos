@@ -20,8 +20,7 @@
     </div>
 
     <div class="topo-acoes">
-        <div class="badge">Gerente</div>
-
+    
         <a href="{% url 'veiculos' %}" class="btn-voltar">
             <i data-lucide="chevron-left"></i> Voltar para veículos
         </a>
@@ -116,7 +115,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -154,7 +153,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'reservar_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -165,14 +164,12 @@
                                 type="text"
                                 name="cliente_nome"
                                 placeholder="Nome do cliente"
-                                required
                             >
 
                             <input
                                 type="text"
                                 name="cliente_contato"
                                 placeholder="Contato do cliente"
-                                required
                             >
                         </div>
 
@@ -211,7 +208,7 @@
                     <div class="acoes-situacao">
 
                         <form
-                            method="post"
+                            method="post" novalidate
                             action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                             class="form-situacao acao-venda"
                         >
@@ -222,6 +219,17 @@
                                 name="situacao"
                                 value="VENDIDO"
                             >
+
+                            <select name="cliente" required class="select-cliente">
+                                <option value="" disabled selected>Selecione o cliente comprador...</option>
+                                {% for c in clientes_list|default:None %}
+                                    <option value="{{ c.id }}">{{ c.nome|default:c.razao_social }}</option>
+                                {% empty %}
+                                    {% comment %} Caso prefira renderizar dinamicamente pelo form {% endcomment %}
+                                {% endfor %}
+                            </select>
+
+                            {{ form.cliente }}
 
                             <input
                                 type="text"
@@ -236,7 +244,7 @@
 
 
                         <form
-                            method="post"
+                            method="post" novalidate
                             action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                             class="form-situacao"
                         >
@@ -276,7 +284,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -407,6 +415,13 @@
                     <span>Quilometragem</span>
                     <strong>{{ veiculo.quilometragem }} km</strong>
                 </div>
+
+                {% if veiculo.cliente_comprador %}
+                <div class="info-item">
+                    <span>Cliente Comprador</span>
+                    <strong>{{ veiculo.cliente_comprador.nome|default:veiculo.cliente_comprador.razao_social }}</strong>
+                </div>
+                {% endif %}
 
             </div>
 

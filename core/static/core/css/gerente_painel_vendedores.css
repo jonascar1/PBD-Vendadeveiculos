@@ -145,15 +145,14 @@
 ============================== */
 
 .table-container {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 12px;
-    overflow: hidden;
+        width: 100%;
+        overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
+    text-align: left;
 }
 
 thead {
@@ -161,24 +160,35 @@ thead {
 }
 
 th {
-    text-align: left;
     padding: 13px 20px;
-    font-size: 11px;
     color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    white-space: nowrap;
 }
 
 td {
     padding: 15px 20px;
     border-top: 1px solid #f0f1f3;
+    color: #374151;
     font-size: 13px;
+    vertical-align: middle;
 }
 
 .main-content {
     margin-left: 250px;
     width: calc(100% - 250px);
     padding: 35px 45px;
+}
+
+.vendedores-tabela tbody tr {
+    transition: background 0.15s;
+}
+
+.vendedores-tabela tbody tr:hover {
+    background: #fafcff;
 }
 
 /* ==============================
@@ -189,15 +199,18 @@ td {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 30px;
 }
 
 .topbar h1 {
     font-size: 28px;
-    margin-bottom: 6px;
+    margin: 0 0 6px;
+    color: #111827;
 }
 
 .topbar p {
+    margin: 0;
     color: #6b7280;
     font-size: 14px;
 }
@@ -211,19 +224,28 @@ td {
 }
 
 .add-button {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 16px;
     border-radius: 7px;
     background: #2563eb;
-    color: white;
+    color: #fff;
     text-decoration: none;
     font-size: 13px;
-    font-weight: bold;
-    transition: 0.2s;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
 }
 
 .add-button:hover {
     background: #1d4ed8;
+}
+
+.add-button svg {
+    width: 17px;
+    height: 17px;
 }
 
 /* USUÁRIO */
@@ -273,15 +295,6 @@ td {
 .topbar p {
     color: #6b7280;
     font-size: 14px;
-}
-
-.user-info {
-    background: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-weight: bold;
 }
 
 .acoes-vendedores-topo {

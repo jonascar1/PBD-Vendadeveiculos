@@ -63,7 +63,7 @@
         </div>
 
 
-        <form method="post" class="preco-form">
+        <form method="post" class="preco-form" novalidate>
 
             {% csrf_token %}
 
@@ -82,21 +82,16 @@
                 </div>
             {% endif %}
 
+            {{ form.non_field_errors }}
+
             <div class="campo-preco">
 
                 <label for="preco_venda">
                     Novo preço de venda
                 </label>
 
-                <input
-                    type="number"
-                    id="preco_venda"
-                    name="preco_venda"
-                    step="0.01"
-                    min="0"
-                    value="{{ veiculo.preco_venda|default:'' }}"
-                    required
-                >
+                {{ form.preco_venda }}
+                {{ form.preco_venda.errors }}
 
             </div>
 

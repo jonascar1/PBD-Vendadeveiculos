@@ -17,19 +17,30 @@ Cobre os critérios de aceite:
 - Auditoria simples de edição/exclusão de lançamentos financeiros
 """
 
+# --- stdlib ---
 import re
+from datetime import date
 from decimal import Decimal
 
-from django.conf import settings
+# --- django ---
+from django import forms
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 
+# ============================================================
+# Constantes / regex
+# ============================================================
+
 PLACA_REGEX = re.compile(r"^[A-Z]{3}-?\d{4}$|^[A-Z]{3}\d[A-Z]\d{2}$")  # antiga e Mercosul
 CHASSI_REGEX = re.compile(r"^[A-HJ-NPR-Z0-9]{17}$")  # 17 chars, sem I/O/Q (padrão VIN)
 
+
+# ============================================================
+# Usuários e perfis
+# ============================================================
 
 class Usuario(AbstractUser):
     """
@@ -70,8 +81,8 @@ class PerfilVendedor(models.Model):
     """
 
     class TipoAlcada(models.TextChoices):
-            PERCENTUAL = "PERCENTUAL", "Percentual (%)"
-            VALOR = "VALOR", "Valor (R$)"
+        PERCENTUAL = "PERCENTUAL", "Percentual (%)"
+        VALOR = "VALOR", "Valor (R$)"
 
     usuario = models.OneToOneField(
         Usuario,
@@ -121,8 +132,17 @@ class PerfilVendedor(models.Model):
             )
 
     def __str__(self):
-        return f"Vendedor: {self.usuario} — alçada {self.alcada_desconto}% / comissão {self.percentual_comissao}%"
+        # BUGFIX: o original referenciava self.alcada_desconto (campo inexistente).
+        return (
+            f"Vendedor: {self.usuario} — "
+            f"alçada {self.valor_alcada} ({self.get_tipo_alcada_display()}) / "
+            f"comissão {self.percentual_comissao}%"
+        )
 
+
+# ============================================================
+# Veículos
+# ============================================================
 
 class Veiculo(models.Model):
     class Origem(models.TextChoices):
@@ -158,7 +178,9 @@ class Veiculo(models.Model):
     # Situação operacional (fluxo de preparo/entrega) — granularidade maior
     # que `status`, que controla apenas disponibilidade comercial.
     situacao = models.CharField(
-        max_length=20, choices=Situacao.choices, default=Situacao.PREPARACAO,
+        max_length=20,
+        choices=Situacao.choices,
+        default=Situacao.PREPARACAO,
     )
 
     origem = models.CharField(max_length=20, choices=Origem.choices)
@@ -171,12 +193,16 @@ class Veiculo(models.Model):
 
     # Trava: depois que a venda fecha, custo não pode mais mudar.
     venda_fechada = models.BooleanField(default=False)
+    cliente_comprador = models.ForeignKey("Cliente",on_delete=models.PROTECT,related_name="veiculos_comprados",null=True,blank=True,)
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DISPONIVEL)
 
-    criado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="veiculos_cadastrados")
+    criado_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="veiculos_cadastrados"
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
 
+    
     class Meta:
         constraints = [
             # Unicidade de placa e chassi apenas no estoque ATIVO (não vendido).
@@ -227,15 +253,20 @@ class Veiculo(models.Model):
 
     def __str__(self):
         return f"{self.marca} {self.modelo} — {self.placa}"
+    
 
 
 class HistoricoSituacaoVeiculo(models.Model):
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="historico_situacoes")
+    veiculo = models.ForeignKey(
+        Veiculo, on_delete=models.PROTECT, related_name="historico_situacoes"
+    )
 
     situacao_anterior = models.CharField(max_length=20, blank=True, null=True)
     situacao_nova = models.CharField(max_length=20)
 
-    alterado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="alteracoes_situacao_veiculo")
+    alterado_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="alteracoes_situacao_veiculo"
+    )
     alterado_em = models.DateTimeField(auto_now_add=True)
 
     motivo = models.CharField(max_length=255, blank=True, null=True)
@@ -257,7 +288,9 @@ class FotoVeiculo(models.Model):
         super().save(*args, **kwargs)
         if self.principal:
             # Garante que só há uma foto principal por veículo.
-            FotoVeiculo.objects.filter(veiculo=self.veiculo).exclude(pk=self.pk).update(principal=False)
+            FotoVeiculo.objects.filter(veiculo=self.veiculo).exclude(pk=self.pk).update(
+                principal=False
+            )
 
 
 class ReservaVeiculo(models.Model):
@@ -269,12 +302,16 @@ class ReservaVeiculo(models.Model):
     """
 
     veiculo = models.OneToOneField(
-        Veiculo, on_delete=models.CASCADE, related_name="reserva_ativa",
+        Veiculo,
+        on_delete=models.CASCADE,
+        related_name="reserva_ativa",
         limit_choices_to={"status": Veiculo.Status.DISPONIVEL},
     )
     cliente_nome = models.CharField(max_length=120)
     cliente_contato = models.CharField(max_length=60)
-    vendedor = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="reservas_feitas")
+    vendedor = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="reservas_feitas"
+    )
 
     criada_em = models.DateTimeField(auto_now_add=True)
     expira_em = models.DateTimeField()
@@ -321,6 +358,10 @@ class ReservaVeiculo(models.Model):
             Veiculo.objects.filter(pk=self.veiculo_id).update(status=Veiculo.Status.RESERVADO)
 
 
+# ============================================================
+# Financeiro
+# ============================================================
+
 class LancamentoFinanceiro(models.Model):
     """
     Toda entrada/saída ligada a um veículo (custo extra, despesa de preparo,
@@ -337,7 +378,9 @@ class LancamentoFinanceiro(models.Model):
         VENDA = "VENDA", "Valor de venda"
         COMISSAO = "COMISSAO", "Comissão paga"
 
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="lancamentos")
+    veiculo = models.ForeignKey(
+        Veiculo, on_delete=models.PROTECT, related_name="lancamentos"
+    )
     tipo = models.CharField(max_length=20, choices=Tipo.choices)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     descricao = models.CharField(max_length=200, blank=True)
@@ -347,12 +390,20 @@ class LancamentoFinanceiro(models.Model):
 
     # Auditoria de edição/exclusão (soft delete, igual ao Usuario).
     editado_por = models.ForeignKey(
-        Usuario, on_delete=models.PROTECT, null=True, blank=True, related_name="despesas_editadas",
+        Usuario,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="despesas_editadas",
     )
     editado_em = models.DateTimeField(null=True, blank=True)
     excluido = models.BooleanField(default=False)
     excluido_por = models.ForeignKey(
-        Usuario, on_delete=models.PROTECT, null=True, blank=True, related_name="despesas_excluidas",
+        Usuario,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="despesas_excluidas",
     )
     excluido_em = models.DateTimeField(null=True, blank=True)
 
@@ -386,7 +437,9 @@ def calcular_margem(veiculo: Veiculo) -> Decimal:
 
 
 class HistoricoPrecoVeiculo(models.Model):
-    veiculo = models.ForeignKey(Veiculo, on_delete=models.PROTECT, related_name="historico_precos")
+    veiculo = models.ForeignKey(
+        Veiculo, on_delete=models.PROTECT, related_name="historico_precos"
+    )
 
     valor_anterior = models.DecimalField(max_digits=12, decimal_places=2)
     valor_novo = models.DecimalField(max_digits=12, decimal_places=2)
@@ -394,12 +447,68 @@ class HistoricoPrecoVeiculo(models.Model):
     custo_total_no_momento = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     abaixo_do_custo = models.BooleanField(default=False)
 
-    alterado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="alteracoes_preco_veiculo")
+    alterado_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="alteracoes_preco_veiculo"
+    )
     alterado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.veiculo} — R$ {self.valor_anterior} → R$ {self.valor_novo}"
 
+
+# ============================================================
+# Validação de documentos (CPF / CNPJ)
+# ============================================================
+
+def validar_cpf(valor):
+    cpf = re.sub(r"\D", "", valor or "")
+
+    if len(cpf) != 11 or len(set(cpf)) == 1:
+        return False
+
+    numeros = [int(digito) for digito in cpf]
+
+    soma = sum(numeros[i] * (10 - i) for i in range(9))
+    resto = (soma * 10) % 11
+    primeiro = 0 if resto == 10 else resto
+
+    if numeros[9] != primeiro:
+        return False
+
+    soma = sum(numeros[i] * (11 - i) for i in range(10))
+    resto = (soma * 10) % 11
+    segundo = 0 if resto == 10 else resto
+
+    return numeros[10] == segundo
+
+
+def validar_cnpj(valor):
+    cnpj = re.sub(r"\D", "", valor or "")
+
+    if len(cnpj) != 14 or len(set(cnpj)) == 1:
+        return False
+
+    numeros = [int(digito) for digito in cnpj]
+
+    pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    soma = sum(n * p for n, p in zip(numeros[:12], pesos1))
+    resto = soma % 11
+    primeiro = 0 if resto < 2 else 11 - resto
+
+    if numeros[12] != primeiro:
+        return False
+
+    pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    soma = sum(n * p for n, p in zip(numeros[:13], pesos2))
+    resto = soma % 11
+    segundo = 0 if resto < 2 else 11 - resto
+
+    return numeros[13] == segundo
+
+
+# ============================================================
+# Clientes
+# ============================================================
 
 class Cliente(models.Model):
     class Tipo(models.TextChoices):
@@ -540,3 +649,56 @@ class TelefoneCliente(models.Model):
 
     def __str__(self):
         return self.numero
+
+
+# ============================================================
+# Formulário de Cliente
+# ============================================================
+
+class ClienteForm(forms.ModelForm):
+    """
+    Form de Cliente com validação de CPF/CNPJ e data de nascimento.
+
+    As validações de documento e data ficavam soltas no módulo (como
+    `def clean_cpf(self)`), o que é inválido — métodos `clean_<campo>`
+    só existem dentro de um Form. Foram movidos para cá.
+    """
+
+    class Meta:
+        model = Cliente
+        fields = "__all__"
+
+    def _somente_numeros(self, campo):
+        return re.sub(r"\D", "", self.cleaned_data.get(campo) or "")
+
+    def clean_cpf(self):
+        cpf = self._somente_numeros("cpf")
+
+        if self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_FISICA:
+            if not validar_cpf(cpf):
+                raise ValidationError("Informe um CPF válido.")
+
+        return cpf
+
+    def clean_cnpj(self):
+        cnpj = self._somente_numeros("cnpj")
+
+        if self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_JURIDICA:
+            if not validar_cnpj(cnpj):
+                raise ValidationError("Informe um CNPJ válido.")
+
+        return cnpj
+
+    def clean_data_nascimento(self):
+        nascimento = self.cleaned_data.get("data_nascimento")
+
+        if (
+            self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_FISICA
+            and nascimento
+            and nascimento > date.today()
+        ):
+            raise ValidationError(
+                "A data de nascimento não pode ser futura."
+            )
+
+        return nascimento

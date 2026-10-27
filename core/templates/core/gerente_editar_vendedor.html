@@ -1,4 +1,4 @@
-    {% extends 'core/gerente_base.html' %}
+{% extends 'core/gerente_base.html' %}
 
     {% load static %}
 
@@ -23,11 +23,6 @@
                         </p>
 
                     </div>
-
-
-                    <span class="badge">
-                        Gerente
-                    </span>
 
                 </div>
 
@@ -76,9 +71,11 @@
 
 
 
-                    <form method="post">
+                    <form method="post" novalidate>
 
                         {% csrf_token %}
+
+                        {{ form.non_field_errors }}
 
 
                         <!-- ==========================
@@ -109,14 +106,8 @@
                                         Nome
                                     </label>
 
-                                    <input
-                                        type="text"
-                                        id="nome"
-                                        name="nome"
-                                        value="{{ dados.usuario.first_name }}"
-                                        placeholder="Digite o nome"
-                                        required
-                                    >
+                                    {{ form.nome }}
+{{ form.nome.errors }}
 
                                 </div>
 
@@ -127,13 +118,8 @@
                                         E-mail
                                     </label>
 
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        value="{{ dados.usuario.email }}"
-                                        placeholder="Digite o e-mail"
-                                    >
+                                    {{ form.email }}
+{{ form.email.errors }}
 
                                 </div>
 
@@ -191,23 +177,8 @@
                                         Status
                                     </label>
 
-                                    <select id="ativo" name="ativo">
-
-                                        <option
-                                            value="true"
-                                            {% if dados.usuario.ativo %}selected{% endif %}
-                                        >
-                                            Ativo
-                                        </option>
-
-                                        <option
-                                            value="false"
-                                            {% if not dados.usuario.ativo %}selected{% endif %}
-                                        >
-                                            Inativo
-                                        </option>
-
-                                    </select>
+                                    {{ form.ativo }}
+                                    {{ form.ativo.errors }}
 
                                     <small class="descricao">
                                         Vendedores inativos não conseguem acessar o sistema.
@@ -286,9 +257,7 @@
                                                 type="radio"
                                                 name="tipo_alcada"
                                                 value="PERCENTUAL"
-                                                {% if dados.tipo_alcada == "PERCENTUAL" %}
-                                                    checked
-                                                {% endif %}
+                                                {% if form.tipo_alcada.value == "PERCENTUAL" %}checked{% endif %}
                                             >
                                             Percentual (%)
                                         </label>
@@ -298,9 +267,7 @@
                                                 type="radio"
                                                 name="tipo_alcada"
                                                 value="VALOR"
-                                                {% if dados.tipo_alcada == "VALOR" %}
-                                                    checked
-                                                {% endif %}
+                                                {% if form.tipo_alcada.value == "VALOR" %}checked{% endif %}
                                             >
                                             Valor (R$)
                                         </label>
@@ -325,21 +292,14 @@
 
                                         
 
-                                        <input
-                                            type="number"
-                                            id="percentual_comissao"
-                                            name="percentual_comissao"
-                                            value="{{ dados.percentual_comissao|unlocalize}}"
-                                            min="0"
-                                            max="100"
-                                            step="0.01"
-                                        >
+                                        {{ form.percentual_comissao }}
 
                                         <span>
                                             %
                                         </span>
 
                                     </div>
+{{ form.percentual_comissao.errors }}
 
                                 </div>
 
@@ -361,14 +321,7 @@
 
                                     <div class="input-percentual">
 
-                                        <input
-                                            type="number"
-                                            id="valor_alcada"
-                                            name="valor_alcada"
-                                            value="{{ dados.valor_alcada|unlocalize }}"
-                                            min="0"
-                                            step="0.01"
-                                        >
+                                        {{ form.valor_alcada }}
 
                                         <span id="sufixo-alcada">
                                             {% if dados.tipo_alcada == "VALOR" %}
@@ -379,6 +332,7 @@
                                         </span>
 
                                     </div>
+{{ form.valor_alcada.errors }}
 
                                 </div>
                             </div>
@@ -465,7 +419,3 @@
     atualizarAlcada();
     </script>
     {% endblock %}
-
-
-            
-
