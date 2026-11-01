@@ -1,0 +1,416 @@
+:root {
+    --prop-primary: #0f172a;
+    --prop-accent: #2563eb;
+    --prop-accent-hover: #1d4ed8;
+    --prop-background: #f4f7fb;
+    --prop-card: #ffffff;
+    --prop-text: #1e293b;
+    --prop-muted: #64748b;
+    --prop-border: #e2e8f0;
+    --prop-radius: 10px;
+    --prop-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --prop-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Área principal: respeita a sidebar definida no template-base. */
+.propostas-page,
+.propostas-page * {
+    box-sizing: border-box;
+}
+
+.propostas-page {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(1.25rem, 2.5vw, 2.25rem);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    color: var(--prop-text);
+    font-family: var(--prop-font);
+}
+
+/* Cabeçalho */
+.prop-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.prop-titulo {
+    margin: 0;
+    color: var(--prop-primary);
+    font-size: clamp(1.5rem, 2vw, 1.85rem);
+    line-height: 1.25;
+    font-weight: 750;
+    letter-spacing: -0.025em;
+}
+
+.prop-subtitulo {
+    margin: 0.4rem 0 0;
+    color: var(--prop-muted);
+    font-size: 0.94rem;
+    line-height: 1.5;
+}
+
+.prop-acoes {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Botões */
+.prop-btn {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.62rem 1rem;
+    border: 1px solid var(--prop-border);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--prop-text);
+    font: inherit;
+    font-size: 0.875rem;
+    font-weight: 650;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.prop-btn:hover {
+    background: #f1f5f9;
+}
+
+.prop-btn:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.22);
+    outline-offset: 2px;
+}
+
+.prop-btn-primario {
+    color: #fff;
+    background: var(--prop-accent);
+    border-color: var(--prop-accent);
+}
+
+.prop-btn-primario:hover {
+    color: #fff;
+    background: var(--prop-accent-hover);
+    border-color: var(--prop-accent-hover);
+}
+
+.prop-btn-secundario {
+    background: #f8fafc;
+    color: var(--prop-primary);
+}
+
+.prop-btn-secundario:hover {
+    background: #eaf0f7;
+}
+
+.prop-btn-pequeno {
+    min-height: 34px;
+    padding: 0.42rem 0.75rem;
+    font-size: 0.82rem;
+}
+
+/* Seções e cartões */
+.prop-secao {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    min-width: 0;
+}
+
+.prop-card {
+    min-width: 0;
+    background: var(--prop-card);
+    border: 1px solid var(--prop-border);
+    border-radius: var(--prop-radius);
+    box-shadow: var(--prop-shadow);
+}
+
+.prop-secao-cabecalho {
+    margin-bottom: 0.1rem;
+}
+
+.prop-secao-titulo {
+    margin: 0;
+    color: var(--prop-primary);
+    font-size: 1.2rem;
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+.prop-secao-ajuda {
+    margin: 0.2rem 0 0;
+    color: var(--prop-muted);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+/* Formulário de filtros */
+.prop-filtros {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: end;
+    gap: 1rem;
+    padding: 1.25rem;
+}
+
+.prop-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.prop-campo label {
+    color: #334155;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.prop-campo select,
+.prop-campo input:not([type="hidden"]),
+.prop-campo textarea {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0.62rem 0.75rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background-color: #fff;
+    color: var(--prop-text);
+    font: inherit;
+    font-size: 0.875rem;
+    line-height: 1.3;
+    outline: none;
+}
+
+.prop-campo select:focus,
+.prop-campo input:focus,
+.prop-campo textarea:focus {
+    border-color: var(--prop-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.prop-campo .errorlist {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: #b91c1c;
+    font-size: 0.8rem;
+}
+
+.prop-acoes-filtro {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.65rem;
+    padding-top: 0.25rem;
+}
+
+/* Lista de propostas */
+.prop-lista {
+    overflow: hidden;
+}
+
+.prop-linha {
+    display: grid;
+    grid-template-columns: minmax(130px, 1.2fr) minmax(150px, 1.35fr)
+                           minmax(125px, 1fr) minmax(130px, 1fr)
+                           minmax(105px, 0.8fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.prop-linha:last-child {
+    border-bottom: 0;
+}
+
+.prop-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.prop-principal,
+.prop-valor {
+    color: var(--prop-primary);
+    font-size: 0.9rem;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+
+.prop-secundario {
+    color: var(--prop-muted);
+    font-size: 0.79rem;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.prop-status-col {
+    display: flex;
+    align-items: center;
+}
+
+.prop-detalhes-col {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.prop-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 0.32rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.prop-badge-em_analise,
+.prop-badge-analise,
+.prop-badge-pendente {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.prop-badge-aprovada,
+.prop-badge-aprovado,
+.prop-badge-aceita {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.prop-badge-recusada,
+.prop-badge-rejeitada,
+.prop-badge-cancelada {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+/* Estado sem resultados */
+.prop-vazio {
+    min-height: 190px;
+    padding: 3rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    text-align: center;
+    color: var(--prop-muted);
+}
+
+.prop-vazio strong {
+    color: var(--prop-primary);
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.prop-vazio p {
+    margin: 0 0 0.55rem;
+    font-size: 0.9rem;
+}
+
+/* Paginação */
+.prop-paginacao {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.35rem;
+}
+
+.prop-pagina-atual {
+    min-height: 34px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--prop-border);
+    border-radius: 7px;
+    color: var(--prop-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+/* Telas médias */
+@media (max-width: 1100px) {
+    .prop-filtros {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .prop-linha {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .prop-detalhes-col {
+        justify-content: flex-start;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .propostas-page {
+        padding: 1rem;
+        gap: 1.25rem;
+    }
+
+    .prop-cabecalho {
+        align-items: flex-start;
+    }
+
+    .prop-acoes,
+    .prop-acoes .prop-btn {
+        width: 100%;
+    }
+
+    .prop-filtros {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .prop-acoes-filtro {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .prop-acoes-filtro .prop-btn {
+        width: 100%;
+    }
+
+    .prop-linha {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+        padding: 1rem;
+    }
+
+    .prop-status-col,
+    .prop-detalhes-col {
+        grid-column: 1 / -1;
+    }
+
+    .prop-detalhes-col .prop-btn {
+        width: 100%;
+    }
+
+    .prop-vazio {
+        padding: 2.25rem 1rem;
+    }
+}

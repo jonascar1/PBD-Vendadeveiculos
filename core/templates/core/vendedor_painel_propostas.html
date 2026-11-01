@@ -1,0 +1,126 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/vendedor_painel_propostas.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="propostas-page">
+    <header class="prop-cabecalho">
+        <div>
+            <h1 class="prop-titulo">Propostas de compra</h1>
+            <p class="prop-subtitulo">Acompanhe as negociações e as condições oferecidas pelos clientes.</p>
+        </div>
+
+        <div class="prop-acoes">
+            <a class="prop-btn prop-btn-primario" href="{% url 'nova_proposta' %}">
+                <span aria-hidden="true">＋</span> Nova proposta
+            </a>
+        </div>
+    </header>
+
+    <section class="prop-secao" aria-label="Filtros de propostas">
+        <form id="filtros-propostas" method="get" action="{% url 'propostas' %}" class="prop-card prop-filtros">
+            <div class="prop-campo">
+                <label for="{{ filtros_form.cliente.id_for_label }}">Cliente</label>
+                {{ filtros_form.cliente }}
+                {{ filtros_form.cliente.errors }}
+            </div>
+
+            <div class="prop-campo">
+                <label for="{{ filtros_form.veiculo.id_for_label }}">Veículo</label>
+                {{ filtros_form.veiculo }}
+                {{ filtros_form.veiculo.errors }}
+            </div>
+
+            <div class="prop-campo">
+                <label for="{{ filtros_form.situacao.id_for_label }}">Situação</label>
+                {{ filtros_form.situacao }}
+                {{ filtros_form.situacao.errors }}
+            </div>
+
+            <div class="prop-campo">
+                <label for="{{ filtros_form.vendedor.id_for_label }}">Vendedor</label>
+                {{ filtros_form.vendedor }}
+                {{ filtros_form.vendedor.errors }}
+            </div>
+
+            <div class="prop-acoes-filtro">
+                <button class="prop-btn prop-btn-primario" type="submit">Filtrar</button>
+                <a class="prop-btn prop-btn-secundario" href="{% url 'propostas' %}">Limpar</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="prop-secao">
+        <div class="prop-secao-cabecalho">
+            <h2 class="prop-secao-titulo">Todas as propostas</h2>
+            <p class="prop-secao-ajuda">Visualize os valores, descontos e situação de cada negociação.</p>
+        </div>
+
+        <div class="prop-card prop-lista">
+            {% for proposta in propostas %}
+                <article class="prop-linha">
+                    <div class="prop-info-col">
+                        <span class="prop-principal">{{ proposta.cliente }}</span>
+                        <span class="prop-secundario">Cliente</span>
+                    </div>
+
+                    <div class="prop-info-col">
+                        <span class="prop-principal">{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }}</span>
+                        <span class="prop-secundario">{{ proposta.veiculo.placa|default:"Placa não informada" }}</span>
+                    </div>
+
+                    <div class="prop-info-col">
+                        <span class="prop-valor">R$ {{ proposta.valor_oferecido|floatformat:2 }}</span>
+                        <span class="prop-secundario">Valor oferecido</span>
+                    </div>
+
+                    <div class="prop-info-col prop-desconto-col">
+                        <span class="prop-valor">R$ {{ proposta.desconto_embutido|default:0|floatformat:2 }}</span>
+                        <span class="prop-secundario">{{ proposta.desconto_percentual|default:0|floatformat:2 }}% de desconto</span>
+                    </div>
+
+                    <div class="prop-status-col">
+                        <span class="prop-badge prop-badge-{{ proposta.situacao|lower }}">
+                            {{ proposta.get_situacao_display|default:proposta.situacao }}
+                        </span>
+                    </div>
+
+                    <div class="prop-detalhes-col">
+                        <a class="prop-btn prop-btn-secundario prop-btn-pequeno"
+                           href="{% url 'detalhes_proposta' proposta.pk %}">Detalhes</a>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="prop-vazio">
+                    <strong>Nenhuma proposta encontrada</strong>
+                    <p>Não há propostas para os filtros selecionados.</p>
+                    <a class="prop-btn prop-btn-primario" href="{% url 'nova_proposta' %}">
+                        Criar primeira proposta
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+            <nav class="prop-paginacao" aria-label="Paginação">
+                {% if page_obj.has_previous %}
+                    <a class="prop-btn prop-btn-pequeno"
+                       href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                {% endif %}
+
+                <span class="prop-pagina-atual" aria-current="page">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a class="prop-btn prop-btn-pequeno"
+                       href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

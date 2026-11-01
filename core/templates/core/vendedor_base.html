@@ -8,10 +8,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Painel do Vendedor | VENDACERTA {% endblock %}</title>
+    <title>{% block title %}Painel do Vendedor | VENDACERTA{% endblock %}</title>
 
     <link rel="stylesheet" href="{% static 'core/css/vendedor_base.css' %}">
-    {% block extra_css %} {% endblock %}
+    {% block extra_css %}{% endblock %}
     <link rel="icon" type="image/png" href="{% static 'core/img/favicon.png' %}">
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -45,7 +45,7 @@
             </a>
 
             <a href="{% url 'clientes' %}" class="menu-item 
-                {% if request.resolver_match.url_name == 'clientes' or request.resolver_match.url_name == 'cadastrar_cliente' or request.resolver_match.url_name == 'editar_cliente' or request.resolver_match.url_name == 'detalhes_cliente'  %}active{% endif %}">
+                {% if request.resolver_match.url_name == 'clientes' or request.resolver_match.url_name == 'cadastrar_cliente' or request.resolver_match.url_name == 'editar_cliente' or request.resolver_match.url_name == 'detalhes_cliente' %}active{% endif %}">
                 <span><i data-lucide="user"></i></span>
                 Clientes
             </a>
@@ -55,7 +55,8 @@
                 Veículos
             </a>
 
-            <a href="#" class="menu-item">
+            <a href="{% url 'propostas' %}" class="menu-item
+                {% if request.resolver_match.url_name == 'propostas' or request.resolver_match.url_name == 'nova_proposta' or request.resolver_match.url_name == 'editar_proposta' or request.resolver_match.url_name == 'detalhes_proposta' %}active{% endif %}">
                 <span><i data-lucide="circle-dollar-sign"></i></span>
                 Negociações
             </a>
@@ -83,22 +84,19 @@
 
     </aside>
 
-<!-- CONTEÚDO DA PÁGINA -->
+    <!-- CONTEÚDO DA PÁGINA -->
     <main class="conteudo">
-
-        {% block conteudo %}
+        {% block content %}
         {% endblock %}
-
     </main>
+
+    <!-- JAVASCRIPT ESPECÍFICO DA PÁGINA E ÍCONES -->
+    <script>
+        lucide.createIcons();
+    </script>
+
+    {% block extra_js %}
+    {% endblock %}
+
 </body>
 </html>
-
-<!-- JAVASCRIPT ESPECÍFICO DA PÁGINA -->
-
-
-<script>
-    lucide.createIcons();
-</script>
-
-{% block extra_js %}
-{% endblock %}

@@ -194,3 +194,21 @@
     font-style: italic;
     margin: 8px 0;
 }
+/* Badges de status para propostas e reservas */
+.badge.status-aguardando {
+    background-color: var(--warning-bg, #fffbe6);
+    color: var(--warning-color, #d46b08);
+    border: 1px solid var(--warning-border, #ffe58f);
+}
+
+.badge.status-ativa {
+    background-color: var(--success-bg, #f6ffed);
+    color: var(--success-color, #389e0d);
+    border: 1px solid var(--success-border, #b7eb8f);
+}
+
+.badge.status-cancelada {
+    background-color: var(--danger-bg, #fff1f0);
+    color: var(--danger-color, #cf1322);
+    border: 1px solid var(--danger-border, #ffa39e);
+}

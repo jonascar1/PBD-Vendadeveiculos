@@ -13,7 +13,7 @@ urlpatterns = [
     path("painel/vendedor/clientes/<int:cliente_id>/", views.detalhes_cliente_view, name="detalhes_cliente"),
     path("painel/vendedor/clientes/<int:cliente_id>/editar/", views.editar_cliente_view, name="editar_cliente"),
     path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
-    path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
+
 
     path("painel/administrativo/inicio/", views.painel_administrativo_view, name="painel_administrativo"),
     path("painel/administrativo/despesas/", views.despesas_view, name="despesas"),
@@ -37,5 +37,7 @@ urlpatterns = [
 
     path("", views.vitrine_view, name="vitrine"),
     path("vitrine/veiculo/<int:pk>/", views.vitrine_veiculo_detalhe_view, name="vitrine_veiculo_detalhe"),
-
-]
+    path("painel/vendedor/propostas/", views.propostas_view, name="propostas"),
+    path("painel/vendedor/propostas/nova/", views.nova_proposta_view, name="nova_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/", views.detalhes_proposta_view, name="detalhes_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/editar/", views.editar_proposta_view, name="editar_proposta"),]

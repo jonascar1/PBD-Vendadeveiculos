@@ -6,13 +6,14 @@
     Detalhes de {{ cliente.nome|default:cliente.razao_social }} | VENDACERTA
 {% endblock %}
 
+
+{% block content %}
+
+<header class="topo-detalhes">
+    
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'core/css/vendedor_cliente_detalhes.css' %}">
 {% endblock %}
-
-{% block conteudo %}
-
-<header class="topo-detalhes">
     <div>
         <h1>Ficha do Cliente</h1>
         <p>Visualize os dados do cliente, veículos comprados e histórico de reservas/propostas.</p>
@@ -147,38 +148,48 @@
         {% endif %}
     </div>
 
-    <!-- RESERVAS E PROPOSTAS -->
+        <!-- PROPOSTAS -->
     <div class="card-info">
         <div class="card-cabecalho">
-            <h3><i data-lucide="bookmark"></i> Histórico de Reservas e Propostas</h3>
-            <span class="contador-badge">{{ propostas_reservas.count }}</span>
+            <h3><i data-lucide="circle-dollar-sign"></i> Propostas</h3>
+            <span class="contador-badge">{{ propostas|length }}</span>
         </div>
 
-        {% if propostas_reservas %}
+        <div class="topo-acoes">
+            <a href="{% url 'nova_proposta' %}?cliente={{ cliente.id }}" class="btn-editar">
+                <i data-lucide="plus"></i> Nova proposta
+            </a>
+        </div>
+
+        {% if propostas %}
             <div class="tabela-responsive">
                 <table class="tabela">
                     <thead>
                         <tr>
                             <th>Veículo</th>
-                            <th>Vendedor Responsável</th>
-                            <th>Contato Registrado</th>
-                            <th>Prazo da Reserva</th>
-                            <th>Status</th>
+                            <th>Data</th>
+                            <th>Valor oferecido</th>
+                            <th>Desconto</th>
+                            <th>Situação</th>
+                            <th>Ação</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for reserva in propostas_reservas %}
+                        {% for proposta in propostas %}
                             <tr>
-                                <td><strong>{{ reserva.veiculo.marca }} {{ reserva.veiculo.modelo }}</strong></td>
-                                <td>{{ reserva.vendedor.get_full_name|default:reserva.vendedor.username }}</td>
-                                <td>{{ reserva.cliente_contato }}</td>
-                                <td>Expira em: {{ reserva.expira_em|date:"d/m/Y H:i" }}</td>
+                                <td><strong>{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }}</strong></td>
+                                <td>{{ proposta.data|date:"d/m/Y" }}</td>
+                                <td>R$ {{ proposta.valor_oferecido|floatformat:"2g" }}</td>
+                                <td>R$ {{ proposta.desconto_embutido|floatformat:"2g" }}</td>
                                 <td>
-                                    {% if reserva.cancelada %}
-                                        <span class="badge status-inativo">Cancelada / Expirada</span>
-                                    {% else %}
-                                        <span class="badge status-ativo">Ativa</span>
-                                    {% endif %}
+                                    <span class="badge status-{{ proposta.situacao|lower }}">
+                                        {{ proposta.get_situacao_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'detalhes_proposta' proposta.id %}" class="btn-link">
+                                        <i data-lucide="eye"></i> Detalhes
+                                    </a>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -186,7 +197,7 @@
                 </table>
             </div>
         {% else %}
-            <p class="sem-registros">Nenhuma reserva ou proposta encontrada para este cliente.</p>
+            <p class="sem-registros">Nenhuma proposta registrada para este cliente.</p>
         {% endif %}
     </div>
 

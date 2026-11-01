@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .decorators import perfil_requerido
 from .models import (
     HistoricoSituacaoVeiculo,
+    Proposta,
     Usuario,
     PerfilVendedor,
     Veiculo,
@@ -29,15 +30,19 @@ from django.utils import timezone
 from .forms import (
     AlterarSituacaoForm,
     ClienteForm,
+    ComposicaoFormSet,
     DespesaEditarForm,
     DespesaForm,
     LoginForm,
     PrecoVendaForm,
+    PropostaFiltroForm,
+    PropostaForm,
     ReservaForm,
     TelefoneClienteFormSet,
     VeiculoForm,
     VendedorCadastroForm,
     VendedorEdicaoForm,
+    
 )
 
 
@@ -664,57 +669,96 @@ def alterar_preco_veiculo_view(request, veiculo_id):
     )
 
 
+
 @perfil_requerido("GERENTE")
 def reservar_veiculo_view(request, veiculo_id):
-    veiculo = get_object_or_404(Veiculo, pk=veiculo_id)
-
     if request.method != "POST":
-        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+        return redirect("detalhes_veiculo", veiculo_id=veiculo_id)
 
     form = ReservaForm(request.POST)
 
     if not form.is_valid():
         erros_do_form_como_mensagens(request, form)
-        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+        return redirect("detalhes_veiculo", veiculo_id=veiculo_id)
 
     cliente_nome = form.cleaned_data["cliente_nome"]
     cliente_contato = form.cleaned_data["cliente_contato"]
 
-    if veiculo.situacao != Veiculo.Situacao.DISPONIVEL:
-        messages.error(request, "Apenas veículos disponíveis podem ser reservados.")
-        return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+    try:
+        with transaction.atomic():
+            # Bloqueia o veículo durante a operação.
+            veiculo = Veiculo.objects.select_for_update().get(pk=veiculo_id)
 
-    reserva, criada = ReservaVeiculo.objects.get_or_create(
-        veiculo=veiculo,
-        defaults={
-            "cliente_nome": cliente_nome,
-            "cliente_contato": cliente_contato,
-            "vendedor": request.user,
-            "expira_em": timezone.now() + timedelta(hours=24),
-        },
-    )
+            # Primeiro, expira as reservas vencidas.
+            reservas_vencidas = veiculo.reservas.filter(
+                cancelada=False,
+                expira_em__lte=timezone.now(),
+            )
 
-    if not criada:
-        reserva.cliente_nome = cliente_nome
-        reserva.cliente_contato = cliente_contato
-        reserva.vendedor = request.user
-        reserva.expira_em = timezone.now() + timedelta(hours=24)
-        reserva.cancelada = False
-        reserva.save()
+            for antiga in reservas_vencidas:
+                antiga.expirar()
 
-    veiculo.situacao = Veiculo.Situacao.RESERVADO
-    veiculo.save(update_fields=["situacao"])
+            veiculo.refresh_from_db()
 
-    HistoricoSituacaoVeiculo.objects.create(
-        veiculo=veiculo,
-        situacao_anterior=Veiculo.Situacao.DISPONIVEL,
-        situacao_nova=Veiculo.Situacao.RESERVADO,
-        alterado_por=request.user,
-        motivo="Reserva do veículo",
-    )
+            # Verifica se ainda existe uma reserva válida.
+            reserva_existente = veiculo.reservas.filter(
+                cancelada=False,
+                expira_em__gt=timezone.now(),
+            ).exists()
+
+            if (
+                veiculo.situacao != Veiculo.Situacao.DISPONIVEL
+                or reserva_existente
+            ):
+                messages.error(
+                    request,
+                    "Apenas veículos disponíveis e sem reserva ativa podem ser reservados."
+                )
+                return redirect(
+                    "detalhes_veiculo",
+                    veiculo_id=veiculo.id,
+                )
+
+            # Cria a reserva.
+            ReservaVeiculo.objects.create(
+                veiculo=veiculo,
+                cliente=form.cleaned_data.get("cliente"),
+                cliente_nome=cliente_nome,
+                cliente_contato=cliente_contato,
+                vendedor=request.user,
+                expira_em=timezone.now() + timedelta(hours=24),
+            )
+
+            # Atualiza a situação operacional.
+            situacao_anterior = veiculo.situacao
+            veiculo.situacao = Veiculo.Situacao.RESERVADO
+            veiculo.save(update_fields=["situacao"])
+
+            # Registra a alteração no histórico.
+            HistoricoSituacaoVeiculo.objects.create(
+                veiculo=veiculo,
+                situacao_anterior=situacao_anterior,
+                situacao_nova=Veiculo.Situacao.RESERVADO,
+                alterado_por=request.user,
+                motivo="Reserva do veículo",
+            )
+
+    except Veiculo.DoesNotExist:
+        return redirect("lista_veiculos")
+
+    except IntegrityError:
+        messages.error(
+            request,
+            "Este veículo já possui uma reserva ativa."
+        )
+        return redirect(
+            "detalhes_veiculo",
+            veiculo_id=veiculo_id,
+        )
 
     messages.success(request, "Veículo reservado com sucesso.")
-    return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
+
+    return redirect("detalhes_veiculo", veiculo_id=veiculo_id)
 
 
 @perfil_requerido("GERENTE", "ADMINISTRATIVO")
@@ -979,19 +1023,17 @@ def detalhes_cliente_view(request, cliente_id):
         cliente_comprador=cliente
     ).prefetch_related("fotos").order_by("-criado_em")
 
-    # 2. Reservas/Propostas associadas ao nome do cliente (usando criada_em no feminino)
-    propostas_reservas = ReservaVeiculo.objects.filter(
-        Q(cliente_nome__icontains=cliente.nome) |
-        (Q(cliente_nome__icontains=cliente.razao_social) if cliente.razao_social else Q())
-    ).select_related("veiculo", "vendedor").order_by("-criada_em")
-
+    propostas = (
+        cliente.propostas.select_related("veiculo", "vendedor")
+        .order_by("-criada_em")
+    )
     return render(
         request,
         "core/vendedor_cliente_detalhes.html",
         {
             "cliente": cliente,
             "veiculos_comprados": veiculos_comprados,
-            "propostas_reservas": propostas_reservas,
+            "propostas_reservas": propostas,
         },
     )
 
@@ -1071,3 +1113,244 @@ def deletar_cliente_view(request, cliente_id):
         "core/vendedor_cliente_confirmar_exclusao.html",
         {"cliente": cliente},
     )
+    
+
+
+
+def expirar_reservas_vencidas():
+    """
+    Fecha as reservas vencidas. Não existe agendador: a expiração acontece
+    quando alguém abre uma tela. Por isso as telas de proposta chamam isto
+    antes de decidir se uma proposta ainda está "aguardando".
+    (Você pode trocar o `for` de veiculos_view por uma chamada a esta função.)
+    """
+    for reserva in ReservaVeiculo.objects.filter(
+        cancelada=False, expira_em__lte=timezone.now()
+    ):
+        reserva.expirar()
+ 
+ 
+def _propostas_visiveis(usuario):
+    """Vendedor enxerga só as próprias propostas. Quando o gerente for liberado, vê todas."""
+    propostas = Proposta.objects.select_related("cliente", "veiculo", "vendedor")
+    if usuario.is_vendedor():
+        propostas = propostas.filter(vendedor=usuario)
+    return propostas
+ 
+ 
+def _dados_veiculos_para_js(veiculos):
+    """
+    {id_do_veiculo: {preco, reservado, reserva_expira}} para o JavaScript
+    mostrar o preço de tabela e o aviso de reserva ao escolher o veículo.
+    """
+    reservas = {
+        r.veiculo_id: r
+        for r in ReservaVeiculo.objects.filter(
+            veiculo__in=veiculos,
+            cancelada=False,
+            expira_em__gt=timezone.now(),
+        )
+    }
+    dados = {}
+    for veiculo in veiculos:
+        reserva = reservas.get(veiculo.pk)
+        dados[str(veiculo.pk)] = {
+            "preco": str(veiculo.preco_venda),
+            "reservado": reserva is not None,
+            "reserva_expira": (
+                timezone.localtime(reserva.expira_em).strftime("%d/%m/%Y %H:%M")
+                if reserva
+                else ""
+            ),
+        }
+    return dados
+ 
+ 
+# ---------------------------------------------------------------------
+# Lista
+# ---------------------------------------------------------------------
+ 
+@perfil_requerido("VENDEDOR")
+def propostas_view(request):
+    expirar_reservas_vencidas()
+
+    filtros_form = PropostaFiltroForm(request.GET or None)
+    propostas = _propostas_visiveis(request.user)
+
+    if filtros_form.is_valid():
+        cliente = filtros_form.cleaned_data.get("cliente")
+        veiculo = filtros_form.cleaned_data.get("veiculo")
+        situacao = filtros_form.cleaned_data.get("situacao")
+        vendedor = filtros_form.cleaned_data.get("vendedor")
+
+        if cliente:
+            propostas = propostas.filter(cliente=cliente)
+
+        if veiculo:
+            propostas = propostas.filter(veiculo=veiculo)
+
+        if situacao:
+            propostas = propostas.filter(situacao=situacao)
+
+        if vendedor:
+            propostas = propostas.filter(vendedor=vendedor)
+
+    propostas = propostas.order_by("-criada_em")
+
+    return render(
+        request,
+        "core/vendedor_painel_propostas.html",
+        {
+            "propostas": propostas,
+            "filtros_form": filtros_form,
+        },
+    )
+ 
+# ---------------------------------------------------------------------
+# Criar / editar (mesma tela)
+# ---------------------------------------------------------------------
+ 
+def _proposta_form_view(request, proposta, titulo):
+    editando = proposta.pk is not None
+ 
+    if request.method == "POST":
+        form = PropostaForm(request.POST, instance=proposta)
+        formset = ComposicaoFormSet(request.POST, instance=proposta)
+ 
+        # Ordem importa: o formset precisa saber o valor oferecido ANTES de
+        # validar, para conferir se a soma da composição fecha.
+        form_valido = form.is_valid()
+        formset.valor_oferecido = form.cleaned_data.get("valor_oferecido")
+ 
+        if form_valido and formset.is_valid():
+            with transaction.atomic():
+                proposta = form.save(commit=False)
+                if not editando:
+                    proposta.vendedor = request.user
+                proposta.save(usuario=request.user)  # grava o histórico de valor
+ 
+                formset.instance = proposta
+                formset.save()
+ 
+            if proposta.situacao == Proposta.Situacao.AGUARDANDO:
+
+                if proposta.reserva_aguardada:
+                    prazo = timezone.localtime(proposta.reserva_aguardada.expira_em)
+
+                    messages.warning(
+                        request,
+                        "Proposta registrada como AGUARDANDO: o veículo está reservado "
+                        f"até {prazo:%d/%m/%Y %H:%M}. Ela só será ativada se a reserva vencer.",
+                    )
+
+                else:
+                    messages.warning(
+                        request,
+                        "Proposta registrada como AGUARDANDO: já existe outra proposta ativa "
+                        "para este veículo. Ela será ativada quando chegar sua vez na fila.",
+                    )
+
+            else:
+                messages.success(
+                    request,
+                    "Proposta atualizada com sucesso."
+                    if editando
+                    else "Proposta registrada com sucesso.",
+                )
+            return redirect("detalhes_proposta", proposta_id=proposta.pk)
+    else:
+        initial = {}
+        if not editando:
+            # Permite abrir a tela já preenchida: ?cliente=3&veiculo=7
+            for campo in ("cliente", "veiculo"):
+                valor = request.GET.get(campo, "")
+                if valor.isdigit():
+                    initial[campo] = int(valor)
+ 
+        form = PropostaForm(instance=proposta, initial=initial)
+        formset = ComposicaoFormSet(instance=proposta)
+ 
+    return render(
+        request,
+        "core/vendedor_painel_proposta_formulario.html",
+        {
+            "form": form,
+            "formset": formset,
+            "titulo": titulo,
+            "proposta": proposta if editando else None,
+            "veiculos_info": _dados_veiculos_para_js(form.fields["veiculo"].queryset),
+        },
+    )
+ 
+ 
+@perfil_requerido("VENDEDOR")
+def nova_proposta_view(request):
+    expirar_reservas_vencidas()
+    return _proposta_form_view(request, Proposta(), "Nova proposta")
+ 
+ 
+@perfil_requerido("VENDEDOR")
+def editar_proposta_view(request, proposta_id):
+    expirar_reservas_vencidas()
+    proposta = get_object_or_404(_propostas_visiveis(request.user), pk=proposta_id)
+ 
+    if proposta.situacao == Proposta.Situacao.CANCELADA:
+        messages.error(request, "Proposta cancelada não pode ser editada.")
+        return redirect("detalhes_proposta", proposta_id=proposta.pk)
+ 
+    if proposta.veiculo.situacao in (
+        Veiculo.Situacao.VENDIDO,
+        Veiculo.Situacao.ENTREGUE,
+    ):
+        messages.error(
+            request,
+            "O veículo desta proposta já foi vendido; a proposta não pode mais ser editada.",
+        )
+        return redirect("detalhes_proposta", proposta_id=proposta.pk)
+ 
+    return _proposta_form_view(request, proposta, "Editar proposta")
+ 
+ 
+# ---------------------------------------------------------------------
+# Detalhes
+# ---------------------------------------------------------------------
+ 
+@perfil_requerido("VENDEDOR")
+def detalhes_proposta_view(request, proposta_id):
+    expirar_reservas_vencidas()
+    proposta = get_object_or_404(_propostas_visiveis(request.user), pk=proposta_id)
+ 
+    return render(
+        request,
+        "core/vendedor_painel_proposta_detalhe.html",
+        {
+            "proposta": proposta,
+            "composicao": proposta.composicao.all(),
+            "historico": proposta.historico.select_related("alterado_por"),
+            "reserva": (
+                proposta.reserva_aguardada
+                if proposta.situacao == Proposta.Situacao.AGUARDANDO
+                else None
+            ),
+        },
+    )
+ 
+ 
+# ---------------------------------------------------------------------
+# Painel inicial do vendedor: SUBSTITUA a painel_vendedor_view existente por esta
+# ---------------------------------------------------------------------
+ 
+@perfil_requerido("VENDEDOR")
+def painel_vendedor_view(request):
+    expirar_reservas_vencidas()
+ 
+    dados = get_object_or_404(PerfilVendedor, usuario=request.user)
+    veiculos = Veiculo.objects.all().order_by("-criado_em")
+    propostas = _propostas_visiveis(request.user).order_by("-criada_em")[:5]
+ 
+    return render(
+        request,
+        "core/vendedor_painel_inicio.html",
+        {"dados": dados, "veiculos": veiculos, "propostas": propostas},
+    )
+ 

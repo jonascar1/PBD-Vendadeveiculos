@@ -1,0 +1,106 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_proposta_detalhe.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="propostas-page">
+    <header class="prop-detalhe-topo">
+        <div>
+            <div class="prop-detalhe-identificacao">
+                <h1>{{ proposta.cliente }}</h1>
+                <span class="prop-badge prop-badge-{{ proposta.situacao|lower }}">{{ proposta.get_situacao_display|default:proposta.situacao }}</span>
+            </div>
+            <p class="prop-subtitulo">{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }} · {{ proposta.veiculo.placa|default:"Placa não informada" }}</p>
+        </div>
+        <div class="prop-acoes">
+            <a class="prop-btn" href="{% url 'propostas' %}">Voltar</a>
+            <a class="prop-btn prop-btn-primario" href="{% url 'editar_proposta' proposta.pk %}">Editar proposta</a>
+        </div>
+    </header>
+
+    <div class="prop-detalhe-grid">
+        <section class="prop-card prop-card-p">
+            <h2 class="prop-card-titulo">Dados da proposta</h2>
+            <div class="prop-dados-grid">
+                <div class="prop-dado"><span>Cliente</span><strong>{{ proposta.cliente }}</strong></div>
+                <div class="prop-dado"><span>Veículo</span><strong>{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }}</strong></div>
+                <div class="prop-dado"><span>Data</span><strong>{{ proposta.data|date:"d/m/Y" }}</strong></div>
+                <div class="prop-dado"><span>Vendedor responsável</span><strong>{{ proposta.vendedor }}</strong></div>
+                <div class="prop-dado"><span>Situação</span><strong><span class="prop-badge prop-badge-{{ proposta.situacao|lower }}">{{ proposta.get_situacao_display|default:proposta.situacao }}</span></strong></div>
+                <div class="prop-dado"><span>Identificador</span><strong>#{{ proposta.pk }}</strong></div>
+            </div>
+            <div class="prop-links-relacionados">
+                <a class="prop-btn prop-btn-secundario prop-btn-pequeno" href="{% url 'detalhes_cliente' proposta.cliente.pk %}">Abrir ficha do cliente ↗</a>
+                <a class="prop-btn prop-btn-secundario prop-btn-pequeno" href="{% url 'detalhes_veiculo' proposta.veiculo.pk %}">Abrir ficha do veículo ↗</a>
+            </div>
+        </section>
+
+        <section class="prop-card prop-card-p">
+            <h2 class="prop-card-titulo">Resumo financeiro</h2>
+            <div class="prop-financeiro-grid" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+                <div class="prop-financeiro-item"><span>Preço de tabela</span><strong>R$ {{ proposta.preco_tabela|default:proposta.veiculo.preco_venda|floatformat:2 }}</strong></div>
+                <div class="prop-financeiro-item"><span>Valor oferecido</span><strong>R$ {{ proposta.valor_oferecido|floatformat:2 }}</strong></div>
+                <div class="prop-financeiro-item"><span>Desconto embutido</span><strong>R$ {{ proposta.desconto_embutido|default:0|floatformat:2 }}</strong></div>
+                <div class="prop-financeiro-item"><span>Desconto percentual</span><strong>{{ proposta.desconto_percentual|default:0|floatformat:2 }}%</strong></div>
+            </div>
+        </section>
+
+        <section class="prop-card prop-card-p prop-span-total">
+            <h2 class="prop-card-titulo">Composição do pagamento</h2>
+            <div class="prop-tabela-wrap">
+                <table class="prop-tabela">
+                    <thead>
+                        <tr><th>Forma</th><th>Descrição / instituição</th><th>Detalhes</th><th>Valor</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for pagamento in composicao %}
+                            <tr>
+                                <td>{{ pagamento.get_tipo_display|default:pagamento.tipo }}</td>
+                                <td>
+                                    {% if pagamento.troca_descricao %}{{ pagamento.troca_descricao }}
+                                    {% elif pagamento.financ_banco %}{{ pagamento.financ_banco }}
+                                    {% else %}—{% endif %}
+                                </td>
+                                <td>
+                                    {% if pagamento.financ_parcelas %}
+                                        {{ pagamento.financ_parcelas }}x de R$ {{ pagamento.financ_valor_parcela|floatformat:2 }}
+                                    {% elif pagamento.tipo == "TROCA" %}
+                                        Valor de avaliação informado na composição
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td><strong>R$ {{ pagamento.valor|floatformat:2 }}</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4">Nenhuma forma de pagamento registrada.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="prop-card prop-card-p prop-span-total">
+            <h2 class="prop-card-titulo">Histórico de alterações de valor</h2>
+            <div class="prop-timeline">
+               {% for registro in historico %}
+                    <article class="prop-timeline-item">
+                        <span class="prop-timeline-data">{{ registro.criado_em|date:"d/m/Y à\s H:i" }}</span>
+                        <p><strong>{{ registro.usuario|default:"Usuário não identificado" }}</strong> alterou o valor de
+                            <strong>R$ {{ registro.valor_anterior|floatformat:2 }}</strong> para
+                            <strong>R$ {{ registro.valor_novo|floatformat:2 }}</strong>.</p>
+                    </article>
+                {% empty %}
+                    <div class="prop-vazio" style="padding:20px">
+                        <strong>Nenhuma alteração registrada</strong>
+                        As alterações futuras no valor da proposta aparecerão aqui.
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

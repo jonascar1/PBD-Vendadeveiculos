@@ -455,3 +455,29 @@
     }
 
 }
+/* Estilos para os novos status de proposta / reserva */
+.status.aguardando {
+    background-color: var(--warning-bg, #fffbe6);
+    color: var(--warning-color, #d46b08);
+    border: 1px solid var(--warning-border, #ffe58f);
+}
+
+.status.ativa {
+    background-color: var(--success-bg, #f6ffed);
+    color: var(--success-color, #389e0d);
+    border: 1px solid var(--success-border, #b7eb8f);
+}
+
+.status.cancelada {
+    background-color: var(--danger-bg, #fff1f0);
+    color: var(--danger-color, #cf1322);
+    border: 1px solid var(--danger-border, #ffa39e);
+}
+
+/* Ajuste para o elemento .proposta quando for uma tag de link <a> */
+a.proposta,
+.proposta {
+    text-decoration: none;
+    color: inherit;
+    display: block; /* Garante que o link se comporte como bloco/card completo */
+}

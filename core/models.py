@@ -23,10 +23,10 @@ from datetime import date
 from decimal import Decimal
 
 # --- django ---
-from django import forms
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
+from django.db.models.aggregates import Sum
 from django.utils import timezone
 
 
@@ -254,6 +254,12 @@ class Veiculo(models.Model):
     def __str__(self):
         return f"{self.marca} {self.modelo} — {self.placa}"
     
+    @property
+    def reserva_ativa(self):
+        """Reserva vigente (não cancelada e não vencida), ou None."""
+        return self.reservas.filter(
+            cancelada=False, expira_em__gt=timezone.now()
+        ).first()
 
 
 class HistoricoSituacaoVeiculo(models.Model):
@@ -292,7 +298,6 @@ class FotoVeiculo(models.Model):
                 principal=False
             )
 
-
 class ReservaVeiculo(models.Model):
     """
     Reserva exclusiva com prazo (item da rubrica).
@@ -300,12 +305,18 @@ class ReservaVeiculo(models.Model):
     veículo, nenhuma outra reserva pode ser criada para ele — e o veículo
     fica com status RESERVADO.
     """
-
-    veiculo = models.OneToOneField(
+    veiculo = models.ForeignKey(
         Veiculo,
-        on_delete=models.CASCADE,
-        related_name="reserva_ativa",
+        on_delete=models.PROTECT,
+        related_name="reservas",
         limit_choices_to={"status": Veiculo.Status.DISPONIVEL},
+    )
+    cliente = models.ForeignKey(
+        "Cliente",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="reservas",
     )
     cliente_nome = models.CharField(max_length=120)
     cliente_contato = models.CharField(max_length=60)
@@ -322,34 +333,36 @@ class ReservaVeiculo(models.Model):
         return not self.cancelada and timezone.now() < self.expira_em
 
     def expirar(self):
-        if self.cancelada or timezone.now() >= self.expira_em:
-            self.cancelada = True
-            self.save(update_fields=["cancelada"])
+        # NÃO altere este if! Ele garante que reservas válidas no tempo não sejam expiradas por engano.
+        if self.cancelada or timezone.now() < self.expira_em:
+            return
 
-            veiculo = Veiculo.objects.filter(
-                pk=self.veiculo_id,
-                situacao=Veiculo.Situacao.RESERVADO,
-            ).first()
+        self.cancelada = True
+        self.save(update_fields=["cancelada"])
 
-            if veiculo:
-                veiculo.situacao = Veiculo.Situacao.DISPONIVEL
-                veiculo.status = Veiculo.Status.DISPONIVEL
+        veiculo = Veiculo.objects.filter(
+            pk=self.veiculo_id,
+            situacao=Veiculo.Situacao.RESERVADO,
+        ).first()
 
-                veiculo.save(update_fields=[
-                    "situacao",
-                    "status",
-                ])
+        if veiculo:
+            veiculo.situacao = Veiculo.Situacao.DISPONIVEL
+            veiculo.status = Veiculo.Status.DISPONIVEL
+            veiculo.save(update_fields=["situacao", "status"])
 
-                HistoricoSituacaoVeiculo.objects.create(
-                    veiculo=veiculo,
-                    situacao_anterior=Veiculo.Situacao.RESERVADO,
-                    situacao_nova=Veiculo.Situacao.DISPONIVEL,
-                    alterado_por=self.vendedor,
-                    motivo="Reserva expirada",
-                )
+            HistoricoSituacaoVeiculo.objects.create(
+                veiculo=veiculo,
+                situacao_anterior=Veiculo.Situacao.RESERVADO,
+                situacao_nova=Veiculo.Situacao.DISPONIVEL,
+                alterado_por=self.vendedor,
+                motivo="Reserva expirada",
+            )
+
+        # Propostas que esperavam esta reserva vencer passam a valer.
+        Proposta.ativar_aguardando(self.veiculo_id)
 
     def clean(self):
-        if self.expira_em <= timezone.now():
+        if self.expira_em and self.expira_em <= timezone.now():
             raise ValidationError({"expira_em": "O prazo da reserva deve ser no futuro."})
 
     def save(self, *args, **kwargs):
@@ -357,7 +370,15 @@ class ReservaVeiculo(models.Model):
         if self.esta_valida():
             Veiculo.objects.filter(pk=self.veiculo_id).update(status=Veiculo.Status.RESERVADO)
 
-
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["veiculo"],
+                condition=models.Q(cancelada=False),
+                name="uma_reserva_ativa_por_veiculo",
+            )
+        ]
+    
 # ============================================================
 # Financeiro
 # ============================================================
@@ -454,57 +475,6 @@ class HistoricoPrecoVeiculo(models.Model):
 
     def __str__(self):
         return f"{self.veiculo} — R$ {self.valor_anterior} → R$ {self.valor_novo}"
-
-
-# ============================================================
-# Validação de documentos (CPF / CNPJ)
-# ============================================================
-
-def validar_cpf(valor):
-    cpf = re.sub(r"\D", "", valor or "")
-
-    if len(cpf) != 11 or len(set(cpf)) == 1:
-        return False
-
-    numeros = [int(digito) for digito in cpf]
-
-    soma = sum(numeros[i] * (10 - i) for i in range(9))
-    resto = (soma * 10) % 11
-    primeiro = 0 if resto == 10 else resto
-
-    if numeros[9] != primeiro:
-        return False
-
-    soma = sum(numeros[i] * (11 - i) for i in range(10))
-    resto = (soma * 10) % 11
-    segundo = 0 if resto == 10 else resto
-
-    return numeros[10] == segundo
-
-
-def validar_cnpj(valor):
-    cnpj = re.sub(r"\D", "", valor or "")
-
-    if len(cnpj) != 14 or len(set(cnpj)) == 1:
-        return False
-
-    numeros = [int(digito) for digito in cnpj]
-
-    pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    soma = sum(n * p for n, p in zip(numeros[:12], pesos1))
-    resto = soma % 11
-    primeiro = 0 if resto < 2 else 11 - resto
-
-    if numeros[12] != primeiro:
-        return False
-
-    pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-    soma = sum(n * p for n, p in zip(numeros[:13], pesos2))
-    resto = soma % 11
-    segundo = 0 if resto < 2 else 11 - resto
-
-    return numeros[13] == segundo
-
 
 # ============================================================
 # Clientes
@@ -650,55 +620,329 @@ class TelefoneCliente(models.Model):
     def __str__(self):
         return self.numero
 
-
-# ============================================================
-# Formulário de Cliente
-# ============================================================
-
-class ClienteForm(forms.ModelForm):
+class Proposta(models.Model):
     """
-    Form de Cliente com validação de CPF/CNPJ e data de nascimento.
+    Liga um cliente a um veículo, com o valor oferecido e a composição do
+    pagamento (ver ComposicaoPagamento).
 
-    As validações de documento e data ficavam soltas no módulo (como
-    `def clean_cpf(self)`), o que é inválido — métodos `clean_<campo>`
-    só existem dentro de um Form. Foram movidos para cá.
+    - Nunca é excluída: o histórico (HistoricoProposta) é PROTECT e a
+      proposta só muda de situação (CANCELADA).
+    - Um veículo pode ter várias propostas.
+    - Nasce AGUARDANDO se o veículo estiver com reserva ativa; quando a
+      reserva vence, ReservaVeiculo.expirar() chama ativar_aguardando().
     """
+
+    class Situacao(models.TextChoices):
+        AGUARDANDO = "AGUARDANDO", "Aguardando"
+        ATIVA = "ATIVA", "Ativa"
+        CANCELADA = "CANCELADA", "Cancelada"
+        # A T09 (alçada) provavelmente vai acrescentar situações aqui.
+
+    cliente = models.ForeignKey(
+        Cliente, on_delete=models.PROTECT, related_name="propostas"
+    )
+    veiculo = models.ForeignKey(
+        Veiculo, on_delete=models.PROTECT, related_name="propostas"
+    )
+    vendedor = models.ForeignKey(
+        Usuario,
+        on_delete=models.PROTECT,
+        related_name="propostas",
+        # Hoje só vendedor cria proposta (isso é garantido nas views); o
+        # gerente já entra aqui para não exigir outra migration quando liberarmos.
+        limit_choices_to={
+            "perfil__in": [Usuario.Perfil.VENDEDOR, Usuario.Perfil.GERENTE]
+        },
+    )
+
+    data = models.DateField(default=timezone.localdate)
+    valor_oferecido = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Foto do preço de tabela (Veiculo.preco_venda) no momento em que a
+    # proposta foi salva. Assim o desconto embutido não "muda sozinho" se o
+    # gerente reajustar o preço do veículo depois.
+    preco_tabela = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True, editable=False
+    )
+
+    situacao = models.CharField(
+        max_length=20,
+        choices=Situacao.choices,
+        default=Situacao.ATIVA,
+        editable=False,
+    )
+    # Reserva que esta proposta está esperando vencer (só quando AGUARDANDO).
+    reserva_aguardada = models.ForeignKey(
+        "ReservaVeiculo",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        editable=False,
+        related_name="propostas_aguardando",
+    )
+
+    criada_em = models.DateTimeField(auto_now_add=True)
+    atualizada_em = models.DateTimeField(auto_now=True)
+
+    # Valor que veio do banco, para detectar alteração no save().
+    _valor_original = None
 
     class Meta:
-        model = Cliente
-        fields = "__all__"
+        ordering = ["-criada_em"]
+    constraints = [
+        models.UniqueConstraint(
+            fields=["veiculo"],
+            condition=models.Q(situacao="ATIVA"),
+            name="uma_proposta_ativa_por_veiculo",
+        )
+    ]
 
-    def _somente_numeros(self, campo):
-        return re.sub(r"\D", "", self.cleaned_data.get(campo) or "")
+    @classmethod
+    def from_db(cls, db, field_names, values):
+        instance = super().from_db(db, field_names, values)
+        instance._valor_original = instance.__dict__.get("valor_oferecido")
+        return instance
 
-    def clean_cpf(self):
-        cpf = self._somente_numeros("cpf")
+    # --------------------------- cálculos ---------------------------
 
-        if self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_FISICA:
-            if not validar_cpf(cpf):
-                raise ValidationError("Informe um CPF válido.")
+    @property
+    def desconto_embutido(self):
+        """Preço de tabela menos o valor oferecido (negativo = acima da tabela)."""
+        if self.preco_tabela is None:
+            return Decimal("0.00")
+        return self.preco_tabela - self.valor_oferecido
 
-        return cpf
+    @property
+    def desconto_percentual(self):
+        if not self.preco_tabela:
+            return Decimal("0.00")
+        return (self.desconto_embutido / self.preco_tabela * 100).quantize(
+            Decimal("0.01")
+        )
 
-    def clean_cnpj(self):
-        cnpj = self._somente_numeros("cnpj")
+    @property
+    def soma_composicao(self):
+        total = self.composicao.aggregate(total=Sum("valor"))["total"]
+        return total or Decimal("0.00")
 
-        if self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_JURIDICA:
-            if not validar_cnpj(cnpj):
-                raise ValidationError("Informe um CNPJ válido.")
+    @property
+    def diferenca(self):
+        """Valor oferecido menos a soma da composição (0 = fecha)."""
+        return self.valor_oferecido - self.soma_composicao
 
-        return cnpj
+    @property
+    def composicao_fecha(self):
+        return self.diferenca == 0
 
-    def clean_data_nascimento(self):
-        nascimento = self.cleaned_data.get("data_nascimento")
+    # --------------------------- regras ---------------------------
 
-        if (
-            self.cleaned_data.get("tipo") == Cliente.Tipo.PESSOA_FISICA
-            and nascimento
-            and nascimento > date.today()
-        ):
-            raise ValidationError(
-                "A data de nascimento não pode ser futura."
-            )
+    def clean(self):
+        erros = {}
 
-        return nascimento
+        if self.valor_oferecido is not None and self.valor_oferecido <= 0:
+            erros["valor_oferecido"] = "O valor oferecido deve ser maior que zero."
+
+        if self.veiculo_id:
+            if not self.veiculo.preco_venda:
+                erros["veiculo"] = "Este veículo ainda não tem preço de venda definido."
+            elif not self.pk and self.veiculo.situacao not in (
+                Veiculo.Situacao.DISPONIVEL,
+                Veiculo.Situacao.RESERVADO,
+            ):
+                erros["veiculo"] = (
+                    "Só é possível fazer proposta para veículo disponível ou reservado."
+                )
+
+        if self.cliente_id and not self.pk and not self.cliente.ativo:
+            erros["cliente"] = "Cliente desativado não pode receber proposta."
+
+        if self.pk and self.situacao == self.Situacao.CANCELADA:
+            erros["__all__"] = "Proposta cancelada não pode ser editada."
+
+        if erros:
+            raise ValidationError(erros)
+
+    def save(self, *args, usuario=None, **kwargs):
+        """
+        `usuario` = quem está salvando (vai para o histórico). Se não vier,
+        usa o vendedor da proposta.
+        """
+        criando = self.pk is None
+
+        with transaction.atomic():
+            if self.situacao != self.Situacao.CANCELADA and self.veiculo.preco_venda:
+                self.preco_tabela = self.veiculo.preco_venda
+
+            if criando:
+                reserva = self.veiculo.reserva_ativa
+
+                # Verifica se já existe outra proposta ATIVA para o mesmo veículo
+                proposta_ativa = Proposta.objects.filter(
+                    veiculo_id=self.veiculo_id,
+                    situacao=self.Situacao.ATIVA,
+                ).exists()
+
+                # Se houver reserva OU outra proposta já ativa, esta entra como AGUARDANDO
+                if reserva or proposta_ativa:
+                    self.situacao = self.Situacao.AGUARDANDO
+                    self.reserva_aguardada = reserva
+                else:
+                    self.situacao = self.Situacao.ATIVA
+                    self.reserva_aguardada = None
+
+            super().save(*args, **kwargs)
+
+            if criando or self.valor_oferecido != self._valor_original:
+                HistoricoProposta.objects.create(
+                    proposta=self,
+                    valor_anterior=None if criando else self._valor_original,
+                    valor_novo=self.valor_oferecido,
+                    alterado_por=usuario or self.vendedor,
+                )
+            self._valor_original = self.valor_oferecido
+            
+@classmethod
+def ativar_aguardando(cls, veiculo_id):
+    """
+    Ativa somente a primeira proposta aguardando do veículo.
+    Respeita a ordem de criação e não ativa propostas enquanto
+    existir reserva vigente ou outra proposta ativa.
+    """
+    with transaction.atomic():
+        veiculo = Veiculo.objects.select_for_update().get(
+            pk=veiculo_id
+        )
+
+        # Enquanto houver reserva vigente, ninguém assume.
+        if veiculo.reserva_ativa:
+            return None
+
+        # Não permite duas propostas ativas.
+        if cls.objects.filter(
+            veiculo_id=veiculo_id,
+            situacao=cls.Situacao.ATIVA,
+        ).exists():
+            return None
+
+        # Seleciona a proposta mais antiga da fila.
+        proxima = cls.objects.select_for_update().filter(
+            veiculo_id=veiculo_id,
+            situacao=cls.Situacao.AGUARDANDO,
+        ).order_by("criada_em", "pk").first()
+
+        if not proxima:
+            return None
+
+        cls.objects.filter(pk=proxima.pk).update(
+            situacao=cls.Situacao.ATIVA,
+            reserva_aguardada=None,
+            atualizada_em=timezone.now(),
+        )
+
+        return proxima
+    
+    def cancelar(self):
+     if self.situacao == self.Situacao.CANCELADA:
+        return
+
+    with transaction.atomic():
+        self.situacao = self.Situacao.CANCELADA
+
+        self.save(
+            update_fields=["situacao", "atualizada_em"]
+        )
+
+        # Libera a próxima proposta da fila, se possível.
+        Proposta.ativar_aguardando(self.veiculo_id)
+
+    def __str__(self):
+        return f"Proposta #{self.pk} — {self.cliente} — {self.veiculo}"
+
+
+class ComposicaoPagamento(models.Model):
+    """
+    Uma linha da composição do pagamento. `valor` é sempre o que a linha
+    contribui para a soma: dinheiro da entrada, valor ESTIMADO do veículo
+    na troca, ou saldo financiado.
+    """
+
+    class Tipo(models.TextChoices):
+        ENTRADA = "ENTRADA", "Entrada em dinheiro"
+        TROCA = "TROCA", "Veículo na troca"
+        FINANCIAMENTO = "FINANCIAMENTO", "Saldo financiado"
+
+    proposta = models.ForeignKey(
+        Proposta, on_delete=models.CASCADE, related_name="composicao"
+    )
+    tipo = models.CharField(max_length=20, choices=Tipo.choices)
+    valor = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Só para TROCA
+    troca_descricao = models.CharField(max_length=150, blank=True)
+
+    # Só para FINANCIAMENTO
+    financ_banco = models.CharField(max_length=100, blank=True)
+    financ_parcelas = models.PositiveSmallIntegerField(null=True, blank=True)
+    financ_valor_parcela = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+
+    class Meta:
+        ordering = ["id"]
+
+    def clean(self):
+        erros = {}
+
+        if self.valor is not None and self.valor <= 0:
+            erros["valor"] = "O valor deve ser maior que zero."
+
+        if self.tipo == self.Tipo.TROCA:
+            if not self.troca_descricao.strip():
+                erros["troca_descricao"] = "Descreva o veículo recebido na troca."
+            self.financ_banco = ""
+            self.financ_parcelas = None
+            self.financ_valor_parcela = None
+
+        elif self.tipo == self.Tipo.FINANCIAMENTO:
+            if not self.financ_banco.strip():
+                erros["financ_banco"] = "Informe o banco do financiamento."
+            if not self.financ_parcelas or self.financ_parcelas < 1:
+                erros["financ_parcelas"] = "Informe o número de parcelas."
+            if not self.financ_valor_parcela or self.financ_valor_parcela <= 0:
+                erros["financ_valor_parcela"] = "Informe o valor da parcela."
+            self.troca_descricao = ""
+
+        else:  # ENTRADA (ou tipo vazio, que o campo já recusa)
+            self.troca_descricao = ""
+            self.financ_banco = ""
+            self.financ_parcelas = None
+            self.financ_valor_parcela = None
+
+        if erros:
+            raise ValidationError(erros)
+
+    def __str__(self):
+        return f"{self.get_tipo_display()}: R$ {self.valor}"
+
+
+class HistoricoProposta(models.Model):
+    """Cada alteração do valor oferecido. A primeira linha (criação) tem valor_anterior vazio."""
+
+    proposta = models.ForeignKey(
+        Proposta, on_delete=models.PROTECT, related_name="historico"
+    )
+    valor_anterior = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    valor_novo = models.DecimalField(max_digits=12, decimal_places=2)
+    alterado_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="alteracoes_proposta"
+    )
+    alterado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-alterado_em", "-id"]
+
+    def __str__(self):
+        anterior = "—" if self.valor_anterior is None else f"R$ {self.valor_anterior}"
+        return f"{self.proposta} — {anterior} → R$ {self.valor_novo}"

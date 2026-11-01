@@ -3,13 +3,13 @@
 {% load static %}
 {% load static l10n %}
 
+
+{% block content %}
+    <header class="topo">
+
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_inicio.css'%}">
 {% endblock %}
-
-
-{% block conteudo %}
-    <header class="topo">
 
         <div>
             <h1>Painel do Vendedor</h1>
@@ -33,7 +33,7 @@
 
         <div class="cards-acoes">
 
-            <a href="#" class="card-acao">
+            <a href="{% url 'nova_proposta' %}" class="card-acao">
 
                 <div class="icone">
                     <i data-lucide="dollar-sign"></i>
@@ -61,51 +61,28 @@
             <p>Acompanhe suas propostas e o andamento das negociações.</p>
         </div>
 
-        <div class="propostas-card">
+                <div class="propostas-card">
 
-            <div class="proposta">
+            {% for p in propostas %}
+                <a href="{% url 'detalhes_proposta' p.pk %}" class="proposta">
 
-                <div class="proposta-info">
-                    <strong>João da Silva</strong>
-                    <span>Honda Civic 2022</span>
+                    <div class="proposta-info">
+                        <strong>{{ p.cliente.nome_exibicao }}</strong>
+                        <span>{{ p.veiculo.marca }} {{ p.veiculo.modelo }} {{ p.veiculo.ano_modelo|unlocalize }}</span>
+                    </div>
+
+                    <div class="proposta-valor">
+                        <strong>R$ {{ p.valor_oferecido|floatformat:"2g" }}</strong>
+                        <span class="status {{ p.situacao|lower }}">{{ p.get_situacao_display }}</span>
+                    </div>
+
+                </a>
+            {% empty %}
+                <div class="aviso">
+                    <strong>Nenhuma proposta ainda</strong>
+                    <p>Use "Nova negociação" para registrar a primeira.</p>
                 </div>
-
-                <div class="proposta-valor">
-                    <strong>R$ 85.000,00</strong>
-                    <span class="status pendente">Pendente</span>
-                </div>
-
-            </div>
-
-
-            <div class="proposta">
-
-                <div class="proposta-info">
-                    <strong>Maria Oliveira</strong>
-                    <span>Toyota Corolla 2023</span>
-                </div>
-
-                <div class="proposta-valor">
-                    <strong>R$ 112.000,00</strong>
-                    <span class="status aprovada">Aprovada</span>
-                </div>
-
-            </div>
-
-
-            <div class="proposta">
-
-                <div class="proposta-info">
-                    <strong>Carlos Souza</strong>
-                    <span>Volkswagen T-Cross 2023</span>
-                </div>
-
-                <div class="proposta-valor">
-                    <strong>R$ 98.500,00</strong>
-                    <span class="status recusada">Recusada</span>
-                </div>
-
-            </div>
+            {% endfor %}
 
         </div>
 
@@ -171,9 +148,6 @@
         </div>
 
     </section>
-
-
-    <section class="dados-section">
         <section class="dados-section">
 
 <div class="titulo-secao">

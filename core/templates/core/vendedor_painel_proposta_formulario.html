@@ -1,0 +1,231 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_proposta_formulario.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="propostas-page">
+    <header class="prop-cabecalho">
+        <div>
+            <h1 class="prop-titulo">{% if object %}Editar proposta{% else %}Nova proposta{% endif %}</h1>
+            <p class="prop-subtitulo">Registre a oferta e todas as formas de pagamento combinadas com o cliente.</p>
+        </div>
+        <a class="prop-btn" href="{% url 'propostas' %}">Voltar para propostas</a>
+    </header>
+
+    <!-- Aviso de reserva: inicia oculto se o JS for controlar, ou renderiza via backend se veiculo_reservado existir -->
+    <div id="aviso-reserva" class="prop-aviso" role="status" style="margin-bottom:18px" {% if not veiculo_reservado %}hidden{% endif %}>
+        <span aria-hidden="true">⚠</span>
+        <div>
+            Veículo reservado até <span id="aviso-reserva-prazo">{{ reserva_prazo }}</span>.
+            A proposta ficará aguardando até a reserva vencer.
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" novalidate id="proposta-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="prop-grid-form">
+            <div class="prop-coluna">
+                <section class="prop-card prop-card-p">
+                    <h2 class="prop-card-titulo">Dados da proposta</h2>
+                    <div class="prop-form-grid">
+                        <div class="prop-campo {% if form.cliente.errors %}erro{% endif %}">
+                            <label for="{{ form.cliente.id_for_label }}">Cliente <span class="prop-asterisco">*</span></label>
+                            {{ form.cliente }}
+                            {{ form.cliente.errors }}
+                        </div>
+                        <div class="prop-campo {% if form.veiculo.errors %}erro{% endif %}">
+                            <label for="{{ form.veiculo.id_for_label }}">Veículo <span class="prop-asterisco">*</span></label>
+                            {{ form.veiculo }}
+                            {{ form.veiculo.errors }}
+                        </div>
+                        <div class="prop-campo {% if form.valor_oferecido.errors %}erro{% endif %}">
+                            <label for="{{ form.valor_oferecido.id_for_label }}">Valor oferecido <span class="prop-asterisco">*</span></label>
+                            {{ form.valor_oferecido }}
+                            {{ form.valor_oferecido.errors }}
+                        </div>
+                        <div class="prop-campo {% if form.data.errors %}erro{% endif %}">
+                            <label for="{{ form.data.id_for_label }}">Data da proposta</label>
+                            {{ form.data }}
+                            {{ form.data.errors }}
+                        </div>
+                        {% if form.vendedor %}
+                        <div class="prop-campo prop-span-2 {% if form.vendedor.errors %}erro{% endif %}">
+                            <label for="{{ form.vendedor.id_for_label }}">Vendedor responsável</label>
+                            {{ form.vendedor }}
+                            {{ form.vendedor.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section class="prop-card prop-card-p">
+                    <h2 class="prop-card-titulo">Composição do pagamento</h2>
+                    {{ formset.management_form }}
+                    {{ formset.non_form_errors }}
+                    <div class="prop-formset" id="pagamentos-container" data-prefix="{{ formset.prefix }}">
+                    {% for pagamento in formset %}
+                        <article class="prop-pagamento-linha composicao-linha" data-form-row>
+                            <div class="prop-pagamento-topo">
+                                <span class="prop-pagamento-titulo">Forma de pagamento <span data-row-number>{{ forloop.counter }}</span></span>
+                                <button type="button" class="prop-btn prop-btn-perigo prop-btn-pequeno btn-remover-linha" data-remove-row>Remover</button>
+                            </div>
+                            {% for hidden in pagamento.hidden_fields %}{{ hidden }}{% endfor %}
+                            <div class="prop-pagamento-grid">
+                                <div class="prop-campo {% if pagamento.tipo.errors %}erro{% endif %}">
+                                    <label for="{{ pagamento.tipo.id_for_label }}">Tipo</label>
+                                    {{ pagamento.tipo }}
+                                    {{ pagamento.tipo.errors }}
+                                </div>
+                                <div class="prop-campo {% if pagamento.valor.errors %}erro{% endif %}">
+                                    <label for="{{ pagamento.valor.id_for_label }}"><span class="rotulo-valor">Valor (R$)</span></label>
+                                    {{ pagamento.valor }}
+                                    {{ pagamento.valor.errors }}
+                                </div>
+
+                                <div class="prop-extra-troca campos-troca" data-extra="troca">
+                                    <div class="prop-campo {% if pagamento.troca_descricao.errors %}erro{% endif %}">
+                                        <label for="{{ pagamento.troca_descricao.id_for_label }}">Descrição do veículo recebido na troca</label>
+                                        {{ pagamento.troca_descricao }}
+                                        {{ pagamento.troca_descricao.errors }}
+                                    </div>
+                                </div>
+
+                                <div class="prop-extra-financiamento campos-financiamento" data-extra="financiamento">
+                                    <div class="prop-campo {% if pagamento.financ_banco.errors %}erro{% endif %}">
+                                        <label for="{{ pagamento.financ_banco.id_for_label }}">Banco</label>
+                                        {{ pagamento.financ_banco }}
+                                        {{ pagamento.financ_banco.errors }}
+                                    </div>
+
+                                    <div class="prop-campo {% if pagamento.financ_parcelas.errors %}erro{% endif %}">
+                                        <label for="{{ pagamento.financ_parcelas.id_for_label }}">Número de parcelas</label>
+                                        {{ pagamento.financ_parcelas }}
+                                        {{ pagamento.financ_parcelas.errors }}
+                                    </div>
+
+                                    <div class="prop-campo {% if pagamento.financ_valor_parcela.errors %}erro{% endif %}">
+                                        <label for="{{ pagamento.financ_valor_parcela.id_for_label }}">Valor da parcela</label>
+                                        {{ pagamento.financ_valor_parcela }}
+                                        {{ pagamento.financ_valor_parcela.errors }}
+                                    </div>
+                                </div>
+                                {% if pagamento.DELETE %}
+                                    <div class="prop-campo prop-delete-field" hidden>{{ pagamento.DELETE }}</div>
+                                {% endif %}
+                            </div>
+                        </article>
+                    {% endfor %}
+                    </div>
+
+                    <!-- Template/Molde oficial Django para novas linhas -->
+                    <template id="pagamento-empty-form">
+                        <article class="prop-pagamento-linha composicao-linha" data-form-row>
+                            <div class="prop-pagamento-topo">
+                                <span class="prop-pagamento-titulo">Forma de pagamento <span data-row-number>__prefix__</span></span>
+                                <button type="button" class="prop-btn prop-btn-perigo prop-btn-pequeno btn-remover-linha" data-remove-row>Remover</button>
+                            </div>
+                            <div class="prop-pagamento-grid">
+                                <div class="prop-campo">
+                                    <label for="{{ formset.empty_form.tipo.id_for_label }}">Tipo</label>
+                                    {{ formset.empty_form.tipo }}
+                                </div>
+                                <div class="prop-campo">
+                                    <label for="{{ formset.empty_form.valor.id_for_label }}"><span class="rotulo-valor">Valor (R$)</span></label>
+                                    {{ formset.empty_form.valor }}
+                                </div>
+
+                                <div class="prop-extra-troca campos-troca" data-extra="troca">
+                                    <div class="prop-campo">
+                                        <label for="{{ formset.empty_form.troca_descricao.id_for_label }}">Descrição do veículo recebido na troca</label>
+                                        {{ formset.empty_form.troca_descricao }}
+                                    </div>
+                                </div>
+
+                                <div class="prop-extra-financiamento campos-financiamento" data-extra="financiamento">
+                                    <div class="prop-campo">
+                                        <label for="{{ formset.empty_form.financ_banco.id_for_label }}">Banco</label>
+                                        {{ formset.empty_form.financ_banco }}
+                                    </div>
+
+                                    <div class="prop-campo">
+                                        <label for="{{ formset.empty_form.financ_parcelas.id_for_label }}">Número de parcelas</label>
+                                        {{ formset.empty_form.financ_parcelas }}
+                                    </div>
+
+                                    <div class="prop-campo">
+                                        <label for="{{ formset.empty_form.financ_valor_parcela.id_for_label }}">Valor da parcela</label>
+                                        {{ formset.empty_form.financ_valor_parcela }}
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </template>
+
+                    <div style="margin-top:14px">
+                        <button type="button" class="prop-btn prop-btn-secundario" id="btn-add-linha">＋ Adicionar forma de pagamento</button>
+                    </div>
+
+                    <div class="prop-composicao-resumo">
+                        <div><span>Soma da composição</span><strong id="resumo-soma">R$ 0,00</strong></div>
+                        <div><span>Valor oferecido</span><strong id="resumo-valor-oferecido-composicao">R$ 0,00</strong></div>
+                        <div><span>Diferença</span><strong id="resumo-diferenca">R$ 0,00</strong></div>
+                    </div>
+                    <div class="prop-aviso prop-composicao-alerta" id="aviso-composicao" role="alert" hidden>
+                        <span id="aviso-composicao-texto"></span>
+                    </div>
+                </section>
+
+                <div class="prop-rodape-form">
+                    <a class="prop-btn" href="{% url 'propostas' %}">Cancelar</a>
+                    <button type="submit" class="prop-btn prop-btn-primario">Salvar proposta</button>
+                </div>
+            </div>
+
+            <aside class="prop-card prop-card-p prop-resumo">
+                <h2 class="prop-card-titulo">Resumo financeiro</h2>
+                <div class="prop-resumo-item">
+                    <span>Preço de tabela</span>
+                    <strong id="resumo-preco-tabela" data-valor="{{ veiculo_preco_tabela|default:0 }}">R$ {{ veiculo_preco_tabela|default:0|floatformat:2 }}</strong>
+                </div>
+                <div class="prop-resumo-item">
+                    <span>Valor oferecido</span>
+                    <strong id="resumo-valor-oferecido">R$ 0,00</strong>
+                </div>
+                <div class="prop-desconto">
+                    <small>Desconto embutido</small>
+                    <strong id="resumo-desconto">R$ 0,00</strong>
+                    <span id="resumo-desconto-pct">0,00% do preço de tabela</span>
+                </div>
+                <p class="prop-ajuda-campo">O desconto é calculado pela diferença entre o preço de tabela e o valor oferecido.</p>
+            </aside>
+        </div>
+    </form>
+
+    <!-- Dados em formato JSON passados pelo Django (deve ficar DENTRO do block content) -->
+    {{ veiculos_info|json_script:"veiculos-info" }}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'core/js/proposta_form.js' %}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Sincronização secundária de aliases para garantir retrocompatibilidade
+    const syncText = (srcId, targetId) => {
+        const src = document.getElementById(srcId);
+        const target = document.getElementById(targetId);
+        if (src && target) {
+            const observer = new MutationObserver(() => target.textContent = src.textContent);
+            observer.observe(src, { childList: true, characterData: true, subtree: true });
+        }
+    };
+    syncText('resumo-valor-oferecido', 'resumo-valor-oferecido-composicao');
+});
+</script>
+{% endblock %}

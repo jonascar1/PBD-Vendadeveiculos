@@ -2,18 +2,21 @@
 Todas as validações dos formulários ficam aqui (e nos models), nunca no HTML.
 """
 
+from decimal import Decimal, InvalidOperation
 import re
 from datetime import date
 
 from django import forms
 from django.core.validators import MaxLengthValidator
-from django.forms import inlineformset_factory
+from django.forms import BaseInlineFormSet, inlineformset_factory
 from django.utils import timezone
 
 from .models import (
     Cliente,
+    ComposicaoPagamento,
     LancamentoFinanceiro,
     PerfilVendedor,
+    Proposta,
     TelefoneCliente,
     Usuario,
     Veiculo,
@@ -441,7 +444,14 @@ class ReservaForm(BaseForm, forms.Form):
         max_length=60,
         error_messages={"required": "Informe o contato do cliente."},
     )
-
+    
+    cliente = forms.ModelChoiceField(
+        queryset=Cliente.objects.filter(ativo=True),
+        required=False,
+        label="Cliente cadastrado",
+        empty_label="Selecione um cliente...",
+        error_messages={"invalid_choice": "Selecione um cliente válido."},
+    )
 
 class AlterarSituacaoForm(BaseForm, forms.Form):
     situacao = forms.ChoiceField(
@@ -655,3 +665,266 @@ TelefoneClienteFormSet = inlineformset_factory(
     validate_min=True,
     can_delete=True,
 )
+
+def _brl(valor):
+    """Decimal -> 'R$ 1.234,56'."""
+    texto = f"{valor:,.2f}"
+    return "R$ " + texto.replace(",", "X").replace(".", ",").replace("X", ".")
+ 
+
+class CampoMonetarioBR(forms.DecimalField):
+    widget = forms.TextInput
+
+    def to_python(self, value):
+        if value in self.empty_values:
+            return None
+
+        if isinstance(value, str):
+            valor = value.strip()
+            valor = valor.replace("R$", "").replace(" ", "")
+
+            if "," in valor:
+                valor = valor.replace(".", "").replace(",", ".")
+            elif valor.count(".") > 1:
+                valor = valor.replace(".", "")
+
+            value = valor
+
+        try:
+            return super().to_python(value)
+        except (InvalidOperation, ValueError):
+            raise forms.ValidationError(
+                "Informe um valor monetário válido.",
+                code="invalid",
+            )
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault(
+            "widget",
+            forms.TextInput(attrs={"inputmode": "decimal"})
+        )
+        super().__init__(*args, **kwargs)
+class PropostaForm(BaseForm, forms.ModelForm):
+    """
+    Dados da proposta. O vendedor NÃO é campo: a view grava request.user.
+ 
+    Ao EDITAR, cliente e veículo ficam travados (disabled): trocar o veículo
+    mudaria a regra do "aguardando", então, se errou, cancela e faz outra.
+    """
+    valor_oferecido = CampoMonetarioBR(
+    max_digits=12,
+    decimal_places=2,
+    min_value=Decimal("0.01"),
+)
+    class Meta:
+        model = Proposta
+        fields = ["cliente", "veiculo", "valor_oferecido", "data"]
+        widgets = {
+            "data": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "valor_oferecido": forms.TextInput(
+    attrs={
+        "inputmode": "decimal",
+        "placeholder": "Ex.: 18.500,00",
+    }
+),
+        }
+ 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        editando = bool(self.instance.pk)
+ 
+        cliente = self.fields["cliente"]
+        veiculo = self.fields["veiculo"]
+ 
+        cliente.queryset = Cliente.objects.filter(ativo=True).order_by(
+            "nome", "razao_social"
+        )
+        veiculo.queryset = Veiculo.objects.filter(
+            situacao__in=[Veiculo.Situacao.DISPONIVEL, Veiculo.Situacao.RESERVADO],
+            preco_venda__gt=0,
+        ).order_by("marca", "modelo")
+ 
+        cliente.empty_label = "Selecione o cliente..."
+        veiculo.empty_label = "Selecione o veículo..."
+ 
+        cliente.label_from_instance = lambda c: (
+            f"{c.nome_exibicao} — {c.cpf or c.cnpj}"
+        )
+        veiculo.label_from_instance = lambda v: (
+            f"{v.marca} {v.modelo} {v.ano_modelo} — {v.placa}"
+            f"{' (reservado)' if v.situacao == Veiculo.Situacao.RESERVADO else ''}"
+        )
+ 
+        cliente.error_messages["required"] = "Selecione o cliente."
+        cliente.error_messages["invalid_choice"] = "Selecione um cliente válido."
+        veiculo.error_messages["required"] = "Selecione o veículo."
+        veiculo.error_messages["invalid_choice"] = (
+            "Esse veículo não está disponível para proposta."
+        )
+        self.fields["valor_oferecido"].error_messages["required"] = (
+            "Informe o valor oferecido."
+        )
+        self.fields["valor_oferecido"].error_messages["invalid"] = (
+            "Informe um valor válido."
+        )
+        self.fields["data"].error_messages["required"] = "Informe a data da proposta."
+ 
+        if editando:
+            # Mantém só o registro atual (mesmo que o cliente tenha sido
+            # desativado ou o veículo mudado de situação depois).
+            cliente.queryset = Cliente.objects.filter(pk=self.instance.cliente_id)
+            veiculo.queryset = Veiculo.objects.filter(pk=self.instance.veiculo_id)
+            cliente.disabled = True
+            veiculo.disabled = True
+ 
+class PropostaFiltroForm(BaseForm, forms.Form):
+    """Filtros da listagem de propostas."""
+
+    cliente = forms.ModelChoiceField(
+        queryset=Cliente.objects.all().order_by("id"),
+        required=False,
+        empty_label="Todos os clientes",
+    )
+
+    veiculo = forms.ModelChoiceField(
+        queryset=Veiculo.objects.all().order_by("marca", "modelo"),
+        required=False,
+        empty_label="Todos os veículos",
+    )
+
+    situacao = forms.ChoiceField(
+        choices=[("", "Todas as situações")] + list(Proposta.Situacao.choices),
+        required=False,
+    )
+
+    vendedor = forms.ModelChoiceField(
+        queryset=Usuario.objects.filter(
+            perfil__in=[
+                Usuario.Perfil.VENDEDOR,
+                Usuario.Perfil.GERENTE,
+            ]
+        ).order_by("username"),
+        required=False,
+        empty_label="Todos os vendedores",
+    )
+class ComposicaoPagamentoForm(BaseForm, forms.ModelForm):
+    """Uma linha da composição. As regras por tipo estão no clean() do model."""
+    valor = CampoMonetarioBR(
+    max_digits=12,
+    decimal_places=2,
+    min_value=Decimal("0.01"),
+)
+
+    financ_valor_parcela = CampoMonetarioBR(
+    max_digits=12,
+    decimal_places=2,
+    required=False,
+    min_value=Decimal("0.01"),
+)
+    class Meta:
+        model = ComposicaoPagamento
+        fields = [
+            "tipo",
+            "valor",
+            "troca_descricao",
+            "financ_banco",
+            "financ_parcelas",
+            "financ_valor_parcela",
+        ]
+        widgets = {
+            "valor": forms.NumberInput(attrs={"step": "0.01", "inputmode": "decimal"}),
+            "financ_valor_parcela": forms.NumberInput(
+                attrs={"step": "0.01", "inputmode": "decimal"}
+            ),
+            "financ_parcelas": forms.NumberInput(attrs={"step": "1"}),
+            "troca_descricao": forms.TextInput(
+                attrs={"placeholder": "Ex.: Fiat Uno 2012, placa ABC1D23"}
+            ),
+            "financ_banco": forms.TextInput(attrs={"placeholder": "Banco"}),
+        }
+    class Meta:
+        model = ComposicaoPagamento
+        fields = [
+            "tipo",
+            "valor",
+            "troca_descricao",
+            "financ_banco",
+            "financ_parcelas",
+            "financ_valor_parcela",
+        ]
+        widgets = {
+            "valor": forms.NumberInput(attrs={"step": "0.01", "inputmode": "decimal"}),
+            "troca_descricao": forms.TextInput(
+                attrs={"placeholder": "Ex.: Fiat Uno 2012, placa ABC1D23"}
+            ),
+            "financ_banco": forms.TextInput(attrs={"placeholder": "Banco"}),
+        }
+ 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["tipo"].choices = [("", "Selecione...")] + list(
+            ComposicaoPagamento.Tipo.choices
+        )
+        self.fields["tipo"].error_messages["required"] = "Selecione o tipo."
+        self.fields["tipo"].error_messages["invalid_choice"] = "Tipo inválido."
+        self.fields["valor"].error_messages["required"] = "Informe o valor."
+        self.fields["valor"].error_messages["invalid"] = "Informe um valor válido."
+ 
+ 
+class BaseComposicaoFormSet(BaseInlineFormSet):
+    """
+    Valida a composição como um todo: precisa ter ao menos uma linha e a
+    soma TEM de fechar com o valor oferecido.
+ 
+    A view precisa preencher `formset.valor_oferecido` ANTES de chamar
+    `formset.is_valid()` (ver _proposta_form_view em t08_views_novas.py).
+    """
+ 
+    valor_oferecido = None
+    soma_composicao = Decimal("0.00")
+ 
+    def clean(self):
+        super().clean()
+ 
+        # Se alguma linha já tem erro de campo, deixa esses erros aparecerem primeiro.
+        if any(self.errors):
+            return
+ 
+        total = Decimal("0.00")
+        linhas = 0
+ 
+        for form in self.forms:
+            dados = getattr(form, "cleaned_data", None)
+            if not dados or dados.get("DELETE"):
+                continue
+            valor = dados.get("valor")
+            if valor is None:
+                continue
+            total += valor
+            linhas += 1
+ 
+        self.soma_composicao = total
+ 
+        if linhas == 0:
+            raise forms.ValidationError(
+                "Informe ao menos uma forma de pagamento."
+            )
+ 
+        if self.valor_oferecido is not None and total != self.valor_oferecido:
+            diferenca = self.valor_oferecido - total
+            situacao = "faltam" if diferenca > 0 else "sobram"
+            raise forms.ValidationError(
+                f"A composição não fecha com o valor oferecido: "
+                f"{situacao} {_brl(abs(diferenca))}."
+            )
+ 
+ 
+ComposicaoFormSet = inlineformset_factory(
+    Proposta,
+    ComposicaoPagamento,
+    form=ComposicaoPagamentoForm,
+    formset=BaseComposicaoFormSet,
+    extra=1,
+    can_delete=True,
+)
+ 
