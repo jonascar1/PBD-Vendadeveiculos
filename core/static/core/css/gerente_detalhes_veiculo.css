@@ -329,22 +329,13 @@
     margin-bottom: 16px;
 }
 
-.badge {
-    background: white;
-    padding: 9px 15px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-
 /* ==============================
    BOTÃO VOLTAR
 ============================== */
 
 .btn-voltar {
-    display: inline-block;
+    display: flex;
+    align-items: center;
     padding: 8px 13px;
     border-radius: 6px;
     background: white;
@@ -352,13 +343,21 @@
     color: #374151;
     text-decoration: none;
     font-size: 12px;
-    transition: 0.2s;
+    transition: 0.3s;
     margin-top: 20px;
+
+}
+
+.btn-voltar svg {
+    margin-right: 6px;
+    width: 14px;
+    height: 14px;
 }
 
 .btn-voltar:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
+    border-color: #256eeb;
+    color: #2563eb;
+    transition: 0.3s;
 }
 
 .btn-preco {
@@ -379,9 +378,41 @@
     opacity: 0.9;
 }
 
+.topo-acoes {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.topo-acoes .btn-voltar {
+    margin-top: 0;
+}
+
+.topo-acoes .btn-preco {
+    margin: 0;
+}
+
 /* =========================================================
    SITUAÇÃO DO VEÍCULO
    ========================================================= */
+
+.prazo-reserva {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 12px;
+    border: 1px solid #f3d39a;
+    border-radius: 8px;
+    background: #fff8e8;
+    color: #8a5a00;
+}
+
+.prazo-reserva p {
+    margin: 4px 0 0;
+    font-size: 13px;
+}
 
 .situacao-card {
     padding: 0;
@@ -456,7 +487,16 @@
 .form-situacao {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.form-situacao > * {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .form-situacao input {
@@ -501,6 +541,10 @@
     cursor: pointer;
     white-space: nowrap;
     transition: 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
 .btn-disponivel {
@@ -628,7 +672,7 @@
 @media (max-width: 700px) {
 
     .topo-acoes {
-        align-items: flex-start;
+        align-items: flex-start;    
     }
 
     .titulo-veiculo {

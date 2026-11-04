@@ -34,41 +34,27 @@ Editar despesa | VENDACERTA
 
     <div class="editar-despesa-card">
 
-        <form method="post" class="editar-form">
+        <form method="post" class="editar-form" novalidate>
             {% csrf_token %}
+
+            {{ form.non_field_errors }}
 
             <div>
                 <label for="valor">Valor</label>
-                <input
-                    type="number"
-                    name="valor"
-                    id="valor"
-                    step="0.01"
-                    value="{{ despesa.valor|floatformat:'2u' }}"
-                    required
-                >
+                {{ form.valor }}
+                {{ form.valor.errors }}
             </div>
 
             <div>
                 <label for="data_lancamento">Data</label>
-                <input
-                    type="date"
-                    name="data_lancamento"
-                    id="data_lancamento"
-                    value="{{ despesa.data_lancamento|date:'Y-m-d' }}"
-                    required
-                >
+                {{ form.data_lancamento }}
+                {{ form.data_lancamento.errors }}
             </div>
 
             <div>
                 <label for="descricao">Descrição</label>
-                <input
-                    type="text"
-                    name="descricao"
-                    id="descricao"
-                    value="{{ despesa.descricao }}"
-                    maxlength="200"
-                >
+                {{ form.descricao }}
+                {{ form.descricao.errors }}
             </div>
 
             <div class="editar-acoes">
@@ -96,5 +82,3 @@ Editar despesa | VENDACERTA
 </div>
 
 {% endblock %}
-
- 

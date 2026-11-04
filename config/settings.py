@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-3ehq1sx8n+__delbi+d^_)u0w4i6^hkr0q-wefrqc$$7_bs6js
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.1.70', '192.168.1.101']
 
 
 # Application definition
@@ -113,7 +114,13 @@ LANGUAGE_CODE = 'pt-br'
 
 TIME_ZONE = 'America/Sao_Paulo'
 
-USE_I18N = True
+USE_L10N = True
+
+USE_THOUSAND_SEPARATOR = True
+
+THOUSAND_SEPARATOR = '.'
+
+DECIMAL_SEPARATOR = ','
 
 USE_TZ = True
 
@@ -124,8 +131,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
-
+STATICFILES_DIRS = [ BASE_DIR / "static" ]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),]
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
@@ -134,5 +142,5 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 AUTH_USER_MODEL = "core.Usuario"

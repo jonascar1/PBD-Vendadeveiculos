@@ -1,6 +1,7 @@
 {% extends "core/administrativo_base.html" %}
 
 {% load static %}
+{% load static l10n %}
 
 {% block title %}
 Despesas | VENDACERTA
@@ -122,7 +123,7 @@ Despesas | VENDACERTA
                             alt="Foto do {{ veiculo.marca }} {{ veiculo.modelo }}"
                         >
                     {% else %}
-                        <span>🚗</span>
+                        <span><i data-lucide="image-off"></i></span>
                     {% endif %}
                 </div>
 
@@ -135,14 +136,14 @@ Despesas | VENDACERTA
 
                     <p>
                         Placa: {{ veiculo.placa }}
-                        · {{ veiculo.ano_modelo }}
+                        · {{ veiculo.ano_modelo|unlocalize }}
                     </p>
 
                 </div>
 
 
                 <div class="seta">
-                    →
+                    <span><i data-lucide="chevrons-right"></i></span>
                 </div>
 
             </a>
@@ -152,7 +153,7 @@ Despesas | VENDACERTA
             <div class="vazio">
 
                 <div class="vazio-icone">
-                    🚗
+                    <i data-lucide="car "></i>
                 </div>
 
                 <strong>

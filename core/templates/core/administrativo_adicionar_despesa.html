@@ -25,43 +25,28 @@ Adicionar despesa | {{ veiculo.marca }} {{ veiculo.modelo }}
 
 <div class="formulario-card">
 
-    <form method="post">
+    <form method="post" novalidate>
 
         {% csrf_token %}
 
+        {{ form.non_field_errors }}
+
         <div class="campo">
             <label for="valor">Valor</label>
-
-            <input
-                type="number"
-                id="valor"
-                name="valor"
-                step="0.01"
-                min="0"
-                required
-            >
+            {{ form.valor }}
+            {{ form.valor.errors }}
         </div>
 
         <div class="campo">
             <label for="data_lancamento">Data do lançamento</label>
-
-            <input
-                type="date"
-                id="data_lancamento"
-                name="data_lancamento"
-                required
-            >
+            {{ form.data_lancamento }}
+            {{ form.data_lancamento.errors }}
         </div>
 
         <div class="campo">
             <label for="descricao">Descrição</label>
-
-            <textarea
-                id="descricao"
-                name="descricao"
-                rows="4"
-                placeholder="Ex.: Funilaria, documentação, limpeza..."
-            ></textarea>
+            {{ form.descricao }}
+            {{ form.descricao.errors }}
         </div>
 
         <div class="acoes-formulario">

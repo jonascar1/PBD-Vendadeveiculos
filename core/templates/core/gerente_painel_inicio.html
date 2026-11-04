@@ -16,9 +16,6 @@
                     <p>Olá, {{ request.user.get_full_name|default:request.user.username }}!</p>
                 </div>
 
-                <div class="user-info">
-                    <span>Gerente</span>
-                </div>
 
             </header>
 
@@ -33,6 +30,42 @@
                 </div>
             {% endif %}
 
+            <!-- RESUMO DO PAINEL -->
+            <section class="section">
+                <div class="cards-resumo">
+
+                    <div class="card-resumo">
+                        <div class="card-resumo-icone">
+                            <i data-lucide="car-front"></i>
+                        </div>
+                        <div>
+                            <p>Veículos disponíveis</p>
+                            <h2>{{ veiculos_disponiveis }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="card-resumo">
+                        <div class="card-resumo-icone">
+                            <i data-lucide="badge-check"></i>
+                        </div>
+                        <div>
+                            <p>Vendas concluídas</p>
+                            <h2>{{ vendas_concluidas }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="card-resumo">
+                        <div class="card-resumo-icone">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <div>
+                            <p>Vendedores ativos</p>
+                            <h2>{{ vendedores_ativos }}</h2>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
 
             <!-- AÇÕES RÁPIDAS -->
             <section class="section">
@@ -55,7 +88,7 @@
                     <a href="{% url 'cadastrar_veiculo' %}" class="action-card">
 
                         <div class="action-icon">
-                            🚗
+                            <i data-lucide="car"></i>
                         </div>
 
                         <div>
@@ -66,14 +99,14 @@
                             </p>
                         </div>
 
-                        <span class="arrow">→</span>
+                        <span class="arrow"><i data-lucide="chevrons-right"></i></span>
 
                     </a>
 
                     <a href="{% url 'cadastrar_vendedor' %}" class="action-card">
 
                         <div class="action-icon">
-                            👤
+                            <i data-lucide="user"></i>
                         </div>
 
                         <div>
@@ -84,7 +117,7 @@
                             </p>
                         </div>
 
-                        <span class="arrow">→</span>
+                        <span class="arrow"><i data-lucide="chevrons-right"></i></span>
 
                     </a>
 
@@ -92,7 +125,7 @@
                     <a href="#" class="action-card">
 
                         <div class="action-icon">
-                            💰
+                            <i data-lucide="dollar-sign"></i>
                         </div>
 
                         <div>
@@ -103,7 +136,7 @@
                             </p>
                         </div>
 
-                        <span class="arrow">→</span>
+                        <span class="arrow"><i data-lucide="chevrons-right"></i></span>
 
                     </a>
 
@@ -111,7 +144,7 @@
                     <a href="#" class="action-card">
 
                         <div class="action-icon">
-                            ✓
+                            <i data-lucide="check-circle"></i>
                         </div>
 
                         <div>
@@ -122,26 +155,7 @@
                             </p>
                         </div>
 
-                        <span class="arrow">→</span>
-
-                    </a>
-
-
-                    <a href="#" class="action-card">
-
-                        <div class="action-icon">
-                            🔄
-                        </div>
-
-                        <div>
-                            <h3>Avaliar troca</h3>
-
-                            <p>
-                                Avalie veículos recebidos em troca.
-                            </p>
-                        </div>
-
-                        <span class="arrow">→</span>
+                        <span class="arrow"><i data-lucide="chevrons-right"></i></span>
 
                     </a>
 

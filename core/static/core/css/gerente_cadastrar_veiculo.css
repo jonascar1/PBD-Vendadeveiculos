@@ -19,21 +19,6 @@
     font-size: 14px;
 }
 
-
-/* ==============================
-   BADGE
-============================== */
-
-.badge {
-    background: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-weight: bold;
-}
-
-
 /* ==============================
    CARD
 ============================== */
@@ -304,18 +289,17 @@
 
 .aviso {
     background: #eff6ff;
-
     border: 1px solid #dbeafe;
-
     border-radius: 8px;
-
     padding: 13px 15px;
-
     color: #2563eb;
-
     font-size: 12px;
-
     margin-top: 22px;
+    display: flex;
+    align-items: center;
+}
+.aviso span {
+    margin-left: 8px;
 }
 
 
@@ -648,6 +632,12 @@
     border: 1px solid #dbeafe;
     color: #2563eb;
     font-size: 11px;
+    display: flex;
+    align-items: center;
+}
+
+.aviso-fotos span {
+    margin-left: 8px;
 }
 
 .foto-preview {

@@ -1,0 +1,291 @@
+:root {
+  --primary-color: #0f172a;
+  --accent-color: #2563eb;
+  --accent-hover: #1d4ed8;
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --font-family: system-ui, -apple-system, sans-serif;
+}
+
+.propostas-page {
+  font-family: var(--font-family);
+  color: var(--text-main);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Cabeçalho */
+.prop-detalhe-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.prop-detalhe-identificacao {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.prop-detalhe-identificacao h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.prop-subtitulo {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+
+/* Botões */
+.prop-acoes {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.prop-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.2rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+
+.prop-btn:hover {
+  background-color: #f1f5f9;
+}
+
+.prop-btn-primario {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border-color: var(--accent-color);
+}
+
+.prop-btn-primario:hover {
+  background-color: var(--accent-hover);
+}
+
+.prop-btn-secundario {
+  background-color: #f1f5f9;
+  color: var(--primary-color);
+  border-color: var(--border-color);
+}
+
+.prop-btn-secundario:hover {
+  background-color: #e2e8f0;
+}
+
+.prop-btn-pequeno {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.825rem;
+}
+
+/* Badges */
+.prop-badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.prop-badge-em_analise, .prop-badge-analise, .prop-badge-pendente {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.prop-badge-aprovada, .prop-badge-aprovado, .prop-badge-aceita {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.prop-badge-recusada, .prop-badge-rejeitada, .prop-badge-cancelada {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+/* Grid da Página de Detalhes */
+.prop-detalhe-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.prop-span-total {
+  grid-column: span 2;
+}
+
+.prop-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.prop-card-p {
+  padding: 1.5rem;
+}
+
+.prop-card-titulo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Dados da Proposta */
+.prop-dados-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.prop-dado {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prop-dado span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.prop-dado strong {
+  font-size: 0.95rem;
+  color: var(--primary-color);
+}
+
+.prop-links-relacionados {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Resumo Financeiro Grid */
+.prop-financeiro-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.prop-financeiro-item {
+  background-color: #f8fafc;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.prop-financeiro-item span {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.prop-financeiro-item strong {
+  font-size: 1.15rem;
+  color: var(--primary-color);
+}
+
+/* Tabela de Formas de Pagamento */
+.prop-tabela-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.prop-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.prop-tabela th {
+  background-color: #f8fafc;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.prop-tabela td {
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.prop-tabela tr:last-child td {
+  border-bottom: none;
+}
+
+/* Histórico de Alterações (Timeline) */
+.prop-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prop-timeline-item {
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--accent-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.prop-timeline-data {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.prop-timeline-item p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.prop-vazio {
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .prop-detalhe-grid {
+    grid-template-columns: 1fr;
+  }
+  .prop-span-total {
+    grid-column: span 1;
+  }
+}

@@ -1,6 +1,7 @@
 {% extends "core/gerente_base.html" %}
 
 {% load static %}
+{% load static l10n %}
 
 {% block title %}
     Detalhes do veículo | VENDACERTA
@@ -19,10 +20,9 @@
     </div>
 
     <div class="topo-acoes">
-        <div class="badge">Gerente</div>
-
+    
         <a href="{% url 'veiculos' %}" class="btn-voltar">
-            ← Voltar para veículos
+            <i data-lucide="chevron-left"></i> Voltar para veículos
         </a>
 
         {% if veiculo.situacao != "VENDIDO" and veiculo.situacao != "ENTREGUE" %}
@@ -52,7 +52,7 @@
                 >
             {% else %}
                 <div class="sem-foto">
-                    <span>📷</span>
+                    <span><i data-lucide="image-off"></i></span>
                     <p>Nenhuma foto cadastrada</p>
                 </div>
             {% endif %}
@@ -104,7 +104,7 @@
                 {% if veiculo.situacao == "PREPARACAO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">🔧</span>
+                        <span class="situacao-icone"><i data-lucide="wrench"></i></span>
 
                         <div>
                             <strong>Veículo em preparação</strong>
@@ -115,7 +115,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -134,7 +134,7 @@
                         >
 
                         <button type="submit" class="btn-situacao btn-disponivel">
-                            ✓ Marcar como disponível
+                            <i data-lucide="check"></i> Marcar como disponível
                         </button>
                     </form>
 
@@ -142,7 +142,7 @@
                 {% elif veiculo.situacao == "DISPONIVEL" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">✓</span>
+                        <span class="situacao-icone"><i data-lucide="check"></i></span>
 
                         <div>
                             <strong>Veículo disponível</strong>
@@ -153,7 +153,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'reservar_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -164,19 +164,17 @@
                                 type="text"
                                 name="cliente_nome"
                                 placeholder="Nome do cliente"
-                                required
                             >
 
                             <input
                                 type="text"
                                 name="cliente_contato"
                                 placeholder="Contato do cliente"
-                                required
                             >
                         </div>
 
                         <button type="submit" class="btn-situacao btn-reservar">
-                            📌 Reservar veículo
+                            <i data-lucide="pin"></i> Reservar veículo
                         </button>
                     </form>
 
@@ -184,7 +182,7 @@
                 {% elif veiculo.situacao == "RESERVADO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">📌</span>
+                        <span class="situacao-icone"><i data-lucide="pin"></i></span>
 
                         <div>
                             <strong>Veículo reservado</strong>
@@ -192,12 +190,25 @@
                                 Este veículo está reservado para um cliente.
                             </p>
                         </div>
+                        {% if reserva %}
+                            <div class="prazo-reserva">
+                                <i data-lucide="clock"></i>
+
+                                <div>
+                                    <strong>Prazo da reserva</strong>
+                                    <p>
+                                        Expira em:
+                                        {{ reserva.expira_em|date:"d/m/Y H:i" }}
+                                    </p>
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="acoes-situacao">
 
                         <form
-                            method="post"
+                            method="post" novalidate
                             action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                             class="form-situacao acao-venda"
                         >
@@ -209,6 +220,17 @@
                                 value="VENDIDO"
                             >
 
+                            <select name="cliente" required class="select-cliente">
+                                <option value="" disabled selected>Selecione o cliente comprador...</option>
+                                {% for c in clientes_list|default:None %}
+                                    <option value="{{ c.id }}">{{ c.nome|default:c.razao_social }}</option>
+                                {% empty %}
+                                    {% comment %} Caso prefira renderizar dinamicamente pelo form {% endcomment %}
+                                {% endfor %}
+                            </select>
+
+                            {{ form.cliente }}
+
                             <input
                                 type="text"
                                 name="motivo"
@@ -216,13 +238,13 @@
                             >
 
                             <button type="submit" class="btn-situacao btn-vendido">
-                                💰 Registrar venda
+                                <i data-lucide="dollar-sign"></i> Registrar venda
                             </button>
                         </form>
 
 
                         <form
-                            method="post"
+                            method="post" novalidate
                             action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                             class="form-situacao"
                         >
@@ -251,7 +273,7 @@
                 {% elif veiculo.situacao == "VENDIDO" %}
 
                     <div class="situacao-mensagem">
-                        <span class="situacao-icone">💰</span>
+                        <span class="situacao-icone"><i data-lucide="dollar-sign"></i></span>
 
                         <div>
                             <strong>Veículo vendido</strong>
@@ -262,7 +284,7 @@
                     </div>
 
                     <form
-                        method="post"
+                        method="post" novalidate
                         action="{% url 'alterar_situacao_veiculo' veiculo.id %}"
                         class="form-situacao"
                     >
@@ -281,7 +303,7 @@
                         >
 
                         <button type="submit" class="btn-situacao btn-entregue">
-                            ✓ Registrar entrega
+                            <i data-lucide="check"></i> Registrar entrega
                         </button>
                     </form>
 
@@ -289,7 +311,7 @@
                 {% elif veiculo.situacao == "ENTREGUE" %}
 
                     <div class="situacao-mensagem entregue">
-                        <span class="situacao-icone">✓</span>
+                        <span class="situacao-icone"><i data-lucide="check-circle"></i></span>
 
                         <div>
                             <strong>Veículo entregue</strong>
@@ -313,9 +335,6 @@
     <!-- INFORMAÇÕES -->
     <div class="informacoes">
 
-        
-
-
         <!-- CABEÇALHO DO VEÍCULO -->
         <div class="titulo-veiculo">
 
@@ -330,7 +349,7 @@
                 </h2>
 
                 <p>
-                    {{ veiculo.ano_fabricacao }}/{{ veiculo.ano_modelo }}
+                    {{ veiculo.ano_fabricacao|unlocalize }}/{{ veiculo.ano_modelo|unlocalize }}
                 </p>
 
             </div>
@@ -374,12 +393,12 @@
 
                 <div class="info-item">
                     <span>Ano de fabricação</span>
-                    <strong>{{ veiculo.ano_fabricacao }}</strong>
+                    <strong>{{ veiculo.ano_fabricacao|unlocalize }}</strong>
                 </div>
 
                 <div class="info-item">
                     <span>Ano modelo</span>
-                    <strong>{{ veiculo.ano_modelo }}</strong>
+                    <strong>{{ veiculo.ano_modelo|unlocalize }}</strong>
                 </div>
 
                 <div class="info-item">
@@ -396,6 +415,13 @@
                     <span>Quilometragem</span>
                     <strong>{{ veiculo.quilometragem }} km</strong>
                 </div>
+
+                {% if veiculo.cliente_comprador %}
+                <div class="info-item">
+                    <span>Cliente Comprador</span>
+                    <strong>{{ veiculo.cliente_comprador.nome|default:veiculo.cliente_comprador.razao_social }}</strong>
+                </div>
+                {% endif %}
 
             </div>
 
@@ -499,7 +525,7 @@
 
         {% if ultimo_historico_preco and ultimo_historico_preco.abaixo_do_custo %}
             <div class="alerta-preco-custo">
-                <strong>⚠️ Atenção</strong>
+                <strong><i data-lucide="alert-triangle"></i> Atenção</strong>
                 <p>
                     O preço de venda está abaixo do custo total acumulado
                     do veículo.

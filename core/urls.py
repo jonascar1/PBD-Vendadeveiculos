@@ -7,7 +7,13 @@ urlpatterns = [
     path("accounts/logout/", views.logout_view, name="logout"),
     path("painel/", views.painel_view, name="painel"),
 
-    path("painel/vendedor/", views.painel_vendedor_view, name="painel_vendedor"),
+    path("painel/vendedor/inicio", views.painel_vendedor_view, name="painel_vendedor"),
+    path("painel/vendedor/clientes/", views.clientes_view, name="clientes"),
+    path("painel/vendedor/clientes/cadastrar/", views.cadastrar_cliente_view, name="cadastrar_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/", views.detalhes_cliente_view, name="detalhes_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/editar/", views.editar_cliente_view, name="editar_cliente"),
+    path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
+
 
     path("painel/administrativo/inicio/", views.painel_administrativo_view, name="painel_administrativo"),
     path("painel/administrativo/despesas/", views.despesas_view, name="despesas"),
@@ -17,7 +23,7 @@ urlpatterns = [
     path("painel/administrativo/despesas/<int:despesa_id>/excluir/", views.excluir_despesa_view, name="excluir_despesa"),
     path("painel/administrativo/despesas/veiculo/<int:veiculo_id>/excluidas/", views.despesas_excluidas_veiculo_view, name="despesas_excluidas_veiculo"),
 
-    
+
     path("painel/gerente/inicio/", views.painel_gerente_view, name="painel_gerente"),
     path("painel/gerente/vendedores/", views.vendedores_view, name="vendedores"),
     path("painel/gerente/vendedores/cadastrar/", views.cadastrar_vendedor_view, name="cadastrar_vendedor"),
@@ -29,4 +35,9 @@ urlpatterns = [
     path("veiculos/<int:veiculo_id>/reservar/",views.reservar_veiculo_view, name="reservar_veiculo",),
     path("painel/gerente/veiculos/<int:veiculo_id>/preco/", views.alterar_preco_veiculo_view, name="alterar_preco_veiculo"),
 
-]
+    path("", views.vitrine_view, name="vitrine"),
+    path("vitrine/veiculo/<int:pk>/", views.vitrine_veiculo_detalhe_view, name="vitrine_veiculo_detalhe"),
+    path("painel/vendedor/propostas/", views.propostas_view, name="propostas"),
+    path("painel/vendedor/propostas/nova/", views.nova_proposta_view, name="nova_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/", views.detalhes_proposta_view, name="detalhes_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/editar/", views.editar_proposta_view, name="editar_proposta"),]

@@ -1,0 +1,206 @@
+{% extends "core/vendedor_base.html" %}
+{% load static %}
+{% load static l10n %}
+
+{% block title %}
+    Detalhes de {{ cliente.nome|default:cliente.razao_social }} | VENDACERTA
+{% endblock %}
+
+
+{% block content %}
+
+<header class="topo-detalhes">
+    
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/vendedor_cliente_detalhes.css' %}">
+{% endblock %}
+    <div>
+        <h1>Ficha do Cliente</h1>
+        <p>Visualize os dados do cliente, veículos comprados e histórico de reservas/propostas.</p>
+    </div>
+
+    <div class="topo-acoes">
+        <a href="{% url 'clientes' %}" class="btn-voltar">
+            <i data-lucide="chevron-left"></i> Voltar para clientes
+        </a>
+        <a href="{% url 'editar_cliente' cliente.id %}" class="btn-editar">
+            <i data-lucide="square-pen"></i> Editar cliente
+        </a>
+    </div>
+</header>
+
+<section class="cliente-container">
+
+    <!-- DADOS DO CLIENTE -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="user"></i> Informações do Cliente</h3>
+            <span class="badge {% if cliente.ativo %}status-ativo{% else %}status-inativo{% endif %}">
+                {% if cliente.ativo %}Ativo{% else %}Inativo{% endif %}
+            </span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span>Tipo de Pessoa</span>
+                <strong>
+                    {% if cliente.tipo == "PJ" %}
+                        Pessoa jurídica
+                    {% else %}
+                        Pessoa física
+                    {% endif %}
+                </strong>
+            </div>
+
+            {% if cliente.tipo == "PF" %}
+                <div class="info-item">
+                    <span>Nome Completo</span>
+                    <strong>{{ cliente.nome }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>CPF</span>
+                    <strong>{{ cliente.cpf }}</strong>
+                </div>
+            {% else %}
+                <div class="info-item">
+                    <span>Razão Social</span>
+                    <strong>{{ cliente.razao_social }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>Nome Fantasia</span>
+                    <strong>{{ cliente.nome_fantasia|default:"-" }}</strong>
+                </div>
+                <div class="info-item">
+                    <span>CNPJ</span>
+                    <strong>{{ cliente.cnpj }}</strong>
+                </div>
+            {% endif %}
+
+            <div class="info-item">
+                <span>E-mail</span>
+                <strong>{{ cliente.email|default:"Não informado" }}</strong>
+            </div>
+
+            <div class="info-item">
+                <span>Telefones</span>
+                <strong>
+                    {% for tel in cliente.telefones.all %}
+                        {{ tel.numero }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Nenhum telefone cadastrado
+                    {% endfor %}
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- VEÍCULOS COMPRADOS -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="shopping-bag"></i> Veículos Comprados</h3>
+            <span class="contador-badge">{{ veiculos_comprados.count }}</span>
+        </div>
+
+        {% if veiculos_comprados %}
+            <div class="tabela-responsive">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Placa</th>
+                            <th>Preço de Venda</th>
+                            <th>Situação</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for veiculo in veiculos_comprados %}
+                            <tr>
+                                <td>
+                                    <strong>{{ veiculo.marca }} {{ veiculo.modelo }}</strong>
+                                    <span class="sub-info">{{ veiculo.ano_fabricacao|unlocalize }}/{{ veiculo.ano_modelo|unlocalize }}</span>
+                                </td>
+                                <td>{{ veiculo.placa }}</td>
+                                <td>
+                                    {% if veiculo.preco_venda %}
+                                        R$ {{ veiculo.preco_venda|floatformat:2 }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="badge status-{{ veiculo.situacao|lower }}">
+                                        {{ veiculo.get_situacao_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'detalhes_veiculo' veiculo.id %}" class="btn-link">
+                                        <i data-lucide="eye"></i> Ver veículo
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="sem-registros">Nenhum veículo comprado por este cliente até o momento.</p>
+        {% endif %}
+    </div>
+
+        <!-- PROPOSTAS -->
+    <div class="card-info">
+        <div class="card-cabecalho">
+            <h3><i data-lucide="circle-dollar-sign"></i> Propostas</h3>
+            <span class="contador-badge">{{ propostas|length }}</span>
+        </div>
+
+        <div class="topo-acoes">
+            <a href="{% url 'nova_proposta' %}?cliente={{ cliente.id }}" class="btn-editar">
+                <i data-lucide="plus"></i> Nova proposta
+            </a>
+        </div>
+
+        {% if propostas %}
+            <div class="tabela-responsive">
+                <table class="tabela">
+                    <thead>
+                        <tr>
+                            <th>Veículo</th>
+                            <th>Data</th>
+                            <th>Valor oferecido</th>
+                            <th>Desconto</th>
+                            <th>Situação</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proposta in propostas %}
+                            <tr>
+                                <td><strong>{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }}</strong></td>
+                                <td>{{ proposta.data|date:"d/m/Y" }}</td>
+                                <td>R$ {{ proposta.valor_oferecido|floatformat:"2g" }}</td>
+                                <td>R$ {{ proposta.desconto_embutido|floatformat:"2g" }}</td>
+                                <td>
+                                    <span class="badge status-{{ proposta.situacao|lower }}">
+                                        {{ proposta.get_situacao_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'detalhes_proposta' proposta.id %}" class="btn-link">
+                                        <i data-lucide="eye"></i> Detalhes
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="sem-registros">Nenhuma proposta registrada para este cliente.</p>
+        {% endif %}
+    </div>
+
+</section>
+
+{% endblock conteudo %}

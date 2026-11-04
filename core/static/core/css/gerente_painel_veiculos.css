@@ -6,15 +6,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 30px;
 }
 
 .topo h1 {
     font-size: 28px;
-    margin-bottom: 6px;
+    margin: 0 0 6px;
+    color: #111827;
 }
 
 .topo p {
+    margin: 0;
     color: #6b7280;
     font-size: 14px;
 }
@@ -28,14 +31,39 @@
     gap: 45px;
 }
 
-.badge {
-    background: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-weight: bold;
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e5e7eb;
 }
+
+.section-header h2 {
+    font-size: 16px;
+    margin: 0 0 4px;
+    color: #111827;
+}
+
+.section-header p {
+    color: #64748b;
+    font-size: 12px;
+    margin: 0;
+}
+
+.contador,
+.contador-veiculos {
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 
 
 /* ==============================
@@ -43,15 +71,19 @@
 ============================== */
 
 .btn-cadastrar {
-    display: inline-block;
+     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 16px;
-    background: #2563eb;
-    color: white;
     border-radius: 7px;
+    background: #2563eb;
+    color: #fff;
     text-decoration: none;
     font-size: 13px;
-    font-weight: bold;
-    transition: 0.2s;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.2s;
 }
 
 .btn-cadastrar:hover {
@@ -88,16 +120,6 @@
     font-size: 12px;
 }
 
-.contador {
-    background: #eff6ff;
-    color: #2563eb;
-    padding: 7px 11px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-
 /* ==============================
    TABELA
 ============================== */
@@ -110,6 +132,7 @@
 table {
     width: 100%;
     border-collapse: collapse;
+    text-align: left;
 }
 
 thead {
@@ -117,19 +140,21 @@ thead {
 }
 
 th {
-    text-align: left;
     padding: 13px 20px;
     color: #6b7280;
     font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    white-space: nowrap;
 }
 
 td {
     padding: 15px 20px;
     border-top: 1px solid #f0f1f3;
-    font-size: 13px;
     color: #374151;
+    font-size: 13px;
+    vertical-align: middle;
 }
 
 
@@ -239,10 +264,18 @@ td {
     text-decoration: none;
     font-size: 12px;
     font-weight: bold;
+    background: #eff6ff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: solid 1px #eff6ff;
+    transition: 0.3s;
 }
 
 .btn-ver:hover {
-    text-decoration: underline;
+    border: solid 1px #2563eb;
+    transition: 0.3s;
+    
+    
 }
 
 
@@ -289,10 +322,133 @@ td {
     font-weight: bold;
 }
 
+/* ==============================
+   Barra Pesquisa
+============================== */
+
+
+.barra-pesquisa-veiculos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.campo-pesquisa {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 0 14px;
+    height: 42px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+.campo-pesquisa svg {
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.campo-pesquisa input {
+    width: 100%;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: #111827;
+}
+
+.btn-pesquisar,
+.btn-limpar-busca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-pesquisar {
+    border: none;
+    background: #2563eb;
+    color: white;
+}
+
+.btn-pesquisar:hover {
+    background: #1d4ed8;
+}
+
+.btn-limpar-busca {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+/* ==============================
+   FILTROS
+================================= */
+
+.barra-pesquisa-veiculos select {
+    height: 42px;
+    padding: 0 30px 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #374151;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.barra-pesquisa-veiculos select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.barra-pesquisa-veiculos select:hover {
+    border-color: #93aeea;
+}
 
 /* ==============================
    RESPONSIVIDADE
 ============================== */
+
+@media (max-width: 900px) {
+    .barra-pesquisa-veiculos {
+        flex-wrap: wrap;
+    }
+
+    .barra-pesquisa-veiculos .campo-pesquisa {
+        flex-basis: 100%;
+    }
+
+    .barra-pesquisa-veiculos select {
+        flex: 1;
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 600px) {
+    .barra-pesquisa-veiculos {
+        flex-wrap: wrap;
+        padding: 12px;
+    }
+
+    .campo-pesquisa {
+        flex-basis: 100%;
+    }
+}
 
 @media (max-width: 700px) {
 

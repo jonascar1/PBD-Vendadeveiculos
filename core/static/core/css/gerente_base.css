@@ -100,7 +100,7 @@ body {
     border-radius: 8px;
     color: #d1d5db;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 14px;    
     transition: 0.2s;
 }
 
@@ -140,36 +140,6 @@ body {
     margin-left: 250px;
     width: calc(100% - 250px);
     padding: 35px 45px;
-}
-
-/* ==============================
-   TOPBAR
-============================== */
-
-.topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 35px;
-}
-
-.topbar h1 {
-    font-size: 28px;
-    margin-bottom: 6px;
-}
-
-.topbar p {
-    color: #6b7280;
-    font-size: 14px;
-}
-
-.user-info {
-    background: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-    font-size: 14px;
-    font-weight: bold;
 }
 
 /* ==============================
