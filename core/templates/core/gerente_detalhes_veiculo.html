@@ -35,7 +35,15 @@
         {% endif %}
     </div>
 </header>
-
+    {% if messages %}
+<div class="messages">
+    {% for message in messages %}
+        <div class="message message-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
 <section class="detalhes-container">
 
@@ -220,16 +228,13 @@
                                 value="VENDIDO"
                             >
 
-                            <select name="cliente" required class="select-cliente">
-                                <option value="" disabled selected>Selecione o cliente comprador...</option>
-                                {% for c in clientes_list|default:None %}
-                                    <option value="{{ c.id }}">{{ c.nome|default:c.razao_social }}</option>
-                                {% empty %}
-                                    {% comment %} Caso prefira renderizar dinamicamente pelo form {% endcomment %}
-                                {% endfor %}
+                            <select name="cliente" class="select-cliente">
+                                    <option value="" selected>Selecione o cliente comprador...</option>
+                                    {% for c in clientes_list %}
+                                        <option value="{{ c.id }}">{{ c.nome_exibicao }}</option>
+                                    {% endfor %}
                             </select>
-
-                            {{ form.cliente }}
+                     
 
                             <input
                                 type="text"

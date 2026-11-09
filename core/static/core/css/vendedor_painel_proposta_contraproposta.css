@@ -1,0 +1,50 @@
+.prop-contra-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin-top: 16px;
+}
+
+.prop-contra-meta span,
+.prop-contra-parecer span {
+    display: block;
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.prop-contra-meta strong {
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.prop-contra-parecer {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-left: 3px solid #2563eb;
+    border-radius: 8px;
+}
+
+.prop-contra-parecer p {
+    margin: 0;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.prop-contra-acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.prop-contra-acoes .prop-btn-perigo {
+    color: #b91c1c;
+    border-color: #fecaca;
+    background: #fff;
+}
+
+.prop-contra-acoes .prop-btn-perigo:hover {
+    background: #fef2f2;
+}

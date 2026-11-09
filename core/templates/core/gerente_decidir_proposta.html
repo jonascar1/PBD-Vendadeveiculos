@@ -1,0 +1,167 @@
+{% extends 'core/gerente_base.html' %}
+{% load static %}
+
+{% block title %}Analisar proposta #{{ proposta.pk }} | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/gerente_decidir_proposta.css' %}">
+{% endblock extra_css %}
+
+{% block content %}
+
+<header class="topo">
+    <div>
+        <h1>Analisar proposta #{{ proposta.pk }}</h1>
+        <p>Analise as condições comerciais e registre sua decisão.</p>
+    </div>
+
+    <a href="{% url 'negociacoes_gerente' %}" class="btn-voltar">
+        <i data-lucide="chevron-left"></i> Voltar às negociações
+    </a>
+</header>
+
+{% if messages %}
+<div class="messages">
+    {% for message in messages %}
+        <div class="message message-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<section class="decisao-grid">
+
+    <div class="decisao-coluna">
+
+        <div class="card">
+            <h2 class="card-titulo">Dados da proposta</h2>
+
+            <div class="info-grid">
+                <div class="info-item"><span>Cliente</span><strong>{{ proposta.cliente }}</strong></div>
+                <div class="info-item"><span>Veículo</span><strong>{{ proposta.veiculo }}</strong></div>
+                <div class="info-item"><span>Vendedor</span><strong>{{ proposta.vendedor }}</strong></div>
+                <div class="info-item"><span>Data</span><strong>{{ proposta.data|date:"d/m/Y" }}</strong></div>
+                <div class="info-item"><span>Preço de tabela</span><strong>R$ {{ proposta.preco_tabela|floatformat:2 }}</strong></div>
+                <div class="info-item"><span>Valor oferecido</span><strong>R$ {{ proposta.valor_oferecido|floatformat:2 }}</strong></div>
+                <div class="info-item destaque">
+                    <span>Desconto</span>
+                    <strong>R$ {{ proposta.desconto_embutido|floatformat:2 }} ({{ proposta.desconto_percentual|floatformat:2 }}%)</strong>
+                </div>
+                <div class="info-item"><span>Situação</span><strong>{{ proposta.get_situacao_display }}</strong></div>
+                <div class="info-item"><span>Status da aprovação</span><strong>{{ proposta.get_status_aprovacao_display }}</strong></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-titulo">Alçada comercial</h2>
+
+            {% if perfil %}
+                <div class="info-grid">
+                    <div class="info-item"><span>Tipo de alçada</span><strong>{{ perfil.get_tipo_alcada_display }}</strong></div>
+                    <div class="info-item">
+                        <span>Limite</span>
+                        <strong>
+                            {% if perfil.tipo_alcada == "PERCENTUAL" %}
+                                {{ perfil.valor_alcada }}%
+                            {% else %}
+                                R$ {{ perfil.valor_alcada|floatformat:2 }}
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+            {% else %}
+                <p class="texto-vazio">Não existe perfil de alçada cadastrado para este vendedor.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div class="decisao-coluna">
+
+        <div class="card">
+            <h2 class="card-titulo">Registrar decisão</h2>
+
+            {% if proposta.status_aprovacao == "PENDENTE" %}
+
+                <form method="post" novalidate class="decisao-form">
+                    {% csrf_token %}
+
+                    {{ form.non_field_errors }}
+
+                    <div class="campo">
+                        <label for="{{ form.acao.id_for_label }}">Decisão</label>
+                        {{ form.acao }}
+                        {{ form.acao.errors }}
+                    </div>
+
+                    <div class="campo">
+                        <label for="{{ form.parecer.id_for_label }}">Parecer</label>
+                        {{ form.parecer }}
+                        {{ form.parecer.errors }}
+                    </div>
+
+                    <div class="campo">
+                        <label for="{{ form.novo_valor.id_for_label }}">Valor da contraproposta</label>
+                        {{ form.novo_valor }}
+                        {{ form.novo_valor.errors }}
+                        <small class="descricao">Preencha somente quando escolher contraproposta.</small>
+                    </div>
+
+                    <button type="submit" class="btn-salvar">Registrar decisão</button>
+                </form>
+
+            {% else %}
+                <p class="aviso-decidida">Esta proposta já recebeu uma decisão do gerente.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</section>
+
+<section class="card">
+    <h2 class="card-titulo">Histórico de decisões</h2>
+
+    <div class="linha-tempo">
+        {% for decisao in decisoes %}
+            <article class="linha-tempo-item">
+                <div class="linha-tempo-topo">
+                    <strong>{{ decisao.get_tipo_display }}</strong>
+                    <small>{{ decisao.feito_em|date:"d/m/Y H:i" }}</small>
+                </div>
+                <p>Valor de referência: <strong>R$ {{ decisao.valor_referencia|floatformat:2 }}</strong></p>
+                <p>Responsável: <strong>{{ decisao.feito_por }}</strong></p>
+                {% if decisao.parecer %}
+                    <p class="parecer"><strong>Parecer:</strong> {{ decisao.parecer }}</p>
+                {% endif %}
+            </article>
+        {% empty %}
+            <p class="texto-vazio">Nenhuma decisão registrada.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="card">
+    <h2 class="card-titulo">Histórico de valores</h2>
+
+    <div class="linha-tempo">
+        {% for registro in historico %}
+            <article class="linha-tempo-item">
+                <div class="linha-tempo-topo">
+                    <strong>
+                        {% if registro.valor_anterior is not None %}
+                            R$ {{ registro.valor_anterior|floatformat:2 }} → R$ {{ registro.valor_novo|floatformat:2 }}
+                        {% else %}
+                            Primeira proposta: R$ {{ registro.valor_novo|floatformat:2 }}
+                        {% endif %}
+                    </strong>
+                    <small>{{ registro.alterado_em|date:"d/m/Y H:i" }}</small>
+                </div>
+                <p>Alterado por: <strong>{{ registro.alterado_por }}</strong></p>
+            </article>
+        {% empty %}
+            <p class="texto-vazio">Nenhuma alteração registrada.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{% endblock content %}

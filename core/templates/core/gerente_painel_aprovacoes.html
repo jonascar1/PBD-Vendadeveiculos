@@ -1,0 +1,171 @@
+
+{% extends "core/gerente_base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/aprovacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="aprovacoes-page">
+
+    <header class="aprovacoes-header">
+        <div>
+            <span class="aprovacoes-eyebrow">GESTÃO COMERCIAL</span>
+            <h1>Aprovações de propostas</h1>
+            <p>
+                Analise as negociações que ultrapassaram a alçada de desconto
+                dos vendedores.
+            </p>
+        </div>
+
+        <div class="aprovacoes-contador">
+            <span>{{ propostas|length }}</span>
+            <small>
+                {% if propostas|length == 1 %}
+                    proposta pendente
+                {% else %}
+                    propostas pendentes
+                {% endif %}
+            </small>
+        </div>
+    </header>
+
+    <section class="aprovacoes-section">
+        <div class="aprovacoes-section-header">
+            <div>
+                <h2>Fila de aprovação</h2>
+                <p>As solicitações mais antigas aparecem primeiro.</p>
+            </div>
+        </div>
+
+        <div class="aprovacoes-lista">
+
+            {% for proposta in propostas %}
+                <article class="aprovacao-card">
+
+                    <div class="aprovacao-card-topo">
+                        <div class="aprovacao-identificacao">
+                            <span class="aprovacao-id">
+                                PROPOSTA #{{ proposta.pk }}
+                            </span>
+
+                            <span class="aprovacao-status">
+                                Aguardando análise
+                            </span>
+                        </div>
+
+                        <span class="aprovacao-data">
+                            {{ proposta.criada_em|date:"d/m/Y H:i" }}
+                        </span>
+                    </div>
+
+                    <div class="aprovacao-conteudo">
+
+                        <div class="aprovacao-veiculo">
+                            <div class="aprovacao-veiculo-icone">
+                                <span aria-hidden="true">🚗</span>
+                            </div>
+
+                            <div>
+                                <h3>
+                                    {{ proposta.veiculo.marca }}
+                                    {{ proposta.veiculo.modelo }}
+                                </h3>
+
+                                <p>
+                                    {{ proposta.veiculo.ano_modelo }}
+                                    · {{ proposta.veiculo.cor }}
+                                    · {{ proposta.veiculo.placa }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="aprovacao-informacoes">
+                            <div>
+                                <span>Cliente</span>
+                                <strong>{{ proposta.cliente }}</strong>
+                            </div>
+
+                            <div>
+                                <span>Vendedor responsável</span>
+                                <strong>
+                                    {{ proposta.vendedor.get_full_name|default:proposta.vendedor.username }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Preço de tabela</span>
+                                <strong>
+                                    R$ {{ proposta.preco_tabela|floatformat:2 }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Valor oferecido</span>
+                                <strong class="valor-oferecido">
+                                    R$ {{ proposta.valor_oferecido|floatformat:2 }}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Desconto solicitado</span>
+                                <strong class="valor-desconto">
+                                    R$ {{ proposta.desconto_embutido|floatformat:2 }}
+                                    ({{ proposta.desconto_percentual|floatformat:2 }}%)
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Alçada do vendedor</span>
+                                <strong>
+                                    {% if proposta.alcada_vendedor %}
+                                        {% if proposta.alcada_vendedor.tipo_alcada == "PERCENTUAL" %}
+                                            {{ proposta.alcada_vendedor.valor_alcada|floatformat:2 }}%
+                                        {% else %}
+                                            R$ {{ proposta.alcada_vendedor.valor_alcada|floatformat:2 }}
+                                        {% endif %}
+                                    {% else %}
+                                        Não cadastrada
+                                    {% endif %}
+                                </strong>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <footer class="aprovacao-card-footer">
+                        <span>
+                            <strong>Situação do veículo:</strong>
+                            {{ proposta.veiculo.get_situacao_display }}
+                        </span>
+
+                        <a
+                            href="{% url 'decidir_proposta' proposta.pk %}"
+                            class="btn-analisar"
+                        >
+                            Analisar proposta
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </footer>
+
+                </article>
+
+            {% empty %}
+
+                <div class="aprovacoes-vazio">
+                    <div class="aprovacoes-vazio-icone">✓</div>
+                    <h3>Nenhuma aprovação pendente</h3>
+                    <p>
+                        Todas as propostas estão em dia.
+                        Novas solicitações aparecerão aqui.
+                    </p>
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </section>
+
+</div>
+{% endblock %}

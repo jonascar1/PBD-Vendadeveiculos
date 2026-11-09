@@ -1,0 +1,195 @@
+{% extends 'core/gerente_base.html' %}
+{% load static %}
+
+{% block title %}Negociações | VENDACERTA{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'core/css/gerente_painel_negociacoes.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+    <div>
+        <h1>Negociações</h1>
+        <p>Acompanhe propostas e decisões comerciais.</p>
+    </div>
+</header>
+
+{% if messages %}
+<section class="neg-messages">
+    {% for message in messages %}
+        <div class="neg-message">
+            {{ message }}
+        </div>
+    {% endfor %}
+</section>
+{% endif %}
+
+<!-- INDICADORES -->
+<section class="neg-resumo">
+
+    <a href="{% url 'negociacoes_gerente' %}" class="neg-card">
+        <div class="neg-card-icon">
+            <i data-lucide="files"></i>
+        </div>
+        <div>
+            <span>Total de propostas</span>
+            <strong>{{ indicadores.total }}</strong>
+        </div>
+    </a>
+
+    <a href="{% url 'negociacoes_gerente' %}?situacao=PENDENTE"
+       class="neg-card neg-card-pendente">
+        <div class="neg-card-icon">
+            <i data-lucide="clock-3"></i>
+        </div>
+        <div>
+            <span>Aguardando aprovação</span>
+            <strong>{{ indicadores.aguardando }}</strong>
+        </div>
+    </a>
+
+    <a href="{% url 'negociacoes_gerente' %}?situacao=APROVADA"
+       class="neg-card">
+        <div class="neg-card-icon">
+            <i data-lucide="badge-check"></i>
+        </div>
+        <div>
+            <span>Aprovadas</span>
+            <strong>{{ indicadores.aprovadas }}</strong>
+        </div>
+    </a>
+
+    <a href="{% url 'negociacoes_gerente' %}?situacao=RECUSADA"
+       class="neg-card">
+        <div class="neg-card-icon">
+            <i data-lucide="ban"></i>
+        </div>
+        <div>
+            <span>Recusadas</span>
+            <strong>{{ indicadores.recusadas }}</strong>
+        </div>
+    </a>
+
+    <a href="{% url 'negociacoes_gerente' %}?situacao=CONTRAPROPOSTA"
+       class="neg-card">
+        <div class="neg-card-icon">
+            <i data-lucide="handshake"></i>
+        </div>
+        <div>
+            <span>Contrapropostas</span>
+            <strong>{{ indicadores.contrapropostas }}</strong>
+        </div>
+    </a>
+
+</section>
+
+<!-- LISTAGEM -->
+<section class="neg-section">
+
+    <div class="neg-section-header">
+        <div>
+            <h2>Propostas comerciais</h2>
+            <p>Consulte e acompanhe as negociações da equipe.</p>
+        </div>
+
+        <form method="get" class="neg-filter">
+            <label for="filtro-situacao">Situação</label>
+
+            <select name="situacao" id="filtro-situacao"
+                    onchange="this.form.submit()">
+                <option value="">Todas as situações</option>
+
+                {% for valor, rotulo in situacoes %}
+                    <option value="{{ valor }}"
+                        {% if situacao_selecionada == valor %}selected{% endif %}>
+                        {{ rotulo }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <div class="neg-table-container">
+        <table class="neg-table">
+            <thead>
+                <tr>
+                    <th>Proposta</th>
+                    <th>Cliente</th>
+                    <th>Veículo</th>
+                    <th>Vendedor</th>
+                    <th>Valor oferecido</th>
+                    <th>Situação</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for proposta in propostas %}
+                <tr>
+                    <td>
+                        <strong>#{{ proposta.pk }}</strong>
+                        <small>{{ proposta.criada_em|date:"d/m/Y" }}</small>
+                    </td>
+
+                    <td>
+                        <strong>{{ proposta.cliente }}</strong>
+                    </td>
+
+                    <td>
+                        <strong>
+                            {{ proposta.veiculo.marca }}
+                            {{ proposta.veiculo.modelo }}
+                        </strong>
+                        <small>{{ proposta.veiculo.ano_modelo }}</small>
+                    </td>
+
+                    <td>
+                        {{ proposta.vendedor.get_full_name|default:proposta.vendedor.username }}
+                    </td>
+
+                    <td class="neg-valor">
+                        R$ {{ proposta.valor_oferecido|floatformat:2 }}
+                    </td>
+
+                    <td>
+                        <span class="neg-status
+                            {% if proposta.status_aprovacao == 'PENDENTE' %}status-pendente
+                            {% elif proposta.status_aprovacao == 'APROVADA' %}status-aprovada
+                            {% elif proposta.status_aprovacao == 'RECUSADA' %}status-recusada
+                            {% elif proposta.status_aprovacao == 'CONTRAPROPOSTA' %}status-contraproposta
+                            {% else %}status-outro{% endif %}">
+                            {{ proposta.get_status_aprovacao_display }}
+                        </span>
+                    </td>
+
+                    <td>
+                        {% if proposta.status_aprovacao == 'PENDENTE' %}
+                            <a class="neg-action"
+                               href="{% url 'decidir_proposta' proposta.pk %}">
+                                Analisar
+                                <i data-lucide="arrow-right"></i>
+                            </a>
+                        {% else %}
+                            <span class="neg-sem-acao">Sem ação pendente</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="neg-empty">
+                        <i data-lucide="inbox"></i>
+                        <strong>Nenhuma proposta encontrada</strong>
+                        <span>Não existem propostas para esse filtro.</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</section>
+
+{% endblock content %}

@@ -10,10 +10,12 @@ from django import forms
 from django.core.validators import MaxLengthValidator
 from django.forms import BaseInlineFormSet, inlineformset_factory
 from django.utils import timezone
+from django.core.exceptions import PermissionDenied, ValidationError
 
 from .models import (
     Cliente,
     ComposicaoPagamento,
+    DecisaoProposta,
     LancamentoFinanceiro,
     PerfilVendedor,
     Proposta,
@@ -927,4 +929,37 @@ ComposicaoFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
 )
- 
+
+# ======================================================================
+# DECISÃO DO GERENTE (T09)
+# ======================================================================
+class DecisaoPropostaForm(BaseForm, forms.Form):
+    """
+    Só coleta e limpa os dados. As regras de negócio (parecer obrigatório,
+    contraproposta maior que o oferecido, quem pode decidir) ficam em
+    Proposta.decidir(), no model.
+    """
+
+    acao = forms.ChoiceField(
+        choices=[
+            (DecisaoProposta.Tipo.APROVACAO, "Aprovar"),
+            (DecisaoProposta.Tipo.RECUSA, "Recusar"),
+            (DecisaoProposta.Tipo.CONTRAPROPOSTA, "Contraproposta"),
+        ],
+        error_messages={
+            "required": "Escolha uma decisão.",
+            "invalid_choice": "Decisão inválida.",
+        },
+    )
+    parecer = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={"rows": 4, "placeholder": "Explique o motivo da sua decisão..."}
+        ),
+    )
+    novo_valor = CampoMonetarioBR(
+        max_digits=12,
+        decimal_places=2,
+        required=False,
+        min_value=Decimal("0.01"),
+    )

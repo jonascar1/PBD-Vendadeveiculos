@@ -28,7 +28,8 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.aggregates import Sum
 from django.utils import timezone
-
+from decimal import Decimal, InvalidOperation
+from django.core.exceptions import PermissionDenied, ValidationError
 
 # ============================================================
 # Constantes / regex
@@ -56,8 +57,6 @@ class Usuario(AbstractUser):
     perfil = models.CharField(max_length=20, choices=Perfil.choices)
 
     # Soft delete: nunca apagar o usuário, só desativar.
-    # Isso resolve o critério "vendedor desativado não entra, mas as vendas
-    # dele continuam no sistema" — o registro nunca some, só perde acesso.
     ativo = models.BooleanField(default=True)
 
     def is_gerente(self):
@@ -76,8 +75,6 @@ class Usuario(AbstractUser):
 class PerfilVendedor(models.Model):
     """
     Dados extras de quem é vendedor: alçada de desconto e comissão.
-    Fica em tabela separada (não direto no Usuario) porque só vendedor
-    tem esses dois campos — administrativo e gerente não.
     """
 
     class TipoAlcada(models.TextChoices):
@@ -86,7 +83,7 @@ class PerfilVendedor(models.Model):
 
     usuario = models.OneToOneField(
         Usuario,
-        on_delete=models.PROTECT,  # nunca deletar em cascata: histórico de vendas depende disso
+        on_delete=models.PROTECT,
         related_name="dados_vendedor",
         limit_choices_to={"perfil": Usuario.Perfil.VENDEDOR},
     )
@@ -111,7 +108,6 @@ class PerfilVendedor(models.Model):
         help_text="Percentual de comissão do vendedor sobre a margem da venda.",
     )
 
-    # Quem foi o último a editar estes dois campos sensíveis — auditoria simples.
     editado_por = models.ForeignKey(
         Usuario,
         on_delete=models.SET_NULL,
@@ -122,17 +118,12 @@ class PerfilVendedor(models.Model):
     editado_em = models.DateTimeField(auto_now=True)
 
     def clean(self):
-        # Regra de negócio: só quem estiver marcado como GERENTE pode
-        # ser o autor de uma edição destes campos. A validação de "quem
-        # está logado" acontece na view/form; aqui garantimos que o campo
-        # `editado_por`, se preenchido, é de fato um gerente.
         if self.editado_por_id and not self.editado_por.is_gerente():
             raise ValidationError(
                 "Alçada de desconto e comissão só podem ser editadas por um gerente."
             )
 
     def __str__(self):
-        # BUGFIX: o original referenciava self.alcada_desconto (campo inexistente).
         return (
             f"Vendedor: {self.usuario} — "
             f"alçada {self.valor_alcada} ({self.get_tipo_alcada_display()}) / "
@@ -162,7 +153,6 @@ class Veiculo(models.Model):
         VENDIDO = "VENDIDO", "Vendido"
         ENTREGUE = "ENTREGUE", "Entregue"
 
-    # --- Identificação única no estoque ativo ---
     placa = models.CharField(max_length=8)
     chassi = models.CharField(max_length=17)
     renavam = models.CharField(max_length=11)
@@ -175,8 +165,6 @@ class Veiculo(models.Model):
     quilometragem = models.PositiveIntegerField()
     opcionais = models.TextField(blank=True)
 
-    # Situação operacional (fluxo de preparo/entrega) — granularidade maior
-    # que `status`, que controla apenas disponibilidade comercial.
     situacao = models.CharField(
         max_length=20,
         choices=Situacao.choices,
@@ -185,15 +173,18 @@ class Veiculo(models.Model):
 
     origem = models.CharField(max_length=20, choices=Origem.choices)
 
-    # Custo de aquisição: obrigatório para COMPRADO/TROCA, zero para CONSIGNADO.
     custo_aquisicao = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     preco_venda = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    # Só usado quando origem == CONSIGNADO.
     valor_repasse = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
-    # Trava: depois que a venda fecha, custo não pode mais mudar.
     venda_fechada = models.BooleanField(default=False)
-    cliente_comprador = models.ForeignKey("Cliente",on_delete=models.PROTECT,related_name="veiculos_comprados",null=True,blank=True,)
+    cliente_comprador = models.ForeignKey(
+        "Cliente",
+        on_delete=models.PROTECT,
+        related_name="veiculos_comprados",
+        null=True,
+        blank=True,
+    )
 
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.DISPONIVEL)
 
@@ -202,12 +193,8 @@ class Veiculo(models.Model):
     )
     criado_em = models.DateTimeField(auto_now_add=True)
 
-    
     class Meta:
         constraints = [
-            # Unicidade de placa e chassi apenas no estoque ATIVO (não vendido).
-            # Um veículo vendido não deveria travar o cadastro de outro igual
-            # que reentre no estoque (ex: recomprado depois).
             models.UniqueConstraint(
                 fields=["placa"],
                 condition=models.Q(status__in=["DISPONIVEL", "RESERVADO"]),
@@ -241,8 +228,6 @@ class Veiculo(models.Model):
             if self.valor_repasse is None:
                 erros["valor_repasse"] = "Valor de repasse é obrigatório para consignado."
 
-        # Trava de edição pós-venda: se já existe no banco e a venda estava
-        # fechada, custo_aquisicao não pode ter mudado.
         if self.pk:
             original = Veiculo.objects.filter(pk=self.pk).first()
             if original and original.venda_fechada and original.custo_aquisicao != self.custo_aquisicao:
@@ -253,7 +238,7 @@ class Veiculo(models.Model):
 
     def __str__(self):
         return f"{self.marca} {self.modelo} — {self.placa}"
-    
+
     @property
     def reserva_ativa(self):
         """Reserva vigente (não cancelada e não vencida), ou None."""
@@ -293,18 +278,12 @@ class FotoVeiculo(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.principal:
-            # Garante que só há uma foto principal por veículo.
             FotoVeiculo.objects.filter(veiculo=self.veiculo).exclude(pk=self.pk).update(
                 principal=False
             )
 
+
 class ReservaVeiculo(models.Model):
-    """
-    Reserva exclusiva com prazo (item da rubrica).
-    Enquanto houver reserva ativa (não expirada, não cancelada) para um
-    veículo, nenhuma outra reserva pode ser criada para ele — e o veículo
-    fica com status RESERVADO.
-    """
     veiculo = models.ForeignKey(
         Veiculo,
         on_delete=models.PROTECT,
@@ -333,7 +312,6 @@ class ReservaVeiculo(models.Model):
         return not self.cancelada and timezone.now() < self.expira_em
 
     def expirar(self):
-        # NÃO altere este if! Ele garante que reservas válidas no tempo não sejam expiradas por engano.
         if self.cancelada or timezone.now() < self.expira_em:
             return
 
@@ -358,7 +336,6 @@ class ReservaVeiculo(models.Model):
                 motivo="Reserva expirada",
             )
 
-        # Propostas que esperavam esta reserva vencer passam a valer.
         Proposta.ativar_aguardando(self.veiculo_id)
 
     def clean(self):
@@ -378,21 +355,13 @@ class ReservaVeiculo(models.Model):
                 name="uma_reserva_ativa_por_veiculo",
             )
         ]
-    
+
+
 # ============================================================
 # Financeiro
 # ============================================================
 
 class LancamentoFinanceiro(models.Model):
-    """
-    Toda entrada/saída ligada a um veículo (custo extra, despesa de preparo,
-    valor de venda, comissão paga, etc.) vira um lançamento aqui.
-
-    A margem NUNCA é um campo digitado — ela é sempre calculada a partir
-    da soma destes lançamentos (item explícito da rubrica: "margem
-    derivada dos lançamentos").
-    """
-
     class Tipo(models.TextChoices):
         CUSTO_AQUISICAO = "CUSTO_AQUISICAO", "Custo de aquisição"
         DESPESA = "DESPESA", "Despesa (preparo, documentação, etc.)"
@@ -402,14 +371,13 @@ class LancamentoFinanceiro(models.Model):
     veiculo = models.ForeignKey(
         Veiculo, on_delete=models.PROTECT, related_name="lancamentos"
     )
-    tipo = models.CharField(max_length=20, choices=Tipo.choices)
+    tipo = models.CharField(max_length=30, choices=Tipo.choices)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     descricao = models.CharField(max_length=200, blank=True)
     registrado_por = models.ForeignKey(Usuario, on_delete=models.PROTECT)
     criado_em = models.DateTimeField(auto_now_add=True)
     data_lancamento = models.DateField(default=timezone.now)
 
-    # Auditoria de edição/exclusão (soft delete, igual ao Usuario).
     editado_por = models.ForeignKey(
         Usuario,
         on_delete=models.PROTECT,
@@ -433,13 +401,6 @@ class LancamentoFinanceiro(models.Model):
 
 
 def calcular_margem(veiculo: Veiculo) -> Decimal:
-    """
-    Margem = soma(VENDA) - soma(CUSTO_AQUISICAO) - soma(DESPESA) - soma(COMISSAO)
-
-    Isso é o que alimenta os relatórios (item da rubrica "qualidade das
-    consultas e relatórios") — nunca ler um campo "margem" salvo direto.
-    Lançamentos excluídos (soft delete) não entram na conta.
-    """
     lancamentos = veiculo.lancamentos.filter(excluido=False)
 
     entradas = sum(
@@ -476,6 +437,8 @@ class HistoricoPrecoVeiculo(models.Model):
     def __str__(self):
         return f"{self.veiculo} — R$ {self.valor_anterior} → R$ {self.valor_novo}"
 
+
+
 # ============================================================
 # Clientes
 # ============================================================
@@ -490,18 +453,15 @@ class Cliente(models.Model):
         choices=Tipo.choices,
     )
 
-    # Pessoa física
     nome = models.CharField(max_length=150, blank=True)
     cpf = models.CharField(max_length=11, blank=True)
     data_nascimento = models.DateField(null=True, blank=True)
 
-    # Pessoa jurídica
     cnpj = models.CharField(max_length=14, blank=True)
     razao_social = models.CharField(max_length=180, blank=True)
     nome_fantasia = models.CharField(max_length=150, blank=True)
     responsavel = models.CharField(max_length=150, blank=True)
 
-    # Endereço
     cep = models.CharField(max_length=8, blank=True)
     logradouro = models.CharField(max_length=180, blank=True)
     numero = models.CharField(max_length=20, blank=True)
@@ -533,7 +493,6 @@ class Cliente(models.Model):
         super().clean()
         erros = {}
 
-        # Mantém somente os números dos documentos.
         self.cpf = re.sub(r"\D", "", self.cpf or "")
         self.cnpj = re.sub(r"\D", "", self.cnpj or "")
         self.cep = re.sub(r"\D", "", self.cep or "")
@@ -614,29 +573,27 @@ class TelefoneCliente(models.Model):
             })
 
     def save(self, *args, **kwargs):
-        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.numero
 
+
 class Proposta(models.Model):
-    """
-    Liga um cliente a um veículo, com o valor oferecido e a composição do
-    pagamento (ver ComposicaoPagamento).
-
-    - Nunca é excluída: o histórico (HistoricoProposta) é PROTECT e a
-      proposta só muda de situação (CANCELADA).
-    - Um veículo pode ter várias propostas.
-    - Nasce AGUARDANDO se o veículo estiver com reserva ativa; quando a
-      reserva vence, ReservaVeiculo.expirar() chama ativar_aguardando().
-    """
-
+    class StatusAprovacao(models.TextChoices):
+        NAO_NECESSARIA = "NAO_NECESSARIA", "Não necessária"
+        PENDENTE = "PENDENTE", "Pendente"
+        APROVADA = "APROVADA", "Aprovada"
+        RECUSADA = "RECUSADA", "Recusada"
+        CONTRAPROPOSTA = "CONTRAPROPOSTA", "Contraproposta"
     class Situacao(models.TextChoices):
         AGUARDANDO = "AGUARDANDO", "Aguardando"
         ATIVA = "ATIVA", "Ativa"
         CANCELADA = "CANCELADA", "Cancelada"
-        # A T09 (alçada) provavelmente vai acrescentar situações aqui.
+        AGUARDANDO_GERENTE = "AGUARDANDO_GERENTE", "Aguardando gerente"
+        APROVADA = "APROVADA", "Aprovada"
+        RECUSADA = "RECUSADA", "Recusada"
+        CONTRAPROPOSTA = "CONTRAPROPOSTA", "Contraproposta"
 
     cliente = models.ForeignKey(
         Cliente, on_delete=models.PROTECT, related_name="propostas"
@@ -648,8 +605,6 @@ class Proposta(models.Model):
         Usuario,
         on_delete=models.PROTECT,
         related_name="propostas",
-        # Hoje só vendedor cria proposta (isso é garantido nas views); o
-        # gerente já entra aqui para não exigir outra migration quando liberarmos.
         limit_choices_to={
             "perfil__in": [Usuario.Perfil.VENDEDOR, Usuario.Perfil.GERENTE]
         },
@@ -658,9 +613,6 @@ class Proposta(models.Model):
     data = models.DateField(default=timezone.localdate)
     valor_oferecido = models.DecimalField(max_digits=12, decimal_places=2)
 
-    # Foto do preço de tabela (Veiculo.preco_venda) no momento em que a
-    # proposta foi salva. Assim o desconto embutido não "muda sozinho" se o
-    # gerente reajustar o preço do veículo depois.
     preco_tabela = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True, editable=False
     )
@@ -671,7 +623,6 @@ class Proposta(models.Model):
         default=Situacao.ATIVA,
         editable=False,
     )
-    # Reserva que esta proposta está esperando vencer (só quando AGUARDANDO).
     reserva_aguardada = models.ForeignKey(
         "ReservaVeiculo",
         on_delete=models.PROTECT,
@@ -680,22 +631,28 @@ class Proposta(models.Model):
         editable=False,
         related_name="propostas_aguardando",
     )
+    status_aprovacao = models.CharField(
+        max_length=20,
+        choices=StatusAprovacao.choices,
+        default=StatusAprovacao.NAO_NECESSARIA,
+        editable=False,
+    )
 
     criada_em = models.DateTimeField(auto_now_add=True)
     atualizada_em = models.DateTimeField(auto_now=True)
 
-    # Valor que veio do banco, para detectar alteração no save().
     _valor_original = None
-
+    
     class Meta:
         ordering = ["-criada_em"]
-    constraints = [
-        models.UniqueConstraint(
-            fields=["veiculo"],
-            condition=models.Q(situacao="ATIVA"),
-            name="uma_proposta_ativa_por_veiculo",
-        )
-    ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["veiculo"],
+                condition=models.Q(situacao="ATIVA"),
+                name="uma_proposta_ativa_por_veiculo",
+            )
+        ]
+    
 
     @classmethod
     def from_db(cls, db, field_names, values):
@@ -703,11 +660,8 @@ class Proposta(models.Model):
         instance._valor_original = instance.__dict__.get("valor_oferecido")
         return instance
 
-    # --------------------------- cálculos ---------------------------
-
     @property
     def desconto_embutido(self):
-        """Preço de tabela menos o valor oferecido (negativo = acima da tabela)."""
         if self.preco_tabela is None:
             return Decimal("0.00")
         return self.preco_tabela - self.valor_oferecido
@@ -727,15 +681,55 @@ class Proposta(models.Model):
 
     @property
     def diferenca(self):
-        """Valor oferecido menos a soma da composição (0 = fecha)."""
         return self.valor_oferecido - self.soma_composicao
 
     @property
     def composicao_fecha(self):
         return self.diferenca == 0
 
-    # --------------------------- regras ---------------------------
+    @property
+    def alcada_vendedor(self):
+        """Perfil comercial do vendedor da proposta (ou None, ex.: gerente)."""
+        return getattr(self.vendedor, "dados_vendedor", None)
+    @property
+    def fora_da_alcada(self):
+        """
+        Verifica se o desconto ultrapassa a alçada do vendedor.
+        Gerentes não precisam de aprovação.
+        """
+        perfil = self.alcada_vendedor
 
+        if perfil is None:
+            if self.vendedor.is_vendedor():
+                raise ValidationError(
+                    "Este vendedor não possui alçada cadastrada. "
+                    "Solicite ao gerente que configure seu perfil comercial."
+                )
+            return False
+
+        if self.desconto_embutido <= 0:
+            return False
+
+        if perfil.tipo_alcada == PerfilVendedor.TipoAlcada.PERCENTUAL:
+            return self.desconto_percentual > perfil.valor_alcada
+
+        return self.desconto_embutido > perfil.valor_alcada
+    
+    def _desconto_percentual_de(self, valor):
+            """Desconto sobre o preço de tabela se a venda fosse por `valor`."""
+            if not self.preco_tabela:
+                return Decimal("0.00")
+            return ((self.preco_tabela - valor) / self.preco_tabela * 100).quantize(Decimal("0.01"))
+
+    def _alcada_texto(self):
+        """Foto da alçada em texto legível, para a trilha de auditoria."""
+        perfil = self.alcada_vendedor
+        if perfil is None:
+            return ""
+        if perfil.tipo_alcada == PerfilVendedor.TipoAlcada.PERCENTUAL:
+            return f"{perfil.valor_alcada}%"
+        return f"R$ {perfil.valor_alcada}"
+    
     def clean(self):
         erros = {}
 
@@ -763,109 +757,429 @@ class Proposta(models.Model):
             raise ValidationError(erros)
 
     def save(self, *args, usuario=None, **kwargs):
-        """
-        `usuario` = quem está salvando (vai para o histórico). Se não vier,
-        usa o vendedor da proposta.
-        """
         criando = self.pk is None
 
         with transaction.atomic():
-            if self.situacao != self.Situacao.CANCELADA and self.veiculo.preco_venda:
-                self.preco_tabela = self.veiculo.preco_venda
+            veiculo = Veiculo.objects.select_for_update().get(
+                pk=self.veiculo_id
+            )
 
+            if self.situacao != self.Situacao.CANCELADA and veiculo.preco_venda:
+                self.preco_tabela = veiculo.preco_venda
+
+            valor_mudou = (
+                criando or self.valor_oferecido != self._valor_original
+            )
+
+            precisa_aprovacao = (
+                valor_mudou
+                and self.situacao != self.Situacao.CANCELADA
+                and self.fora_da_alcada
+            )
+
+            # Situação inicial: respeita a reserva e a proposta ativa.
             if criando:
-                reserva = self.veiculo.reserva_ativa
+                reserva = veiculo.reservas.filter(
+                    cancelada=False,
+                    expira_em__gt=timezone.now(),
+                ).exists()
 
-                # Verifica se já existe outra proposta ATIVA para o mesmo veículo
                 proposta_ativa = Proposta.objects.filter(
                     veiculo_id=self.veiculo_id,
                     situacao=self.Situacao.ATIVA,
                 ).exists()
 
-                # Se houver reserva OU outra proposta já ativa, esta entra como AGUARDANDO
                 if reserva or proposta_ativa:
                     self.situacao = self.Situacao.AGUARDANDO
-                    self.reserva_aguardada = reserva
+                    self.reserva_aguardada = veiculo.reserva_ativa
                 else:
                     self.situacao = self.Situacao.ATIVA
                     self.reserva_aguardada = None
 
+            # Aprovação é independente da situação do veículo.
+            if valor_mudou:
+                if precisa_aprovacao:
+                    self.status_aprovacao = self.StatusAprovacao.PENDENTE
+                else:
+                    self.status_aprovacao = (
+                        self.StatusAprovacao.NAO_NECESSARIA
+                    )
+
             super().save(*args, **kwargs)
 
-            if criando or self.valor_oferecido != self._valor_original:
+            if valor_mudou:
                 HistoricoProposta.objects.create(
                     proposta=self,
-                    valor_anterior=None if criando else self._valor_original,
+                    valor_anterior=(
+                        None if criando else self._valor_original
+                    ),
                     valor_novo=self.valor_oferecido,
                     alterado_por=usuario or self.vendedor,
                 )
+
+            if precisa_aprovacao:
+                self.registrar_pedido(usuario or self.vendedor)
+
             self._valor_original = self.valor_oferecido
-            
-@classmethod
-def ativar_aguardando(cls, veiculo_id):
-    """
-    Ativa somente a primeira proposta aguardando do veículo.
-    Respeita a ordem de criação e não ativa propostas enquanto
-    existir reserva vigente ou outra proposta ativa.
-    """
-    with transaction.atomic():
-        veiculo = Veiculo.objects.select_for_update().get(
-            pk=veiculo_id
-        )
+    def aceitar_contraproposta(self, usuario):
+        """
+        Permite que o vendedor responsável aceite a contraproposta
+        registrada pelo gerente.
+        """
 
-        # Enquanto houver reserva vigente, ninguém assume.
-        if veiculo.reserva_ativa:
-            return None
+        if not (
+            getattr(usuario, "is_authenticated", False)
+            and usuario.ativo
+            and usuario.is_vendedor()
+        ):
+            raise PermissionDenied(
+                "Somente o vendedor responsável pode aceitar a contraproposta."
+            )
 
-        # Não permite duas propostas ativas.
-        if cls.objects.filter(
-            veiculo_id=veiculo_id,
-            situacao=cls.Situacao.ATIVA,
-        ).exists():
-            return None
+        with transaction.atomic():
 
-        # Seleciona a proposta mais antiga da fila.
-        proxima = cls.objects.select_for_update().filter(
-            veiculo_id=veiculo_id,
-            situacao=cls.Situacao.AGUARDANDO,
-        ).order_by("criada_em", "pk").first()
+            # Bloqueia o veículo para evitar conflitos com outras propostas.
+            veiculo_id = Proposta.objects.only("veiculo_id").get(
+                pk=self.pk
+            ).veiculo_id
 
-        if not proxima:
-            return None
+            veiculo = Veiculo.objects.select_for_update().get(
+                pk=veiculo_id
+            )
 
-        cls.objects.filter(pk=proxima.pk).update(
-            situacao=cls.Situacao.ATIVA,
-            reserva_aguardada=None,
-            atualizada_em=timezone.now(),
-        )
+            proposta = Proposta.objects.select_for_update().get(
+                pk=self.pk
+            )
 
-        return proxima
+            if proposta.vendedor_id != usuario.pk:
+                raise PermissionDenied(
+                    "Você não pode aceitar a contraproposta de outro vendedor."
+                )
+
+            if proposta.situacao == self.Situacao.CANCELADA:
+                raise ValidationError(
+                    "Uma proposta cancelada não pode ser aceita."
+                )
+
+            if proposta.status_aprovacao != self.StatusAprovacao.CONTRAPROPOSTA:
+                raise ValidationError(
+                    "Esta proposta não possui uma contraproposta pendente de aceite."
+                )
+
+            # Recupera a contraproposta mais recente do gerente.
+            decisao = proposta.decisoes.filter(
+                tipo=DecisaoProposta.Tipo.CONTRAPROPOSTA
+            ).order_by("-feito_em", "-id").first()
+
+            if not decisao:
+                raise ValidationError(
+                    "Não foi encontrada uma contraproposta registrada."
+                )
+
+            valor_anterior = proposta.valor_oferecido
+            novo_valor = decisao.valor_referencia
+
+            # Verifica se a proposta pode sair da fila de espera.
+            if proposta.situacao == self.Situacao.AGUARDANDO:
+
+                reserva_ativa = veiculo.reservas.filter(
+                    cancelada=False,
+                    expira_em__gt=timezone.now(),
+                ).exists()
+
+                outra_proposta_ativa = Proposta.objects.filter(
+                    veiculo_id=veiculo.pk,
+                    situacao=self.Situacao.ATIVA,
+                ).exclude(pk=proposta.pk).exists()
+
+                if not reserva_ativa and not outra_proposta_ativa:
+                    proposta.situacao = self.Situacao.ATIVA
+
+                    proposta.reserva_aguardada = None
+
+            # Registra o novo valor e a aprovação.
+            proposta.valor_oferecido = novo_valor
+            proposta.status_aprovacao = self.StatusAprovacao.APROVADA
+
+            # Atualiza diretamente para não executar novamente
+            # a regra de alçada do método save().
+            Proposta.objects.filter(pk=proposta.pk).update(
+                valor_oferecido=novo_valor,
+                status_aprovacao=self.StatusAprovacao.APROVADA,
+                situacao=proposta.situacao,
+                reserva_aguardada=proposta.reserva_aguardada,
+                atualizada_em=timezone.now(),
+            )
+
+            # Registra a alteração do valor.
+            HistoricoProposta.objects.create(
+                proposta=proposta,
+                valor_anterior=valor_anterior,
+                valor_novo=novo_valor,
+                alterado_por=usuario,
+            )
+
+            # Registra o aceite na trilha de auditoria.
+            aceite = DecisaoProposta.objects.create(
+                    proposta=proposta,
+                    tipo=DecisaoProposta.Tipo.ACEITE_CONTRAPROPOSTA,
+                    valor_referencia=novo_valor,
+                    desconto_percentual_no_momento=(
+                        proposta._desconto_percentual_de(novo_valor)
+                    ),
+                    alcada_no_momento=proposta._alcada_texto(),
+                    parecer="Contraproposta aceita pelo vendedor.",
+                    feito_por=usuario,
+                )
+
+            self.refresh_from_db()
+
+        return aceite
+    
+    def recusar_contraproposta(self, usuario):
+        """
+        O vendedor responsável recusa a contraproposta do gerente.
+        A proposta fica RECUSADA + CANCELADA e a fila do veículo anda.
+        """
+        if not (
+            getattr(usuario, "is_authenticated", False)
+            and usuario.ativo
+            and usuario.is_vendedor()
+        ):
+            raise PermissionDenied(
+                "Somente o vendedor responsável pode recusar a contraproposta."
+            )
+
+        with transaction.atomic():
+            proposta = Proposta.objects.select_for_update().get(pk=self.pk)
+
+            if proposta.vendedor_id != usuario.pk:
+                raise PermissionDenied(
+                    "Você não pode recusar a contraproposta de outro vendedor."
+                )
+
+            if proposta.situacao == self.Situacao.CANCELADA:
+                raise ValidationError("Uma proposta cancelada não pode ser recusada.")
+
+            if proposta.status_aprovacao != self.StatusAprovacao.CONTRAPROPOSTA:
+                raise ValidationError(
+                    "Esta proposta não possui uma contraproposta pendente."
+                )
+
+            decisao_gerente = proposta.decisoes.filter(
+                tipo=DecisaoProposta.Tipo.CONTRAPROPOSTA
+            ).first()
+
+            if not decisao_gerente:
+                raise ValidationError(
+                    "Não foi encontrada uma contraproposta registrada."
+                )
+
+            recusa = DecisaoProposta.objects.create(
+                proposta=proposta,
+                tipo=DecisaoProposta.Tipo.RECUSA_CONTRAPROPOSTA,
+                valor_referencia=decisao_gerente.valor_referencia,
+                desconto_percentual_no_momento=(
+                    proposta._desconto_percentual_de(decisao_gerente.valor_referencia)
+                ),
+                alcada_no_momento=proposta._alcada_texto(),
+                parecer="Contraproposta recusada pelo vendedor.",
+                feito_por=usuario,
+            )
+
+            proposta.status_aprovacao = self.StatusAprovacao.RECUSADA
+            proposta.situacao = self.Situacao.CANCELADA
+            proposta.save(
+                update_fields=["status_aprovacao", "situacao", "atualizada_em"]
+            )
+
+            Proposta.ativar_aguardando(proposta.veiculo_id)
+
+            self.refresh_from_db()
+
+        return recusa
+    
+    @classmethod
+    def ativar_aguardando(cls, veiculo_id):
+        with transaction.atomic():
+            veiculo = Veiculo.objects.select_for_update().get(
+                pk=veiculo_id
+            )
+
+            if veiculo.reserva_ativa:
+                return None
+
+            if cls.objects.filter(
+                veiculo_id=veiculo_id,
+                situacao=cls.Situacao.ATIVA,
+            ).exists():
+                return None
+
+            proxima = cls.objects.select_for_update().filter(
+                veiculo_id=veiculo_id,
+                situacao=cls.Situacao.AGUARDANDO,
+                status_aprovacao__in=[
+                    cls.StatusAprovacao.NAO_NECESSARIA,
+                    cls.StatusAprovacao.APROVADA,
+                ],
+            ).order_by("criada_em", "pk").first()
+
+            if not proxima:
+                return None
+
+            proxima.situacao = cls.Situacao.ATIVA
+            proxima.reserva_aguardada = None
+
+            proxima.save(
+                update_fields=[
+                    "situacao",
+                    "reserva_aguardada",
+                    "atualizada_em",
+                ]
+            )
+
+            return proxima
     
     def cancelar(self):
-     if self.situacao == self.Situacao.CANCELADA:
-        return
+        if self.situacao == self.Situacao.CANCELADA:
+            return
 
-    with transaction.atomic():
-        self.situacao = self.Situacao.CANCELADA
+        with transaction.atomic():
+            self.situacao = self.Situacao.CANCELADA
+            self.save(update_fields=["situacao", "atualizada_em"])
+            Proposta.ativar_aguardando(self.veiculo_id)
+            
+        
+    def registrar_pedido(self, usuario):
+            """Grava na trilha o pedido de aprovação (a situação já foi ajustada no save)."""
+            return DecisaoProposta.objects.create(
+            proposta=self,
+            tipo=DecisaoProposta.Tipo.PEDIDO,
+            valor_referencia=self.valor_oferecido,
+            desconto_percentual_no_momento=self.desconto_percentual,
+            alcada_no_momento=self._alcada_texto(),
+            feito_por=usuario,
+            )
 
-        self.save(
-            update_fields=["situacao", "atualizada_em"]
-        )
+    def decidir(self, usuario, tipo, parecer="", novo_valor=None):
+        if not (
+            getattr(usuario, "is_authenticated", False)
+            and usuario.ativo
+            and usuario.is_gerente()
+        ):
+            raise PermissionDenied(
+                "Somente um gerente ativo pode decidir sobre propostas."
+            )
 
-        # Libera a próxima proposta da fila, se possível.
-        Proposta.ativar_aguardando(self.veiculo_id)
+        Tipo = DecisaoProposta.Tipo
 
+        if tipo not in (
+            Tipo.APROVACAO,
+            Tipo.RECUSA,
+            Tipo.CONTRAPROPOSTA,
+        ):
+            raise ValidationError("Tipo de decisão inválido.")
+
+        parecer = (parecer or "").strip()
+
+        with transaction.atomic():
+            proposta = Proposta.objects.select_for_update().get(
+                pk=self.pk
+            )
+            if proposta.situacao == self.Situacao.CANCELADA:
+                raise ValidationError("Esta proposta foi cancelada.")
+
+            if proposta.vendedor_id == usuario.pk:
+                raise PermissionDenied(
+                    "Ninguém pode decidir sobre a própria proposta."
+                )
+
+            if (
+                proposta.status_aprovacao
+                != self.StatusAprovacao.PENDENTE
+            ):
+                raise ValidationError(
+                    "Esta proposta não está aguardando decisão do gerente."
+                )
+
+            if tipo == Tipo.APROVACAO:
+                nova_aprovacao = self.StatusAprovacao.APROVADA
+                valor_ref = proposta.valor_oferecido
+
+            elif tipo == Tipo.RECUSA:
+                if not parecer:
+                    raise ValidationError(
+                        "Informe o parecer da recusa."
+                    )
+
+                nova_aprovacao = self.StatusAprovacao.RECUSADA
+                valor_ref = proposta.valor_oferecido
+
+            else:
+                if not parecer:
+                    raise ValidationError(
+                        "Informe o parecer da contraproposta."
+                    )
+
+                if novo_valor is None:
+                    raise ValidationError(
+                        "Informe o valor da contraproposta."
+                    )
+
+                try:
+                    novo_valor = Decimal(novo_valor)
+                except (InvalidOperation, TypeError, ValueError):
+                    raise ValidationError(
+                        "Valor da contraproposta inválido."
+                    )
+
+                if novo_valor <= proposta.valor_oferecido:
+                    raise ValidationError(
+                        "A contraproposta deve ser maior que o valor oferecido."
+                    )
+
+                nova_aprovacao = self.StatusAprovacao.CONTRAPROPOSTA
+                valor_ref = novo_valor.quantize(Decimal("0.01"))
+
+            decisao = DecisaoProposta.objects.create(
+                proposta=proposta,
+                tipo=tipo,
+                valor_referencia=valor_ref,
+                desconto_percentual_no_momento=(
+                    proposta._desconto_percentual_de(valor_ref)
+                ),
+                alcada_no_momento=proposta._alcada_texto(),
+                parecer=parecer,
+                feito_por=usuario,
+            )
+
+            proposta.status_aprovacao = nova_aprovacao
+
+            if tipo == Tipo.RECUSA:
+                proposta.situacao = self.Situacao.CANCELADA
+
+            proposta.save(
+                update_fields=[
+                    "status_aprovacao",
+                    "situacao",
+                    "atualizada_em",
+                ]
+            )
+            
+            
+            if tipo in (Tipo.RECUSA, Tipo.APROVACAO):
+                Proposta.ativar_aguardando(proposta.veiculo_id)
+                
+            self.status_aprovacao = nova_aprovacao
+            self.situacao = proposta.situacao
+
+            return decisao
+    
     def __str__(self):
         return f"Proposta #{self.pk} — {self.cliente} — {self.veiculo}"
 
 
 class ComposicaoPagamento(models.Model):
-    """
-    Uma linha da composição do pagamento. `valor` é sempre o que a linha
-    contribui para a soma: dinheiro da entrada, valor ESTIMADO do veículo
-    na troca, ou saldo financiado.
-    """
-
     class Tipo(models.TextChoices):
         ENTRADA = "ENTRADA", "Entrada em dinheiro"
         TROCA = "TROCA", "Veículo na troca"
@@ -877,10 +1191,8 @@ class ComposicaoPagamento(models.Model):
     tipo = models.CharField(max_length=20, choices=Tipo.choices)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
 
-    # Só para TROCA
     troca_descricao = models.CharField(max_length=150, blank=True)
 
-    # Só para FINANCIAMENTO
     financ_banco = models.CharField(max_length=100, blank=True)
     financ_parcelas = models.PositiveSmallIntegerField(null=True, blank=True)
     financ_valor_parcela = models.DecimalField(
@@ -912,7 +1224,7 @@ class ComposicaoPagamento(models.Model):
                 erros["financ_valor_parcela"] = "Informe o valor da parcela."
             self.troca_descricao = ""
 
-        else:  # ENTRADA (ou tipo vazio, que o campo já recusa)
+        else:
             self.troca_descricao = ""
             self.financ_banco = ""
             self.financ_parcelas = None
@@ -926,8 +1238,6 @@ class ComposicaoPagamento(models.Model):
 
 
 class HistoricoProposta(models.Model):
-    """Cada alteração do valor oferecido. A primeira linha (criação) tem valor_anterior vazio."""
-
     proposta = models.ForeignKey(
         Proposta, on_delete=models.PROTECT, related_name="historico"
     )
@@ -946,3 +1256,61 @@ class HistoricoProposta(models.Model):
     def __str__(self):
         anterior = "—" if self.valor_anterior is None else f"R$ {self.valor_anterior}"
         return f"{self.proposta} — {anterior} → R$ {self.valor_novo}"
+    
+class DecisaoProposta(models.Model):
+    """
+    Trilha de auditoria da T09: um registro por evento (pedido de aprovação,
+    aprovação, recusa, contraproposta). Nunca é editado nem apagado.
+    """
+
+    class Tipo(models.TextChoices):
+        PEDIDO = "PEDIDO", "Pedido de aprovação"
+        APROVACAO = "APROVACAO", "Aprovação"
+        RECUSA = "RECUSA", "Recusa"
+        CONTRAPROPOSTA = "CONTRAPROPOSTA", "Contraproposta"
+        ACEITE_CONTRAPROPOSTA = ("ACEITE_CONTRAPROPOSTA","Aceite da contraproposta",)
+        RECUSA_CONTRAPROPOSTA = ("RECUSA_CONTRAPROPOSTA","Recusa da contraproposta",)
+        
+
+    proposta = models.ForeignKey(
+        Proposta, on_delete=models.PROTECT, related_name="decisoes"
+    )
+    tipo = models.CharField(
+    max_length=30,
+    choices=Tipo.choices,
+)
+
+    # Pedido: valor que o vendedor ofereceu. Contraproposta: novo valor do gerente.
+    valor_referencia = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Fotos do momento (o preço e a alçada podem mudar depois).
+    desconto_percentual_no_momento = models.DecimalField(
+        max_digits=7, decimal_places=2, default=0
+    )
+    alcada_no_momento = models.CharField(max_length=40, blank=True)
+
+    parecer = models.TextField(blank=True)
+
+    feito_por = models.ForeignKey(
+        Usuario, on_delete=models.PROTECT, related_name="decisoes_proposta"
+    )
+    feito_em = models.DateTimeField(auto_now_add=True)
+    
+    
+
+    class Meta:
+        ordering = ["-feito_em", "-id"]
+
+    def save(self, *args, **kwargs):
+        # Trilha de auditoria: só se cria, nunca se edita.
+        if self.pk:
+            raise ValidationError("Registros de decisão não podem ser alterados.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Registros de decisão não podem ser apagados.")
+
+    def __str__(self):
+        return f"{self.proposta} — {self.get_tipo_display()} — R$ {self.valor_referencia}"
+    
+    

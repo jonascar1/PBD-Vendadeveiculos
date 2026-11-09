@@ -3,18 +3,30 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Autenticação e Painel Geral
     path("accounts/login/", views.login_view, name="login"),
     path("accounts/logout/", views.logout_view, name="logout"),
     path("painel/", views.painel_view, name="painel"),
 
+    # Vitrine Pública
+    path("", views.vitrine_view, name="vitrine"),
+    path("vitrine/veiculo/<int:pk>/", views.vitrine_veiculo_detalhe_view, name="vitrine_veiculo_detalhe"),
+
+    # Painel do Vendedor
     path("painel/vendedor/inicio", views.painel_vendedor_view, name="painel_vendedor"),
     path("painel/vendedor/clientes/", views.clientes_view, name="clientes"),
     path("painel/vendedor/clientes/cadastrar/", views.cadastrar_cliente_view, name="cadastrar_cliente"),
     path("painel/vendedor/clientes/<int:cliente_id>/", views.detalhes_cliente_view, name="detalhes_cliente"),
     path("painel/vendedor/clientes/<int:cliente_id>/editar/", views.editar_cliente_view, name="editar_cliente"),
     path("painel/vendedor/clientes/<int:cliente_id>/desativar/", views.desativar_cliente_view, name="desativar_cliente"),
+    path("painel/vendedor/propostas/", views.propostas_view, name="propostas"),
+    path("painel/vendedor/propostas/nova/", views.nova_proposta_view, name="nova_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/", views.detalhes_proposta_view, name="detalhes_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/editar/", views.editar_proposta_view, name="editar_proposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/aceitar-contraproposta/", views.aceitar_contraproposta_view, name="aceitar_contraproposta"),
+    path("painel/vendedor/propostas/<int:proposta_id>/recusar-contraproposta/", views.recusar_contraproposta_view, name="recusar_contraproposta"),
 
-
+    # Painel Administrativo
     path("painel/administrativo/inicio/", views.painel_administrativo_view, name="painel_administrativo"),
     path("painel/administrativo/despesas/", views.despesas_view, name="despesas"),
     path("painel/administrativo/despesas/<int:veiculo_id>/", views.despesas_veiculo_view, name="despesas_veiculo"),
@@ -23,21 +35,19 @@ urlpatterns = [
     path("painel/administrativo/despesas/<int:despesa_id>/excluir/", views.excluir_despesa_view, name="excluir_despesa"),
     path("painel/administrativo/despesas/veiculo/<int:veiculo_id>/excluidas/", views.despesas_excluidas_veiculo_view, name="despesas_excluidas_veiculo"),
 
-
+    # Painel do Gerente
     path("painel/gerente/inicio/", views.painel_gerente_view, name="painel_gerente"),
     path("painel/gerente/vendedores/", views.vendedores_view, name="vendedores"),
     path("painel/gerente/vendedores/cadastrar/", views.cadastrar_vendedor_view, name="cadastrar_vendedor"),
     path("painel/gerente/vendedores/<int:vendedor_id>/editar/", views.editar_vendedor_view, name="editar_vendedor"),
-    path("painel/gerente/veiculos/cadastrar/", views.cadastrar_veiculo_view, name="cadastrar_veiculo"),
     path("painel/gerente/veiculos/", views.veiculos_view, name="veiculos"),
+    path("painel/gerente/veiculos/cadastrar/", views.cadastrar_veiculo_view, name="cadastrar_veiculo"),
     path("painel/gerente/veiculos/<int:veiculo_id>/", views.detalhes_veiculo_view, name="detalhes_veiculo"),
-    path("veiculos/<int:veiculo_id>/situacao/",views.alterar_situacao_veiculo_view,name="alterar_situacao_veiculo",),
-    path("veiculos/<int:veiculo_id>/reservar/",views.reservar_veiculo_view, name="reservar_veiculo",),
     path("painel/gerente/veiculos/<int:veiculo_id>/preco/", views.alterar_preco_veiculo_view, name="alterar_preco_veiculo"),
+    path("painel/gerente/negociacoes/", views.negociacoes_view, name="negociacoes_gerente"),
+    path("painel/gerente/negociacoes/<int:proposta_id>/decidir/", views.decidir_proposta_view, name="decidir_proposta"),
 
-    path("", views.vitrine_view, name="vitrine"),
-    path("vitrine/veiculo/<int:pk>/", views.vitrine_veiculo_detalhe_view, name="vitrine_veiculo_detalhe"),
-    path("painel/vendedor/propostas/", views.propostas_view, name="propostas"),
-    path("painel/vendedor/propostas/nova/", views.nova_proposta_view, name="nova_proposta"),
-    path("painel/vendedor/propostas/<int:proposta_id>/", views.detalhes_proposta_view, name="detalhes_proposta"),
-    path("painel/vendedor/propostas/<int:proposta_id>/editar/", views.editar_proposta_view, name="editar_proposta"),]
+    # Operações em Veículos (Gerente / Administrativo)
+    path("veiculos/<int:veiculo_id>/situacao/", views.alterar_situacao_veiculo_view, name="alterar_situacao_veiculo"),
+    path("veiculos/<int:veiculo_id>/reservar/", views.reservar_veiculo_view, name="reservar_veiculo"),
+]

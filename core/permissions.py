@@ -3,9 +3,7 @@ Permissão do DRF que faz o mesmo trabalho do decorator @perfil_requerido,
 mas para as views de API (baseadas em classe). Mesmo princípio: checagem
 sempre no servidor, nunca confiar em o que o frontend esconde ou mostra.
 """
-
 from rest_framework.permissions import BasePermission
-
 
 class EhGerente(BasePermission):
     def has_permission(self, request, view):

@@ -1,36 +1,24 @@
+# 1. Biblioteca padrão do Python (Standard Library)
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
-from django.db.models import Q
+
+# 2. Django e bibliotecas de terceiros (Third-party packages)
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.db.models.aggregates import Sum
-from django.shortcuts import render, redirect, get_object_or_404
-from .decorators import perfil_requerido
-from .models import (
-    HistoricoSituacaoVeiculo,
-    Proposta,
-    Usuario,
-    PerfilVendedor,
-    Veiculo,
-    FotoVeiculo,
-    ReservaVeiculo,
-    HistoricoPrecoVeiculo,
-    LancamentoFinanceiro,
-    Cliente,
-    TelefoneCliente,
-)
-
-from django.db import transaction
-from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.db.models import ProtectedError
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import IntegrityError, transaction
+from django.db.models import ProtectedError, Q, Sum
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+# 3. Imports locais da aplicação (Local apps / Relative imports)
+from .decorators import perfil_requerido
 from .forms import (
     AlterarSituacaoForm,
     ClienteForm,
     ComposicaoFormSet,
+    DecisaoPropostaForm,
     DespesaEditarForm,
     DespesaForm,
     LoginForm,
@@ -42,7 +30,19 @@ from .forms import (
     VeiculoForm,
     VendedorCadastroForm,
     VendedorEdicaoForm,
-    
+)
+from .models import (
+    Cliente,
+    FotoVeiculo,
+    HistoricoPrecoVeiculo,
+    HistoricoSituacaoVeiculo,
+    LancamentoFinanceiro,
+    PerfilVendedor,
+    Proposta,
+    ReservaVeiculo,
+    TelefoneCliente,
+    Usuario,
+    Veiculo,
 )
 
 
@@ -147,16 +147,6 @@ def painel_gerente_view(request):
     )
 
 
-@perfil_requerido("VENDEDOR")
-def painel_vendedor_view(request):
-    dados = get_object_or_404(PerfilVendedor, usuario=request.user)
-    veiculos = Veiculo.objects.all().order_by("-criado_em")
-
-    return render(
-        request,
-        "core/vendedor_painel_inicio.html",
-        {"dados": dados, "veiculos": veiculos},
-    )
 
 
 @perfil_requerido("ADMINISTRATIVO")
@@ -608,7 +598,8 @@ def detalhes_veiculo_view(request, veiculo_id):
             "ultimo_lancamento": ultimo_lancamento,
             "ultimo_historico_preco": ultimo_historico_preco,
             "reserva": reserva,
-        },
+        
+    "clientes_list": Cliente.objects.filter(ativo=True).order_by("nome", "razao_social"),}
     )
 
 
@@ -788,7 +779,21 @@ def alterar_situacao_veiculo_view(request, veiculo_id):
         Veiculo.Situacao.VENDIDO: [Veiculo.Situacao.ENTREGUE],
         Veiculo.Situacao.ENTREGUE: [],
     }
+    if nova_situacao == Veiculo.Situacao.VENDIDO:
+        aprovacao_em_aberto = veiculo.propostas.filter(
+            status_aprovacao__in=[
+                Proposta.StatusAprovacao.PENDENTE,
+                Proposta.StatusAprovacao.CONTRAPROPOSTA,
+            ],
+        ).exclude(situacao=Proposta.Situacao.CANCELADA).exists()
 
+        if aprovacao_em_aberto:
+            messages.error(
+                request,
+                "Há proposta aguardando decisão do gerente ou resposta do vendedor. "
+                "Resolva antes de registrar a venda.",
+            )
+            return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
     if nova_situacao not in transicoes_permitidas.get(veiculo.situacao, []):
         messages.error(request, "Essa transição de situação não é permitida.")
         return redirect("detalhes_veiculo", veiculo_id=veiculo.id)
@@ -1028,14 +1033,14 @@ def detalhes_cliente_view(request, cliente_id):
         .order_by("-criada_em")
     )
     return render(
-        request,
-        "core/vendedor_cliente_detalhes.html",
-        {
-            "cliente": cliente,
-            "veiculos_comprados": veiculos_comprados,
-            "propostas_reservas": propostas,
-        },
-    )
+    request,
+    "core/vendedor_cliente_detalhes.html",
+    {
+        "cliente": cliente,
+        "veiculos_comprados": veiculos_comprados,
+        "propostas": propostas,  # <- Altere apenas esta linha!
+    },
+)
 
 @login_required
 def editar_cliente_view(request, cliente_id):
@@ -1353,4 +1358,220 @@ def painel_vendedor_view(request):
         "core/vendedor_painel_inicio.html",
         {"dados": dados, "veiculos": veiculos, "propostas": propostas},
     )
- 
+# ---------------------------------------------------------------------
+# T09: aprovação de desconto pelo gerente
+# ---------------------------------------------------------------------
+
+@perfil_requerido("GERENTE")
+def aprovacoes_view(request):
+    propostas = (
+        Proposta.objects.filter(
+            status_aprovacao=Proposta.StatusAprovacao.PENDENTE
+        )
+        .select_related(
+            "cliente",
+            "veiculo",
+            "vendedor",
+            "vendedor__dados_vendedor",
+        )
+        .order_by("criada_em")
+    )
+
+    return render(
+        request,
+        "core/gerente_painel_aprovacoes.html",
+        {"propostas": propostas},
+    )
+
+@perfil_requerido("GERENTE")
+def decidir_proposta_view(request, proposta_id):
+    proposta = get_object_or_404(
+        Proposta.objects.select_related(
+            "cliente",
+            "veiculo",
+            "vendedor",
+            "vendedor__dados_vendedor",
+        ),
+        pk=proposta_id,
+    )
+
+    if request.method == "POST":
+        form = DecisaoPropostaForm(request.POST)
+
+        if form.is_valid():
+            cd = form.cleaned_data
+
+            try:
+                with transaction.atomic():
+                    # Busca novamente e bloqueia a proposta durante a decisão.
+                    proposta = (
+                        Proposta.objects
+                        .select_for_update()
+                        .get(pk=proposta_id)
+                    )
+
+                    # Impede que uma proposta já decidida seja decidida novamente.
+                    if (
+                        proposta.status_aprovacao
+                        != Proposta.StatusAprovacao.PENDENTE
+                    ):
+                        messages.error(
+                            request,
+                            "Esta proposta já foi decidida.",
+                        )
+                        return redirect("negociacoes_gerente")
+
+                    proposta.decidir(
+                        request.user,
+                        cd["acao"],
+                        parecer=cd["parecer"],
+                        novo_valor=cd["novo_valor"],
+                    )
+
+                messages.success(
+                    request,
+                    "Decisão registrada com sucesso.",
+                )
+                return redirect("negociacoes_gerente")
+
+            except ValidationError as erro:
+                adicionar_erros_de_validacao(form, erro)
+            
+            
+            except PermissionDenied as erro:
+                messages.error(request, str(erro))
+                return redirect("negociacoes_gerente")
+
+    else:
+        form = DecisaoPropostaForm()
+
+    proposta = get_object_or_404(
+        Proposta.objects.select_related(
+            "cliente",
+            "veiculo",
+            "vendedor",
+            "vendedor__dados_vendedor",
+        ),
+        pk=proposta_id,
+    )
+
+    return render(
+        request,
+        "core/gerente_decidir_proposta.html",
+        {
+            "proposta": proposta,
+            "perfil": proposta.alcada_vendedor,
+            "decisoes": proposta.decisoes.select_related("feito_por"),
+            "historico": proposta.historico.select_related("alterado_por"),
+            "form": form,
+        },
+    )
+
+@perfil_requerido("GERENTE")
+def negociacoes_view(request):
+    expirar_reservas_vencidas()
+
+    propostas = (
+        Proposta.objects
+        .select_related(
+            "cliente",
+            "veiculo",
+            "vendedor",
+        )
+        .order_by("-criada_em")
+    )
+
+    situacao = request.GET.get("situacao", "")
+
+    situacoes_validas = [
+        valor for valor, rotulo in Proposta.Situacao.choices
+    ]
+
+    if situacao in situacoes_validas:
+        propostas = propostas.filter(situacao=situacao)
+    else:
+        situacao = ""
+
+    indicadores = {
+        "total": Proposta.objects.count(),
+        "aguardando": Proposta.objects.filter(
+            situacao=Proposta.Situacao.AGUARDANDO_GERENTE
+        ).count(),
+        "aprovadas": Proposta.objects.filter(
+            situacao=Proposta.Situacao.APROVADA
+        ).count(),
+        "recusadas": Proposta.objects.filter(
+            situacao=Proposta.Situacao.RECUSADA
+        ).count(),
+        "contrapropostas": Proposta.objects.filter(
+            situacao=Proposta.Situacao.CONTRAPROPOSTA
+        ).count(),
+    }
+
+    return render(
+        request,
+        "core/gerente_painel_negociacoes.html",
+        {
+            "propostas": propostas,
+            "situacoes": Proposta.Situacao.choices,
+            "situacao_selecionada": situacao,
+            "indicadores": indicadores,
+        },
+    )
+@perfil_requerido("VENDEDOR")
+def aceitar_contraproposta_view(request, proposta_id):
+    if request.method != "POST":
+        return redirect("propostas")
+
+    proposta = get_object_or_404(
+        Proposta,
+        pk=proposta_id,
+    )
+
+    try:
+        proposta.aceitar_contraproposta(request.user)
+
+    except ValidationError as erro:
+        messages.error(request, " ".join(erro.messages))
+
+    except PermissionDenied as erro:
+        messages.error(request, str(erro))
+
+    else:
+        messages.success(
+            request,
+            "Contraproposta aceita com sucesso!",
+        )
+
+    return redirect(
+        "detalhes_proposta",
+        proposta_id=proposta.pk,
+    )
+    
+    
+@perfil_requerido("VENDEDOR")
+def recusar_contraproposta_view(request, proposta_id):
+    if request.method != "POST":
+        return redirect("propostas")
+
+    proposta = get_object_or_404(
+        _propostas_visiveis(request.user),
+        pk=proposta_id,
+    )
+
+    try:
+        proposta.recusar_contraproposta(request.user)
+
+    except ValidationError as erro:
+        messages.error(request, " ".join(erro.messages))
+
+    except PermissionDenied as erro:
+        messages.error(request, str(erro))
+
+    else:
+        messages.success(
+            request,
+            "Contraproposta recusada. Se quiser, registre uma nova proposta.",
+        )
+
+    return redirect("detalhes_proposta", proposta_id=proposta.pk)

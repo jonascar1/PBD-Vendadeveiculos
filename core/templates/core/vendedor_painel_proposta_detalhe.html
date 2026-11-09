@@ -3,10 +3,31 @@
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_proposta_detalhe.css' %}">
+    <link rel="stylesheet" href="{% static 'core/css/vendedor_painel_proposta_contraproposta.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="propostas-page">
+    {% if messages %}
+        <div class="prop-mensagens">
+            {% for message in messages %}
+                <div class="prop-mensagem prop-mensagem-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if proposta.status_aprovacao == "PENDENTE" %}
+        <div class="prop-card prop-card-p prop-aviso-aprovacao">
+            <h2>Proposta em análise</h2>
+            <p>
+                O desconto ultrapassou sua alçada comercial.
+                A proposta está aguardando a decisão do gerente.
+            </p>
+        </div>
+    {% endif %}
+
     <header class="prop-detalhe-topo">
         <div>
             <div class="prop-detalhe-identificacao">
@@ -15,9 +36,16 @@
             </div>
             <p class="prop-subtitulo">{{ proposta.veiculo.marca }} {{ proposta.veiculo.modelo }} · {{ proposta.veiculo.placa|default:"Placa não informada" }}</p>
         </div>
+
         <div class="prop-acoes">
             <a class="prop-btn" href="{% url 'propostas' %}">Voltar</a>
-            <a class="prop-btn prop-btn-primario" href="{% url 'editar_proposta' proposta.pk %}">Editar proposta</a>
+
+            {% if proposta.status_aprovacao != "PENDENTE" and proposta.status_aprovacao != "CONTRAPROPOSTA" and proposta.situacao != "CANCELADA" %}
+                <a class="prop-btn prop-btn-primario"
+                   href="{% url 'editar_proposta' proposta.pk %}">
+                    Editar proposta
+                </a>
+            {% endif %}
         </div>
     </header>
 
@@ -47,6 +75,78 @@
                 <div class="prop-financeiro-item"><span>Desconto percentual</span><strong>{{ proposta.desconto_percentual|default:0|floatformat:2 }}%</strong></div>
             </div>
         </section>
+
+        {% if proposta.status_aprovacao == "CONTRAPROPOSTA" %}
+            <section class="prop-card prop-card-p prop-span-total">
+                <h2 class="prop-card-titulo">Contraproposta do gerente</h2>
+
+                {% with decisao=proposta.decisoes.first %}
+                    {% if decisao and decisao.tipo == "CONTRAPROPOSTA" %}
+
+                        <div class="prop-financeiro-grid"
+                             style="grid-template-columns:repeat(2,minmax(0,1fr))">
+
+                            <div class="prop-financeiro-item">
+                                <span>Valor originalmente oferecido</span>
+                                <strong>
+                                    R$ {{ proposta.valor_oferecido|floatformat:2 }}
+                                </strong>
+                            </div>
+
+                            <div class="prop-financeiro-item">
+                                <span>Novo valor proposto pelo gerente</span>
+                                <strong>
+                                    R$ {{ decisao.valor_referencia|floatformat:2 }}
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="prop-contra-meta">
+                            <div>
+                                <span>Responsável</span>
+                                <strong>{{ decisao.feito_por.get_full_name|default:decisao.feito_por.username }}</strong>
+                            </div>
+                            <div>
+                                <span>Data</span>
+                                <strong>{{ decisao.feito_em|date:"d/m/Y H:i" }}</strong>
+                            </div>
+                        </div>
+
+                        {% if decisao.parecer %}
+                            <div class="prop-contra-parecer">
+                                <span>Parecer do gerente</span>
+                                <p>{{ decisao.parecer }}</p>
+                            </div>
+                        {% endif %}
+
+                        <div class="prop-contra-acoes">
+                            <form method="post"
+                                  action="{% url 'aceitar_contraproposta' proposta.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="prop-btn prop-btn-primario">
+                                    Aceitar contraproposta
+                                </button>
+                            </form>
+
+                            <form method="post"
+                                  action="{% url 'recusar_contraproposta' proposta.pk %}"
+                                  onsubmit="return confirm('Recusar a contraproposta cancela esta proposta. Continuar?');">
+                                {% csrf_token %}
+                                <button type="submit" class="prop-btn prop-btn-perigo">
+                                    Recusar contraproposta
+                                </button>
+                            </form>
+                        </div>
+
+                    {% else %}
+                        <p>
+                            Não foi possível localizar o registro da contraproposta.
+                            Entre em contato com o gerente.
+                        </p>
+                    {% endif %}
+                {% endwith %}
+            </section>
+        {% endif %}
 
         <section class="prop-card prop-card-p prop-span-total">
             <h2 class="prop-card-titulo">Composição do pagamento</h2>
@@ -83,15 +183,45 @@
             </div>
         </section>
 
+        {% if decisoes %}
+        <section class="prop-card prop-card-p prop-span-total">
+            <h2 class="prop-card-titulo">Histórico de decisões e aprovações</h2>
+            <div class="prop-timeline">
+                {% for decisao in decisoes %}
+                    <article class="prop-timeline-item">
+                        <span class="prop-timeline-data">{{ decisao.feito_em|date:"d/m/Y \à\s H:i" }}</span>
+                        <p>
+                            <strong>{{ decisao.feito_por.get_full_name|default:decisao.feito_por.username }}</strong> — 
+                            <strong>{{ decisao.get_tipo_display }}</strong> 
+                            (Valor de ref.: R$ {{ decisao.valor_referencia|floatformat:2 }})
+                        </p>
+                        {% if decisao.parecer %}
+                            <blockquote style="margin-top: 5px; font-style: italic; color: #555;">
+                                "{{ decisao.parecer }}"
+                            </blockquote>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
         <section class="prop-card prop-card-p prop-span-total">
             <h2 class="prop-card-titulo">Histórico de alterações de valor</h2>
             <div class="prop-timeline">
                {% for registro in historico %}
                     <article class="prop-timeline-item">
-                        <span class="prop-timeline-data">{{ registro.criado_em|date:"d/m/Y à\s H:i" }}</span>
-                        <p><strong>{{ registro.usuario|default:"Usuário não identificado" }}</strong> alterou o valor de
-                            <strong>R$ {{ registro.valor_anterior|floatformat:2 }}</strong> para
-                            <strong>R$ {{ registro.valor_novo|floatformat:2 }}</strong>.</p>
+                        <span class="prop-timeline-data">{{ registro.alterado_em|date:"d/m/Y \à\s H:i" }}</span>
+                        <p><strong>{{ registro.alterado_por.get_full_name|default:registro.alterado_por.username }}</strong>
+                            {% if registro.valor_anterior is None %}
+                                registrou a proposta com o valor de
+                                <strong>R$ {{ registro.valor_novo|floatformat:2 }}</strong>.
+                            {% else %}
+                                alterou o valor de
+                                <strong>R$ {{ registro.valor_anterior|floatformat:2 }}</strong> para
+                                <strong>R$ {{ registro.valor_novo|floatformat:2 }}</strong>.
+                            {% endif %}
+                        </p>
                     </article>
                 {% empty %}
                     <div class="prop-vazio" style="padding:20px">

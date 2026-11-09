@@ -1,0 +1,379 @@
+
+/* =====================================================
+   CENTRAL DE NEGOCIAÇÕES - VENDACERTA
+===================================================== */
+
+.neg-resumo {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.neg-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 20px 18px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #17243a;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+}
+
+.neg-card:hover {
+    border-color: #2563eb;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(15, 23, 42, .06);
+}
+
+.neg-card-pendente {
+    border-left: 4px solid #f59e0b;
+}
+
+.neg-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 10px;
+}
+
+.neg-card-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.neg-card span {
+    display: block;
+    margin-bottom: 5px;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.neg-card strong {
+    display: block;
+    color: #17243a;
+    font-size: 25px;
+    line-height: 1;
+}
+
+/* SEÇÃO DA TABELA */
+
+.neg-section {
+    margin-top: 10px;
+}
+
+.neg-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.neg-section-header h2 {
+    margin: 0 0 5px;
+    color: #17243a;
+    font-size: 20px;
+}
+
+.neg-section-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.neg-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 210px;
+}
+
+.neg-filter label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.neg-filter select {
+    width: 100%;
+    padding: 10px 12px;
+    color: #17243a;
+    background: #fff;
+    border: 1px solid #dbe2ea;
+    border-radius: 8px;
+    outline: none;
+}
+
+.neg-filter select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .10);
+}
+
+/* TABELA */
+
+.neg-table-container {
+    overflow-x: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.neg-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.neg-table thead {
+    background: #f8fafc;
+}
+
+.neg-table th {
+    padding: 15px 16px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.neg-table td {
+    padding: 15px 16px;
+    color: #334155;
+    font-size: 13px;
+    border-top: 1px solid #e8edf3;
+    white-space: nowrap;
+}
+
+.neg-table tbody tr {
+    transition: background .15s;
+}
+
+.neg-table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.neg-table td strong {
+    display: block;
+    color: #17243a;
+    font-weight: 600;
+}
+
+.neg-table td small {
+    display: block;
+    margin-top: 4px;
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+.neg-valor {
+    color: #17243a !important;
+    font-weight: 700;
+}
+
+/* SITUAÇÕES */
+
+.neg-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status-pendente {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+.status-aprovada {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.status-recusada {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+.status-contraproposta {
+    color: #6b21a8;
+    background: #f3e8ff;
+}
+
+.status-outro {
+    color: #475569;
+    background: #e2e8f0;
+}
+
+/* AÇÕES */
+
+.neg-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    color: #2563eb;
+    background: #eff6ff;
+    border-radius: 7px;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    transition: background .2s;
+}
+
+.neg-action:hover {
+    color: #fff;
+    background: #2563eb;
+}
+
+.neg-action svg {
+    width: 15px;
+    height: 15px;
+}
+
+.neg-sem-acao {
+    color: #94a3b8;
+    font-size: 11px;
+}
+
+/* ESTADO VAZIO */
+
+.neg-empty {
+    padding: 45px 20px !important;
+    text-align: center;
+    white-space: normal !important;
+}
+
+.neg-empty svg {
+    display: block;
+    width: 32px;
+    height: 32px;
+    margin: 0 auto 12px;
+    color: #94a3b8;
+}
+
+.neg-empty strong {
+    margin-bottom: 5px;
+}
+
+.neg-empty span {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+/* MENSAGENS */
+
+.neg-messages {
+    margin-bottom: 20px;
+}
+
+.neg-message {
+    padding: 12px 16px;
+    color: #166534;
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 1200px) {
+    .neg-resumo {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .neg-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .neg-section-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .neg-filter {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .neg-resumo {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* AJUSTES DE ESPAÇAMENTO E LEITURA */
+
+.topbar {
+    margin-bottom: 24px;
+}
+
+.topbar h1 {
+    margin-bottom: 6px;
+}
+
+.topbar p {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.neg-resumo {
+    gap: 18px;
+    margin-bottom: 38px;
+}
+
+.neg-card {
+    min-height: 88px;
+    padding: 20px;
+}
+
+.neg-section-header {
+    margin-bottom: 20px;
+}
+
+.neg-table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.neg-table {
+    min-width: 1050px;
+}
+
+.neg-table th {
+    padding: 16px 18px;
+}
+
+.neg-table td {
+    padding: 17px 18px;
+}
+
+.neg-table tbody tr:hover {
+    background: #f1f6ff;
+}
+
+.neg-action {
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .neg-resumo {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
